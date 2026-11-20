@@ -43,6 +43,9 @@ jobs:
         run: pnpm db:generate
         env:
           DATABASE_URL: postgresql://diagnostic:diagnostic@localhost:5432/pizca
+      - name: Collect TypeScript diagnostic errors
+        continue-on-error: true
+        run: pnpm --filter @pizca/web exec tsc --noEmit --pretty false
       - name: Build storefront (Render)
         run: pnpm --filter @pizca/web build
         env:

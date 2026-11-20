@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 import { Loader2, ShoppingBag, Trash2, Heart, Plus, Minus, ChevronLeft, ChevronRight, ArrowRight, Gift, Truck, RotateCcw, Shield, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatPEN } from '@pizca/utils';
