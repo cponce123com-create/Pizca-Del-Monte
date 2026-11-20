@@ -5,7 +5,7 @@ export function emailDeliveryConfigured(): boolean {
     process.env.SMTP_HOST &&
     process.env.SMTP_PORT &&
     process.env.SMTP_USER &&
-    process.env.SMTP_PASSWORD &&
+    (process.env.SMTP_PASS || process.env.SMTP_PASSWORD) &&
     process.env.SMTP_FROM &&
     (process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL)
   );
@@ -33,7 +33,7 @@ export async function sendVerificationEmail(email: string, token: string): Promi
     host: process.env.SMTP_HOST!,
     port,
     secure: port === 465,
-    auth: { user: process.env.SMTP_USER!, pass: process.env.SMTP_PASSWORD! },
+    auth: { user: process.env.SMTP_USER!, pass: (process.env.SMTP_PASS || process.env.SMTP_PASSWORD)! },
   });
   await transporter.sendMail({
     from: process.env.SMTP_FROM!,

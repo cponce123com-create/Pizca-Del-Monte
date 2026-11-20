@@ -199,7 +199,8 @@ export async function POST(request: NextRequest) {
     if (data.paymentMethod === 'MERCADO_PAGO') {
       return NextResponse.json({ error: 'Mercado Pago todavía no está disponible.' }, { status: 503 });
     }
-    if (data.paymentMethod === 'BANK_TRANSFER' && !process.env.BANK_ACCOUNT_INFO?.trim()) {
+    if (data.paymentMethod === 'BANK_TRANSFER' &&
+        (process.env.BANK_TRANSFER_ENABLED !== 'true' || !process.env.BANK_ACCOUNT_INFO?.trim())) {
       return NextResponse.json({ error: 'La transferencia bancaria no está configurada.' }, { status: 503 });
     }
     if (data.paymentMethod === 'CASH_ON_DELIVERY' &&
@@ -541,7 +542,7 @@ export async function GET(request: NextRequest) {
 
     // Métodos de pago disponibles (desde enum + configuración)
     const paymentMethods = [
-      ...(process.env.BANK_ACCOUNT_INFO?.trim()
+      ...(process.env.BANK_TRANSFER_ENABLED === 'true' && process.env.BANK_ACCOUNT_INFO?.trim()
         ? [{ id: 'BANK_TRANSFER', name: 'Transferencia bancaria', description: 'Confirmación manual antes del despacho', icon: 'bank' }]
         : []),
       ...(process.env.CASH_ON_DELIVERY_ENABLED === 'true'
