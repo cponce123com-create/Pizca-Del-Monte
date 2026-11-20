@@ -30,6 +30,10 @@ jobs:
           node-version: '26'
       - name: Install dependencies (Render)
         run: pnpm install --frozen-lockfile
+      - name: Validate Prisma schema
+        run: pnpm --filter @pizca/database exec prisma validate --schema prisma/schema.prisma
+        env:
+          DATABASE_URL: postgresql://diagnostic:diagnostic@localhost:5432/pizca
       - name: Generate Prisma client (Render)
         run: pnpm db:generate
         env:
