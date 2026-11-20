@@ -1933,7 +1933,9 @@ model QrCode {
   id          String   @id @default(cuid())
   code        String   @unique // El contenido del QR (URL, texto, etc.)
   type        String   // product, recipe, collection, order, tracking, custom
-  referenceId String?  // ID del producto, receta, etc.
+  referenceId String?  // ID polimórfico del producto, receta, colección, etc.
+  productId   String?
+  recipeId    String?
   title       String?
   description String?
   imageUrl    String?  // URL en Cloudinary
@@ -1945,8 +1947,8 @@ model QrCode {
   createdBy   String
   createdAt   DateTime @default(now())
 
-  product     Product? @relation(fields: [referenceId], references: [id], onDelete: SetNull)
-  recipe      Recipe?  @relation(fields: [referenceId], references: [id], onDelete: SetNull)
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  recipe      Recipe?  @relation(fields: [recipeId], references: [id], onDelete: SetNull)
   scans       QrScan[]
 
   @@index([type, referenceId])
