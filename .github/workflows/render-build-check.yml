@@ -10,6 +10,15 @@ on:
       - 'packages/**'
       - 'prisma/**'
       - '.github/workflows/render-build-check.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'apps/**'
+      - 'packages/**'
+      - 'prisma/**'
+      - '.github/workflows/render-build-check.yml'
   workflow_dispatch:
 
 permissions:
@@ -43,8 +52,9 @@ jobs:
         run: pnpm db:generate
         env:
           DATABASE_URL: postgresql://diagnostic:diagnostic@localhost:5432/pizca
-      - name: Collect TypeScript diagnostic errors
-        continue-on-error: true
+      - name: Verify TypeScript (required)
+        env:
+          DATABASE_URL: postgresql://diagnostic:diagnostic@localhost:5432/pizca
         run: pnpm --filter @pizca/web exec tsc --noEmit --pretty false
       - name: Build storefront (Render)
         run: pnpm --filter @pizca/web build
