@@ -1261,6 +1261,7 @@ model Order {
   isGift              Boolean      @default(false)
 
   // Fechas
+  createdAt           DateTime    @default(now())
   confirmedAt         DateTime?
   shippedAt           DateTime?
   deliveredAt         DateTime?
@@ -1376,6 +1377,7 @@ model Payment {
   payerName           String?
   paymentDetails      Json?         // Respuesta completa del proveedor
   refundedAmount      Decimal       @default(0) @db.Decimal(12, 2)
+  createdAt           DateTime      @default(now())
   processedAt         DateTime?
   confirmedAt         DateTime?
   failedAt            DateTime?
@@ -1772,6 +1774,7 @@ model Document {
   xmlContent      String?       @db.Text
   cdrContent      String?       @db.Text
   pdfUrl          String?
+  createdAt       DateTime     @default(now())
   signedAt        DateTime?
   sentAt          DateTime?
   voidedAt        DateTime?
@@ -1833,7 +1836,7 @@ model AccountingEntryLine {
   account         Account         @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@index([entryId])
-  @@index([accountId, date])
+  @@index([accountId])
   @@map("accounting_entry_lines")
 }
 
