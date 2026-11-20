@@ -1,0 +1,42 @@
+name: Render Build Diagnostic
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'apps/**'
+      - 'packages/**'
+      - 'prisma/**'
+      - '.github/workflows/render-build-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+      - name: Install dependencies (Render)
+        run: pnpm install --frozen-lockfile
+      - name: Generate Prisma client (Render)
+        run: pnpm db:generate
+        env:
+          DATABASE_URL: postgresql://diagnostic:diagnostic@localhost:5432/pizca
+      - name: Build storefront (Render)
+        run: pnpm --filter @pizca/web build
+        env:
+          DATABASE_URL: postgresql://diagnostic:diagnostic@localhost:5432/pizca
+          NEXTAUTH_SECRET: diagnostic-secret-for-build-only
+          NEXTAUTH_URL: http://localhost:3000
