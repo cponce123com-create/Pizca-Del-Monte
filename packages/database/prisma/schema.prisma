@@ -327,40 +327,42 @@ enum WebhookEventType {
 // ============================================
 
 model User {
-  id            String       @id @default(cuid())
-  email         String       @unique
-  emailVerified DateTime?
-  passwordHash  String?
-  name          String?
-  avatar        String?
-  phone         String?
-  phoneVerified DateTime?
-  status        UserStatus   @default(PENDING_VERIFICATION)
-  twoFactorEnabled Boolean  @default(false)
-  twoFactorSecret String?
-  lastLoginAt   DateTime?
-  loginAttempts Int          @default(0)
-  lockedUntil   DateTime?
-  locale        String       @default("es-PE")
-  timezone      String       @default("America/Lima")
-  currency      String       @default("PEN")
+  id               String     @id @default(cuid())
+  email            String     @unique
+  emailVerified    DateTime?
+  passwordHash     String?
+  name             String?
+  avatar           String?
+  phone            String?
+  phoneVerified    DateTime?
+  status           UserStatus @default(PENDING_VERIFICATION)
+  twoFactorEnabled Boolean    @default(false)
+  twoFactorSecret  String?
+  lastLoginAt      DateTime?
+  loginAttempts    Int        @default(0)
+  lockedUntil      DateTime?
+  locale           String     @default("es-PE")
+  timezone         String     @default("America/Lima")
+  currency         String     @default("PEN")
 
   // Relaciones
-  roles         UserRole[]
-  sessions      Session[]
-  addresses     Address[]
-  orders        Order[]
-  cart          Cart?
-  wishlist      Wishlist[]
-  reviews       Review[]
-  notifications Notification[]
-  auditLogs     AuditLog[]
-  cashMovements CashMovement[]
+  roles             UserRole[]
+  sessions          Session[]
+  addresses         Address[]
+  orders            Order[]
+  cart              Cart?
+  wishlist          Wishlist[]
+  reviews           Review[]
+  notifications     Notification[]
+  auditLogs         AuditLog[]
+  cashMovements     CashMovement[]
   accountingEntries AccountingEntry[]
-  recipes       Recipe[]
-  recipeRatings RecipeRating[]
-  qrCodes       QrCode[]
-  labels        PrintedLabel[]
+  recipes           Recipe[]
+  recipeRatings     RecipeRating[]
+  qrCodes           QrCode[]
+  labels            PrintedLabel[]
+  Customer          Customer?
+  RecipePdfDownload RecipePdfDownload[]
 
   @@index([email])
   @@index([status])
@@ -368,28 +370,28 @@ model User {
 }
 
 model RoleModel {
-  id          String   @id @default(cuid())
-  name        Role     @unique
+  id          String       @id @default(cuid())
+  name        Role         @unique
   description String?
   permissions Permission[]
-  isSystem    Boolean  @default(false)
-  priority    Int      @default(0)
+  isSystem    Boolean      @default(false)
+  priority    Int          @default(0)
 
-  users       UserRole[]
+  users UserRole[]
 
   @@map("roles")
 }
 
 model UserRole {
-  id        String   @id @default(cuid())
-  userId    String
-  roleId    String
+  id         String    @id @default(cuid())
+  userId     String
+  roleId     String
   assignedBy String?
-  assignedAt DateTime @default(now())
-  expiresAt DateTime?
+  assignedAt DateTime  @default(now())
+  expiresAt  DateTime?
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role      RoleModel @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role RoleModel @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@unique([userId, roleId])
   @@index([userId])
@@ -407,7 +409,7 @@ model Session {
   createdAt    DateTime @default(now())
   lastActivity DateTime @default(now())
 
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([token])
@@ -416,12 +418,12 @@ model Session {
 }
 
 model PasswordResetToken {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
-  token     String   @unique
+  token     String    @unique
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   @@index([userId])
   @@index([token])
@@ -429,12 +431,12 @@ model PasswordResetToken {
 }
 
 model EmailVerificationToken {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
-  token     String   @unique
+  token     String    @unique
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   @@index([userId])
   @@index([token])
@@ -446,27 +448,30 @@ model EmailVerificationToken {
 // ============================================
 
 model Category {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  description String?
-  image       String?
-  icon        String?
-  parentId    String?
-  level       Int      @default(0)
-  sortOrder   Int      @default(0)
-  isActive    Boolean  @default(true)
-  showInMenu  Boolean  @default(true)
-  seoTitle    String?
+  id             String   @id @default(cuid())
+  name           String
+  slug           String   @unique
+  description    String?
+  image          String?
+  icon           String?
+  parentId       String?
+  level          Int      @default(0)
+  sortOrder      Int      @default(0)
+  isActive       Boolean  @default(true)
+  showInMenu     Boolean  @default(true)
+  seoTitle       String?
   seoDescription String?
-  seoKeywords String[]
+  seoKeywords    String[]
 
   // Relaciones
-  parent      Category?    @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
-  children    Category[]   @relation("CategoryHierarchy")
-  products    ProductCategory[]
-  collections CollectionCategory[]
-  attributes  CategoryAttribute[]
+  parent           Category?            @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children         Category[]           @relation("CategoryHierarchy")
+  products         ProductCategory[]
+  collections      CollectionCategory[]
+  attributes       CategoryAttribute[]
+  PromotionProduct PromotionProduct[]
+  CouponProduct    CouponProduct[]
+  ShippingRule     ShippingRule[]
 
   @@index([slug])
   @@index([parentId])
@@ -475,39 +480,40 @@ model Category {
 }
 
 model Brand {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  slug        String   @unique
+  id          String  @id @default(cuid())
+  name        String  @unique
+  slug        String  @unique
   description String?
   logo        String?
   website     String?
-  isActive    Boolean  @default(true)
-  sortOrder   Int      @default(0)
+  isActive    Boolean @default(true)
+  sortOrder   Int     @default(0)
 
-  products    Product[]
+  products Product[]
 
   @@index([slug])
   @@map("brands")
 }
 
 model Collection {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  description String?
-  image       String?
-  bannerImage String?
-  isActive    Boolean  @default(true)
-  isFeatured  Boolean  @default(false)
-  sortOrder   Int      @default(0)
-  startDate   DateTime?
-  endDate     DateTime?
-  seoTitle    String?
+  id             String    @id @default(cuid())
+  name           String
+  slug           String    @unique
+  description    String?
+  image          String?
+  bannerImage    String?
+  isActive       Boolean   @default(true)
+  isFeatured     Boolean   @default(false)
+  sortOrder      Int       @default(0)
+  startDate      DateTime?
+  endDate        DateTime?
+  seoTitle       String?
   seoDescription String?
-  seoKeywords String[]
+  seoKeywords    String[]
 
-  products    CollectionProduct[]
-  categories  CollectionCategory[]
+  products         CollectionProduct[]
+  categories       CollectionCategory[]
+  PromotionProduct PromotionProduct[]
 
   @@index([slug])
   @@index([isActive, isFeatured])
@@ -515,63 +521,65 @@ model Collection {
 }
 
 model Product {
-  id              String       @id @default(cuid())
-  sku             String       @unique
-  name            String
-  slug            String       @unique
-  description     String?
-  shortDescription String?
-  type            ProductType  @default(SIMPLE)
-  status          ProductStatus @default(DRAFT)
-  brandId         String?
-  basePrice       Decimal      @db.Decimal(12, 2)
-  compareAtPrice  Decimal?     @db.Decimal(12, 2)
-  costPrice       Decimal?     @db.Decimal(12, 2)
-  taxRate         Decimal      @default(18.00) @db.Decimal(5, 2) // IGV 18%
-  taxType         TaxType      @default(IGV)
-  weight          Decimal?     @db.Decimal(8, 3) // kg
-  length          Decimal?     @db.Decimal(8, 3) // cm
-  width           Decimal?     @db.Decimal(8, 3) // cm
-  height          Decimal?     @db.Decimal(8, 3) // cm
-  unitOfMeasure   String       @default("UN") // UN, KG, G, L, ML, PAQ
-  minOrderQty     Int          @default(1)
-  maxOrderQty     Int?
-  trackInventory  Boolean      @default(true)
-  allowBackorder  Boolean      @default(false)
-  requiresShipping Boolean     @default(true)
-  isGiftCard      Boolean      @default(false)
+  id                 String        @id @default(cuid())
+  sku                String        @unique
+  name               String
+  slug               String        @unique
+  description        String?
+  shortDescription   String?
+  type               ProductType   @default(SIMPLE)
+  status             ProductStatus @default(DRAFT)
+  brandId            String?
+  basePrice          Decimal       @db.Decimal(12, 2)
+  compareAtPrice     Decimal?      @db.Decimal(12, 2)
+  costPrice          Decimal?      @db.Decimal(12, 2)
+  taxRate            Decimal       @default(18.00) @db.Decimal(5, 2) // IGV 18%
+  taxType            TaxType       @default(IGV)
+  weight             Decimal?      @db.Decimal(8, 3) // kg
+  length             Decimal?      @db.Decimal(8, 3) // cm
+  width              Decimal?      @db.Decimal(8, 3) // cm
+  height             Decimal?      @db.Decimal(8, 3) // cm
+  unitOfMeasure      String        @default("UN") // UN, KG, G, L, ML, PAQ
+  minOrderQty        Int           @default(1)
+  maxOrderQty        Int?
+  trackInventory     Boolean       @default(true)
+  allowBackorder     Boolean       @default(false)
+  requiresShipping   Boolean       @default(true)
+  isGiftCard         Boolean       @default(false)
   giftCardTemplateId String?
-  metaTitle       String?
-  metaDescription String?
-  metaKeywords    String[]
-  publishedAt     DateTime?
-  featuredUntil   DateTime?
+  metaTitle          String?
+  metaDescription    String?
+  metaKeywords       String[]
+  publishedAt        DateTime?
+  featuredUntil      DateTime?
 
   // Relaciones
-  brand           Brand?           @relation(fields: [brandId], references: [id], onDelete: SetNull)
-  categories      ProductCategory[]
-  collections     CollectionProduct[]
-  variants        ProductVariant[]
-  media           ProductMedia[]
-  attributes      ProductAttributeValue[]
-  inventory       InventoryItem?
-  lots            InventoryLot[]
-  stockMovements  StockMovement[]
-  cartItems       CartItem[]
-  orderItems      OrderItem[]
+  brand             Brand?                  @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  categories        ProductCategory[]
+  collections       CollectionProduct[]
+  variants          ProductVariant[]
+  media             ProductMedia[]
+  attributes        ProductAttributeValue[]
+  inventory         InventoryItem?
+  lots              InventoryLot[]
+  stockMovements    StockMovement[]
+  cartItems         CartItem[]
+  orderItems        OrderItem[]
   recipeIngredients RecipeIngredient[]
-  recipeProducts  RecipeProduct[]
-  relatedProducts ProductRelation[] @relation("ProductRelations")
-  relatedTo       ProductRelation[] @relation("ProductRelatedTo")
-  bundles         BundleItem[]     @relation("BundleProducts")
-  bundleOf        BundleItem[]     @relation("BundleComponents")
-  promotions      PromotionProduct[]
-  coupons         CouponProduct[]
-  wishlistItems   Wishlist[]
-  reviews         Review[]
-  qrCodes         QrCode[]
-  labels          PrintedLabel[]
-  shippingRules   ShippingRule[]
+  recipeProducts    RecipeProduct[]
+  relatedProducts   ProductRelation[]       @relation("ProductRelations")
+  relatedTo         ProductRelation[]       @relation("ProductRelatedTo")
+  bundles           BundleItem[]            @relation("BundleProducts")
+  bundleOf          BundleItem[]            @relation("BundleComponents")
+  promotions        PromotionProduct[]
+  coupons           CouponProduct[]
+  wishlistItems     Wishlist[]
+  reviews           Review[]
+  qrCodes           QrCode[]
+  labels            PrintedLabel[]
+  shippingRules     ShippingRule[]
+  PriceListItem     PriceListItem[]
+  PurchaseOrderItem PurchaseOrderItem[]
 
   @@index([slug])
   @@index([sku])
@@ -582,37 +590,45 @@ model Product {
 }
 
 model ProductVariant {
-  id              String   @id @default(cuid())
-  productId       String
-  sku             String   @unique
-  name            String
-  barcode         String?  @unique
-  ean13           String?  @unique
-  price           Decimal  @db.Decimal(12, 2)
-  compareAtPrice  Decimal? @db.Decimal(12, 2)
-  costPrice       Decimal? @db.Decimal(12, 2)
-  weight          Decimal? @db.Decimal(8, 3)
-  length          Decimal? @db.Decimal(8, 3)
-  width           Decimal? @db.Decimal(8, 3)
-  height          Decimal? @db.Decimal(8, 3)
-  unitOfMeasure   String   @default("UN")
-  sortOrder       Int      @default(0)
-  isDefault       Boolean  @default(false)
-  trackInventory  Boolean  @default(true)
-  allowBackorder  Boolean  @default(false)
+  id             String   @id @default(cuid())
+  productId      String
+  sku            String   @unique
+  name           String
+  barcode        String?  @unique
+  ean13          String?  @unique
+  price          Decimal  @db.Decimal(12, 2)
+  compareAtPrice Decimal? @db.Decimal(12, 2)
+  costPrice      Decimal? @db.Decimal(12, 2)
+  weight         Decimal? @db.Decimal(8, 3)
+  length         Decimal? @db.Decimal(8, 3)
+  width          Decimal? @db.Decimal(8, 3)
+  height         Decimal? @db.Decimal(8, 3)
+  unitOfMeasure  String   @default("UN")
+  sortOrder      Int      @default(0)
+  isDefault      Boolean  @default(false)
+  trackInventory Boolean  @default(true)
+  allowBackorder Boolean  @default(false)
 
   // Atributos que definen esta variante (ej: peso, sabor, presentación)
-  attributes      ProductAttributeValue[]
+  attributes ProductAttributeValue[]
 
   // Relaciones
-  product         Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
-  inventory       InventoryItem?
-  lots            InventoryLot[]
-  stockMovements  StockMovement[]
-  cartItems       CartItem[]
-  orderItems      OrderItem[]
-  bundleItems     BundleItem[]
-  labels          PrintedLabel[]
+  product           Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
+  inventory         InventoryItem?
+  lots              InventoryLot[]
+  stockMovements    StockMovement[]
+  cartItems         CartItem[]
+  orderItems        OrderItem[]
+  bundleItems       BundleItem[]
+  labels            PrintedLabel[]
+  PriceListItem     PriceListItem[]
+  PromotionProduct  PromotionProduct[]
+  CouponProduct     CouponProduct[]
+  PurchaseOrderItem PurchaseOrderItem[]
+  ShippingRule      ShippingRule[]
+  RecipeIngredient  RecipeIngredient[]
+  RecipeProduct     RecipeProduct[]
+  Wishlist          Wishlist[]
 
   @@index([productId])
   @@index([sku])
@@ -622,14 +638,14 @@ model ProductVariant {
 }
 
 model ProductCategory {
-  id          String   @id @default(cuid())
-  productId   String
-  categoryId  String
-  isPrimary   Boolean  @default(false)
-  sortOrder   Int      @default(0)
+  id         String  @id @default(cuid())
+  productId  String
+  categoryId String
+  isPrimary  Boolean @default(false)
+  sortOrder  Int     @default(0)
 
-  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@unique([productId, categoryId])
   @@index([productId])
@@ -638,14 +654,14 @@ model ProductCategory {
 }
 
 model CollectionProduct {
-  id            String      @id @default(cuid())
-  collectionId  String
-  productId     String
-  sortOrder     Int         @default(0)
-  isFeatured    Boolean     @default(false)
+  id           String  @id @default(cuid())
+  collectionId String
+  productId    String
+  sortOrder    Int     @default(0)
+  isFeatured   Boolean @default(false)
 
-  collection    Collection  @relation(fields: [collectionId], references: [id], onDelete: Cascade)
-  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  product    Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([collectionId, productId])
   @@index([collectionId])
@@ -654,47 +670,47 @@ model CollectionProduct {
 }
 
 model CollectionCategory {
-  id          String      @id @default(cuid())
+  id           String @id @default(cuid())
   collectionId String
-  categoryId  String
+  categoryId   String
 
-  collection  Collection  @relation(fields: [collectionId], references: [id], onDelete: Cascade)
-  category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  category   Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@unique([collectionId, categoryId])
   @@map("collection_categories")
 }
 
 model Attribute {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  type        String   @default("select") // select, text, number, boolean, color, date
-  isRequired  Boolean  @default(false)
+  id           String  @id @default(cuid())
+  name         String
+  slug         String  @unique
+  type         String  @default("select") // select, text, number, boolean, color, date
+  isRequired   Boolean @default(false)
   isFilterable Boolean @default(true)
-  isVariant   Boolean  @default(false) // Define variantes del producto
-  sortOrder   Int      @default(0)
-  helpText    String?
+  isVariant    Boolean @default(false) // Define variantes del producto
+  sortOrder    Int     @default(0)
+  helpText     String?
 
-  values      AttributeValue[]
-  categories  CategoryAttribute[]
-  products    ProductAttributeValue[]
+  values     AttributeValue[]
+  categories CategoryAttribute[]
+  products   ProductAttributeValue[]
 
   @@index([slug])
   @@map("attributes")
 }
 
 model AttributeValue {
-  id          String     @id @default(cuid())
+  id          String  @id @default(cuid())
   attributeId String
   value       String
   slug        String
-  color       String?    // Para atributos de color
-  image       String?    // Para atributos visuales
-  sortOrder   Int        @default(0)
+  color       String? // Para atributos de color
+  image       String? // Para atributos visuales
+  sortOrder   Int     @default(0)
 
-  attribute   Attribute  @relation(fields: [attributeId], references: [id], onDelete: Cascade)
-  products    ProductAttributeValue[]
+  attribute Attribute               @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  products  ProductAttributeValue[]
 
   @@unique([attributeId, slug])
   @@index([attributeId])
@@ -702,31 +718,31 @@ model AttributeValue {
 }
 
 model CategoryAttribute {
-  id          String     @id @default(cuid())
-  categoryId  String
-  attributeId String
-  isRequired  Boolean    @default(false)
-  isFilterable Boolean   @default(true)
-  sortOrder   Int        @default(0)
+  id           String  @id @default(cuid())
+  categoryId   String
+  attributeId  String
+  isRequired   Boolean @default(false)
+  isFilterable Boolean @default(true)
+  sortOrder    Int     @default(0)
 
-  category    Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  attribute   Attribute  @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  category  Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  attribute Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
 
   @@unique([categoryId, attributeId])
   @@map("category_attributes")
 }
 
 model ProductAttributeValue {
-  id              String         @id @default(cuid())
-  productId       String?
-  variantId       String?
-  attributeId     String
+  id               String  @id @default(cuid())
+  productId        String?
+  variantId        String?
+  attributeId      String
   attributeValueId String
 
-  product         Product?       @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variant         ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
-  attribute       Attribute      @relation(fields: [attributeId], references: [id], onDelete: Cascade)
-  attributeValue  AttributeValue @relation(fields: [attributeValueId], references: [id], onDelete: Cascade)
+  product        Product?        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant        ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  attribute      Attribute       @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  attributeValue AttributeValue  @relation(fields: [attributeValueId], references: [id], onDelete: Cascade)
 
   @@unique([productId, attributeId, attributeValueId])
   @@unique([variantId, attributeId, attributeValueId])
@@ -736,21 +752,21 @@ model ProductAttributeValue {
 }
 
 model ProductMedia {
-  id          String   @id @default(cuid())
-  productId   String
-  type        String   @default("image") // image, video, 3d, document
-  url         String
-  alt         String?
-  title       String?
-  sortOrder   Int      @default(0)
-  isPrimary   Boolean  @default(false)
-  width       Int?
-  height      Int?
-  size        Int?     // bytes
-  mimeType    String?
+  id           String  @id @default(cuid())
+  productId    String
+  type         String  @default("image") // image, video, 3d, document
+  url          String
+  alt          String?
+  title        String?
+  sortOrder    Int     @default(0)
+  isPrimary    Boolean @default(false)
+  width        Int?
+  height       Int?
+  size         Int? // bytes
+  mimeType     String?
   cloudinaryId String?
 
-  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId, isPrimary])
   @@index([productId, sortOrder])
@@ -758,14 +774,14 @@ model ProductMedia {
 }
 
 model ProductRelation {
-  id            String   @id @default(cuid())
-  productId     String
-  relatedId     String
-  type          String   @default("cross_sell") // cross_sell, up_sell, alternative, complement, recipe
-  sortOrder     Int      @default(0)
+  id        String @id @default(cuid())
+  productId String
+  relatedId String
+  type      String @default("cross_sell") // cross_sell, up_sell, alternative, complement, recipe
+  sortOrder Int    @default(0)
 
-  product       Product  @relation("ProductRelations", fields: [productId], references: [id], onDelete: Cascade)
-  related       Product  @relation("ProductRelatedTo", fields: [relatedId], references: [id], onDelete: Cascade)
+  product Product @relation("ProductRelations", fields: [productId], references: [id], onDelete: Cascade)
+  related Product @relation("ProductRelatedTo", fields: [relatedId], references: [id], onDelete: Cascade)
 
   @@unique([productId, relatedId, type])
   @@index([productId])
@@ -778,20 +794,20 @@ model ProductRelation {
 // ============================================
 
 model PriceList {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String
-  slug        String   @unique
+  slug        String    @unique
   description String?
-  currency    String   @default("PEN")
-  isActive    Boolean  @default(true)
-  isDefault   Boolean  @default(false)
-  priority    Int      @default(0)
+  currency    String    @default("PEN")
+  isActive    Boolean   @default(true)
+  isDefault   Boolean   @default(false)
+  priority    Int       @default(0)
   startDate   DateTime?
   endDate     DateTime?
-  rules       Json?    // Reglas de precios dinámicos
+  rules       Json? // Reglas de precios dinámicos
 
-  items       PriceListItem[]
-  customers   CustomerPriceList[]
+  items     PriceListItem[]
+  customers CustomerPriceList[]
 
   @@index([slug])
   @@index([isActive, isDefault])
@@ -799,17 +815,17 @@ model PriceList {
 }
 
 model PriceListItem {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   priceListId String
   productId   String?
   variantId   String?
-  price       Decimal  @db.Decimal(12, 2)
-  minQty      Int      @default(1)
+  price       Decimal @db.Decimal(12, 2)
+  minQty      Int     @default(1)
   maxQty      Int?
 
-  priceList   PriceList @relation(fields: [priceListId], references: [id], onDelete: Cascade)
-  product     Product?  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variant     ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  priceList PriceList       @relation(fields: [priceListId], references: [id], onDelete: Cascade)
+  product   Product?        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
 
   @@unique([priceListId, productId, variantId, minQty])
   @@index([priceListId])
@@ -819,40 +835,41 @@ model PriceListItem {
 }
 
 model CustomerPriceList {
-  id          String    @id @default(cuid())
+  id          String @id @default(cuid())
   customerId  String
   priceListId String
 
-  customer    Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  priceList   PriceList @relation(fields: [priceListId], references: [id], onDelete: Cascade)
+  customer  Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  priceList PriceList @relation(fields: [priceListId], references: [id], onDelete: Cascade)
 
   @@unique([customerId])
   @@map("customer_price_lists")
 }
 
 model Promotion {
-  id              String         @id @default(cuid())
-  name            String
-  slug            String         @unique
-  description     String?
-  type            PromotionType
-  value           Decimal        @db.Decimal(12, 2)
-  minOrderAmount  Decimal?       @db.Decimal(12, 2)
-  maxDiscount     Decimal?       @db.Decimal(12, 2)
-  usageLimit      Int?
-  usageCount      Int            @default(0)
+  id               String        @id @default(cuid())
+  name             String
+  slug             String        @unique
+  description      String?
+  type             PromotionType
+  value            Decimal       @db.Decimal(12, 2)
+  minOrderAmount   Decimal?      @db.Decimal(12, 2)
+  maxDiscount      Decimal?      @db.Decimal(12, 2)
+  usageLimit       Int?
+  usageCount       Int           @default(0)
   perCustomerLimit Int?
-  startDate       DateTime
-  endDate         DateTime?
-  isActive        Boolean        @default(true)
-  priority        Int            @default(0)
-  appliesToAll    Boolean        @default(false)
-  requiresCoupon  Boolean        @default(false)
-  couponCode      String?        @unique
-  conditions      Json?          // Condiciones complejas (categorías, productos, clientes, etc.)
+  startDate        DateTime
+  endDate          DateTime?
+  isActive         Boolean       @default(true)
+  priority         Int           @default(0)
+  appliesToAll     Boolean       @default(false)
+  requiresCoupon   Boolean       @default(false)
+  couponCode       String?       @unique
+  conditions       Json? // Condiciones complejas (categorías, productos, clientes, etc.)
 
-  products        PromotionProduct[]
-  coupons         Coupon[]
+  products       PromotionProduct[]
+  coupons        Coupon[]
+  OrderPromotion OrderPromotion[]
 
   @@index([slug])
   @@index([isActive, startDate, endDate])
@@ -861,18 +878,18 @@ model Promotion {
 }
 
 model PromotionProduct {
-  id            String     @id @default(cuid())
-  promotionId   String
-  productId     String?
-  variantId     String?
-  categoryId    String?
-  collectionId  String?
+  id           String  @id @default(cuid())
+  promotionId  String
+  productId    String?
+  variantId    String?
+  categoryId   String?
+  collectionId String?
 
-  promotion     Promotion  @relation(fields: [promotionId], references: [id], onDelete: Cascade)
-  product       Product?   @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variant       ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
-  category      Category?  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  collection    Collection? @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  promotion  Promotion       @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  product    Product?        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant    ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  category   Category?       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  collection Collection?     @relation(fields: [collectionId], references: [id], onDelete: Cascade)
 
   @@index([promotionId])
   @@index([productId])
@@ -882,28 +899,30 @@ model PromotionProduct {
 }
 
 model Coupon {
-  id              String      @id @default(cuid())
-  code            String      @unique
-  name            String
-  description     String?
-  type            CouponType
-  value           Decimal     @db.Decimal(12, 2)
-  minOrderAmount  Decimal?    @db.Decimal(12, 2)
-  maxDiscount     Decimal?    @db.Decimal(12, 2)
-  usageLimit      Int?
-  usageCount      Int         @default(0)
+  id               String     @id @default(cuid())
+  code             String     @unique
+  name             String
+  description      String?
+  type             CouponType
+  value            Decimal    @db.Decimal(12, 2)
+  minOrderAmount   Decimal?   @db.Decimal(12, 2)
+  maxDiscount      Decimal?   @db.Decimal(12, 2)
+  usageLimit       Int?
+  usageCount       Int        @default(0)
   perCustomerLimit Int        @default(1)
-  startDate       DateTime
-  endDate         DateTime?
-  isActive        Boolean     @default(true)
-  appliesToAll    Boolean     @default(false)
-  promotionId     String?
+  startDate        DateTime
+  endDate          DateTime?
+  isActive         Boolean    @default(true)
+  appliesToAll     Boolean    @default(false)
+  promotionId      String?
 
-  products        CouponProduct[]
-  customers       CouponCustomer[]
-  orders          Order[]
+  products  CouponProduct[]
+  customers CouponCustomer[]
+  orders    Order[]
 
-  promotion       Promotion?  @relation(fields: [promotionId], references: [id], onDelete: SetNull)
+  promotion   Promotion?    @relation(fields: [promotionId], references: [id], onDelete: SetNull)
+  CartCoupon  CartCoupon[]
+  OrderCoupon OrderCoupon[]
 
   @@index([code])
   @@index([isActive, startDate, endDate])
@@ -911,16 +930,16 @@ model Coupon {
 }
 
 model CouponProduct {
-  id        String   @id @default(cuid())
-  couponId  String
-  productId String?
-  variantId String?
+  id         String  @id @default(cuid())
+  couponId   String
+  productId  String?
+  variantId  String?
   categoryId String?
 
-  coupon    Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
-  product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
-  category  Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  coupon   Coupon          @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  product  Product?        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant  ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  category Category?       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@index([couponId])
   @@index([productId])
@@ -929,12 +948,12 @@ model CouponProduct {
 }
 
 model CouponCustomer {
-  id        String   @id @default(cuid())
-  couponId  String
+  id         String @id @default(cuid())
+  couponId   String
   customerId String
 
-  coupon    Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
-  customer  Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  coupon   Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@unique([couponId, customerId])
   @@index([couponId])
@@ -943,16 +962,16 @@ model CouponCustomer {
 }
 
 model TaxConfiguration {
-  id          String   @id @default(cuid())
-  name        String
-  type        TaxType
-  rate        Decimal  @db.Decimal(5, 4) // ej: 0.1800 para 18%
-  isActive    Boolean  @default(true)
-  appliesTo   String[] // Categorías, productos, o "all"
-  exemptions  String[] // RUCs, tipos de cliente exentos
-  startDate   DateTime
-  endDate     DateTime?
-  sunatCode   String?  // Código SUNAT para el impuesto
+  id         String    @id @default(cuid())
+  name       String
+  type       TaxType
+  rate       Decimal   @db.Decimal(5, 4) // ej: 0.1800 para 18%
+  isActive   Boolean   @default(true)
+  appliesTo  String[] // Categorías, productos, o "all"
+  exemptions String[] // RUCs, tipos de cliente exentos
+  startDate  DateTime
+  endDate    DateTime?
+  sunatCode  String? // Código SUNAT para el impuesto
 
   @@index([type, isActive])
   @@map("tax_configurations")
@@ -963,26 +982,26 @@ model TaxConfiguration {
 // ============================================
 
 model InventoryItem {
-  id              String   @id @default(cuid())
-  productId       String?  @unique
-  variantId       String?  @unique
-  quantity        Int      @default(0)
-  reservedQty     Int      @default(0)
-  availableQty    Int      @default(0)
-  minStock        Int      @default(0)
-  maxStock        Int?
-  reorderPoint    Int      @default(0)
-  reorderQty      Int      @default(0)
-  location        String?  // Ubicación en almacén (ej: A-01-03)
-  warehouseId     String?
-  lastCountedAt   DateTime?
-  lastMovementAt  DateTime?
+  id             String    @id @default(cuid())
+  productId      String?   @unique
+  variantId      String?   @unique
+  quantity       Int       @default(0)
+  reservedQty    Int       @default(0)
+  availableQty   Int       @default(0)
+  minStock       Int       @default(0)
+  maxStock       Int?
+  reorderPoint   Int       @default(0)
+  reorderQty     Int       @default(0)
+  location       String? // Ubicación en almacén (ej: A-01-03)
+  warehouseId    String?
+  lastCountedAt  DateTime?
+  lastMovementAt DateTime?
 
-  product         Product?       @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variant         ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
-  warehouse       Warehouse?     @relation(fields: [warehouseId], references: [id], onDelete: SetNull)
-  lots            InventoryLot[]
-  movements       StockMovement[]
+  product   Product?        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  warehouse Warehouse?      @relation(fields: [warehouseId], references: [id], onDelete: SetNull)
+  lots      InventoryLot[]
+  movements StockMovement[]
 
   @@index([productId])
   @@index([variantId])
@@ -992,24 +1011,25 @@ model InventoryItem {
 }
 
 model Warehouse {
-  id          String   @id @default(cuid())
-  name        String
-  code        String   @unique
-  address     String?
-  city        String?
-  region      String?
-  country     String   @default("PE")
-  isActive    Boolean  @default(true)
-  isDefault   Boolean  @default(false)
-  contactName String?
+  id           String  @id @default(cuid())
+  name         String
+  code         String  @unique
+  address      String?
+  city         String?
+  region       String?
+  country      String  @default("PE")
+  isActive     Boolean @default(true)
+  isDefault    Boolean @default(false)
+  contactName  String?
   contactPhone String?
   contactEmail String?
 
-  inventory   InventoryItem[]
-  shipments   Shipment[]
-  stockMovements StockMovement[]
+  inventory          InventoryItem[]
+  shipments          Shipment[]
+  stockMovements     StockMovement[]
   fromStockMovements StockMovement[] @relation("FromWarehouseMovements")
   toStockMovements   StockMovement[] @relation("ToWarehouseMovements")
+  PurchaseOrder      PurchaseOrder[]
 
   @@index([code])
   @@index([isActive, isDefault])
@@ -1017,26 +1037,30 @@ model Warehouse {
 }
 
 model InventoryLot {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   productId       String
   variantId       String?
   lotNumber       String
   manufactureDate DateTime?
   expiryDate      DateTime?
-  quantity        Int      @default(0)
-  reservedQty     Int      @default(0)
-  availableQty    Int      @default(0)
-  costPrice       Decimal? @db.Decimal(12, 2)
+  quantity        Int       @default(0)
+  reservedQty     Int       @default(0)
+  availableQty    Int       @default(0)
+  costPrice       Decimal?  @db.Decimal(12, 2)
   supplierId      String?
   purchaseOrderId String?
   status          LotStatus @default(ACTIVE)
   notes           String?
 
-  product         Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variant         ProductVariant?   @relation(fields: [variantId], references: [id], onDelete: Cascade)
-  supplier        Supplier?         @relation(fields: [supplierId], references: [id], onDelete: SetNull)
-  purchaseOrder   PurchaseOrder?    @relation(fields: [purchaseOrderId], references: [id], onDelete: SetNull)
+  product         Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant         ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  supplier        Supplier?       @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  purchaseOrder   PurchaseOrder?  @relation(fields: [purchaseOrderId], references: [id], onDelete: SetNull)
   movements       StockMovement[]
+  InventoryItem   InventoryItem?  @relation(fields: [inventoryItemId], references: [id])
+  inventoryItemId String?
+  ShipmentItem    ShipmentItem[]
+  PrintedLabel    PrintedLabel[]
 
   @@unique([productId, lotNumber])
   @@index([variantId])
@@ -1046,17 +1070,17 @@ model InventoryLot {
 }
 
 model StockMovement {
-  id              String              @id @default(cuid())
+  id              String                @id @default(cuid())
   productId       String
   variantId       String?
   lotId           String?
   type            InventoryMovementType
-  quantity        Int                 // Positivo = entrada, Negativo = salida
+  quantity        Int // Positivo = entrada, Negativo = salida
   previousQty     Int
   newQty          Int
-  unitCost        Decimal?            @db.Decimal(12, 2)
-  totalCost       Decimal?            @db.Decimal(12, 2)
-  referenceType   String?             // order, purchase_order, adjustment, transfer, etc.
+  unitCost        Decimal?              @db.Decimal(12, 2)
+  totalCost       Decimal?              @db.Decimal(12, 2)
+  referenceType   String? // order, purchase_order, adjustment, transfer, etc.
   referenceId     String?
   warehouseId     String?
   fromWarehouseId String?
@@ -1064,14 +1088,16 @@ model StockMovement {
   notes           String?
   performedBy     String
   approvedBy      String?
-  createdAt       DateTime            @default(now())
+  createdAt       DateTime              @default(now())
 
-  product         Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variant         ProductVariant?   @relation(fields: [variantId], references: [id], onDelete: Cascade)
-  lot             InventoryLot?     @relation(fields: [lotId], references: [id], onDelete: SetNull)
-  warehouse       Warehouse?        @relation(fields: [warehouseId], references: [id], onDelete: SetNull)
-  fromWarehouse   Warehouse?        @relation("FromWarehouseMovements", fields: [fromWarehouseId], references: [id], onDelete: SetNull)
-  toWarehouse     Warehouse?        @relation("ToWarehouseMovements", fields: [toWarehouseId], references: [id], onDelete: SetNull)
+  product         Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant         ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  lot             InventoryLot?   @relation(fields: [lotId], references: [id], onDelete: SetNull)
+  warehouse       Warehouse?      @relation(fields: [warehouseId], references: [id], onDelete: SetNull)
+  fromWarehouse   Warehouse?      @relation("FromWarehouseMovements", fields: [fromWarehouseId], references: [id], onDelete: SetNull)
+  toWarehouse     Warehouse?      @relation("ToWarehouseMovements", fields: [toWarehouseId], references: [id], onDelete: SetNull)
+  InventoryItem   InventoryItem?  @relation(fields: [inventoryItemId], references: [id])
+  inventoryItemId String?
 
   @@index([productId, createdAt])
   @@index([variantId, createdAt])
@@ -1083,25 +1109,26 @@ model StockMovement {
 }
 
 model Supplier {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  ruc         String?  @unique
-  contactName String?
-  email       String?
-  phone       String?
-  address     String?
-  city        String?
-  region      String?
-  country     String   @default("PE")
+  id           String  @id @default(cuid())
+  name         String
+  slug         String  @unique
+  ruc          String? @unique
+  contactName  String?
+  email        String?
+  phone        String?
+  address      String?
+  city         String?
+  region       String?
+  country      String  @default("PE")
   paymentTerms Int     @default(30) // días
-  currency    String   @default("PEN")
-  isActive    Boolean  @default(true)
-  rating      Int      @default(0) // 1-5
-  notes       String?
+  currency     String  @default("PEN")
+  isActive     Boolean @default(true)
+  rating       Int     @default(0) // 1-5
+  notes        String?
 
   purchaseOrders PurchaseOrder[]
   lots           InventoryLot[]
+  Expense        Expense[]
 
   @@index([slug])
   @@index([ruc])
@@ -1110,28 +1137,28 @@ model Supplier {
 }
 
 model PurchaseOrder {
-  id              String   @id @default(cuid())
-  orderNumber     String   @unique
-  supplierId      String
-  warehouseId     String
-  status          String   @default("DRAFT") // DRAFT, SENT, CONFIRMED, PARTIAL, RECEIVED, CANCELLED
-  orderDate       DateTime @default(now())
-  expectedDate    DateTime?
-  receivedDate    DateTime?
-  subtotal        Decimal  @db.Decimal(12, 2)
-  taxAmount       Decimal  @db.Decimal(12, 2)
-  total           Decimal  @db.Decimal(12, 2)
-  currency        String   @default("PEN")
-  exchangeRate    Decimal  @default(1.0) @db.Decimal(10, 4)
-  notes           String?
-  createdBy       String
-  approvedBy      String?
-  approvedAt      DateTime?
+  id           String    @id @default(cuid())
+  orderNumber  String    @unique
+  supplierId   String
+  warehouseId  String
+  status       String    @default("DRAFT") // DRAFT, SENT, CONFIRMED, PARTIAL, RECEIVED, CANCELLED
+  orderDate    DateTime  @default(now())
+  expectedDate DateTime?
+  receivedDate DateTime?
+  subtotal     Decimal   @db.Decimal(12, 2)
+  taxAmount    Decimal   @db.Decimal(12, 2)
+  total        Decimal   @db.Decimal(12, 2)
+  currency     String    @default("PEN")
+  exchangeRate Decimal   @default(1.0) @db.Decimal(10, 4)
+  notes        String?
+  createdBy    String
+  approvedBy   String?
+  approvedAt   DateTime?
 
-  supplier        Supplier      @relation(fields: [supplierId], references: [id], onDelete: Cascade)
-  warehouse       Warehouse     @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
-  items           PurchaseOrderItem[]
-  lots            InventoryLot[]
+  supplier  Supplier            @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  warehouse Warehouse           @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  items     PurchaseOrderItem[]
+  lots      InventoryLot[]
 
   @@index([orderNumber])
   @@index([supplierId, status])
@@ -1141,20 +1168,20 @@ model PurchaseOrder {
 }
 
 model PurchaseOrderItem {
-  id              String   @id @default(cuid())
+  id              String  @id @default(cuid())
   purchaseOrderId String
   productId       String
   variantId       String?
   quantity        Int
-  receivedQty     Int      @default(0)
-  unitPrice       Decimal  @db.Decimal(12, 2)
-  taxRate         Decimal  @default(18.00) @db.Decimal(5, 2)
-  total           Decimal  @db.Decimal(12, 2)
+  receivedQty     Int     @default(0)
+  unitPrice       Decimal @db.Decimal(12, 2)
+  taxRate         Decimal @default(18.00) @db.Decimal(5, 2)
+  total           Decimal @db.Decimal(12, 2)
   notes           String?
 
-  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
-  product         Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variant         ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  purchaseOrder PurchaseOrder   @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  product       Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant       ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
 
   @@index([purchaseOrderId])
   @@index([productId])
@@ -1166,16 +1193,16 @@ model PurchaseOrderItem {
 // ============================================
 
 model Cart {
-  id          String   @id @default(cuid())
-  userId      String?  @unique
-  sessionId   String?  @unique
-  currency    String   @default("PEN")
-  expiresAt   DateTime @default(dbgenerated("(now() + interval '30 days')"))
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  userId    String?  @unique
+  sessionId String?  @unique
+  currency  String   @default("PEN")
+  expiresAt DateTime @default(dbgenerated("(now() + interval '30 days')"))
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items       CartItem[]
+  user           User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items          CartItem[]
   appliedCoupons CartCoupon[]
 
   @@index([userId])
@@ -1185,17 +1212,17 @@ model Cart {
 }
 
 model CartItem {
-  id        String   @id @default(cuid())
+  id        String  @id @default(cuid())
   cartId    String
   productId String
   variantId String?
-  quantity  Int      @default(1)
-  price     Decimal  @db.Decimal(12, 2) // Precio congelado al agregar
-  metadata  Json?    // Opciones personalizadas, regalo, etc.
+  quantity  Int     @default(1)
+  price     Decimal @db.Decimal(12, 2) // Precio congelado al agregar
+  metadata  Json? // Opciones personalizadas, regalo, etc.
 
-  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  cart    Cart            @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
 
   @@unique([cartId, productId, variantId])
   @@index([cartId])
@@ -1208,34 +1235,34 @@ model CartCoupon {
   couponId  String
   appliedAt DateTime @default(now())
 
-  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  coupon    Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  coupon Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
 
   @@unique([cartId, couponId])
   @@map("cart_coupons")
 }
 
 model Order {
-  id                  String       @id @default(cuid())
-  orderNumber         String       @unique
-  userId              String?
-  guestEmail          String?
-  guestToken          String?      @unique // Para tracking sin cuenta
-  status              OrderStatus  @default(PENDING_PAYMENT)
-  currency            String       @default("PEN")
-  subtotal            Decimal      @db.Decimal(12, 2)
-  discountAmount      Decimal      @default(0) @db.Decimal(12, 2)
-  shippingAmount      Decimal      @default(0) @db.Decimal(12, 2)
-  taxAmount           Decimal      @default(0) @db.Decimal(12, 2)
-  total               Decimal      @db.Decimal(12, 2)
-  paidAmount          Decimal      @default(0) @db.Decimal(12, 2)
-  balanceDue          Decimal      @default(0) @db.Decimal(12, 2)
+  id             String      @id @default(cuid())
+  orderNumber    String      @unique
+  userId         String?
+  guestEmail     String?
+  guestToken     String?     @unique // Para tracking sin cuenta
+  status         OrderStatus @default(PENDING_PAYMENT)
+  currency       String      @default("PEN")
+  subtotal       Decimal     @db.Decimal(12, 2)
+  discountAmount Decimal     @default(0) @db.Decimal(12, 2)
+  shippingAmount Decimal     @default(0) @db.Decimal(12, 2)
+  taxAmount      Decimal     @default(0) @db.Decimal(12, 2)
+  total          Decimal     @db.Decimal(12, 2)
+  paidAmount     Decimal     @default(0) @db.Decimal(12, 2)
+  balanceDue     Decimal     @default(0) @db.Decimal(12, 2)
 
   // Direcciones
-  shippingAddressId   String?
-  billingAddressId    String?
-  shippingAddress     Json?        // Snapshot de la dirección
-  billingAddress      Json?
+  shippingAddressId String?
+  billingAddressId  String?
+  shippingAddress   Json? // Snapshot de la dirección
+  billingAddress    Json?
 
   // Envío
   shippingMethod      String?
@@ -1245,44 +1272,48 @@ model Order {
   estimatedDelivery   DateTime?
 
   // Pago
-  paymentMethod       PaymentMethod?
-  paymentReference    String?
-  paymentIdempotencyKey String?    @unique
+  paymentMethod         PaymentMethod?
+  paymentReference      String?
+  paymentIdempotencyKey String?        @unique
 
   // Facturación
-  documentType        DocumentType?
-  documentSeries      String?
-  documentNumber      String?
-  documentSunatStatus String?
+  documentType          DocumentType?
+  documentSeries        String?
+  documentNumber        String?
+  documentSunatStatus   String?
   documentSunatResponse Json?
 
   // Notas
-  customerNotes       String?
-  internalNotes       String?
-  giftMessage         String?
-  isGift              Boolean      @default(false)
+  customerNotes String?
+  internalNotes String?
+  giftMessage   String?
+  isGift        Boolean @default(false)
 
   // Fechas
-  createdAt           DateTime    @default(now())
-  confirmedAt         DateTime?
-  shippedAt           DateTime?
-  deliveredAt         DateTime?
-  cancelledAt         DateTime?
-  cancelledReason     String?
+  createdAt       DateTime  @default(now())
+  confirmedAt     DateTime?
+  shippedAt       DateTime?
+  deliveredAt     DateTime?
+  cancelledAt     DateTime?
+  cancelledReason String?
 
   // Relaciones
-  user                User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
-  shippingAddressRel  Address?     @relation("OrderShippingAddress", fields: [shippingAddressId], references: [id], onDelete: SetNull)
-  billingAddressRel   Address?     @relation("OrderBillingAddress", fields: [billingAddressId], references: [id], onDelete: SetNull)
-  items               OrderItem[]
-  payments            Payment[]
-  refunds             Refund[]
-  statusHistory       OrderStatusHistory[]
-  shipments           Shipment[]
-  appliedCoupons      OrderCoupon[]
-  promotions          OrderPromotion[]
-  documents           Document[]
-  auditLogs           AuditLog[]
+  user               User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+  shippingAddressRel Address?             @relation("OrderShippingAddress", fields: [shippingAddressId], references: [id], onDelete: SetNull)
+  billingAddressRel  Address?             @relation("OrderBillingAddress", fields: [billingAddressId], references: [id], onDelete: SetNull)
+  items              OrderItem[]
+  payments           Payment[]
+  refunds            Refund[]
+  statusHistory      OrderStatusHistory[]
+  shipments          Shipment[]
+  appliedCoupons     OrderCoupon[]
+  promotions         OrderPromotion[]
+  documents          Document[]
+  auditLogs          AuditLog[]
+  Coupon             Coupon?              @relation(fields: [couponId], references: [id])
+  couponId           String?
+  Customer           Customer?            @relation(fields: [customerId], references: [id])
+  customerId         String?
 
   @@index([orderNumber])
   @@index([userId, status])
@@ -1293,24 +1324,27 @@ model Order {
 }
 
 model OrderItem {
-  id              String   @id @default(cuid())
-  orderId         String
-  productId       String
-  variantId       String?
-  sku             String
-  name            String
-  variantName     String?
-  quantity        Int
-  unitPrice       Decimal  @db.Decimal(12, 2)
-  discountAmount  Decimal  @default(0) @db.Decimal(12, 2)
-  taxRate         Decimal  @db.Decimal(5, 2)
-  taxAmount       Decimal  @db.Decimal(12, 2)
-  total           Decimal  @db.Decimal(12, 2)
-  metadata        Json?    // Opciones, personalización, lote, etc.
+  id             String  @id @default(cuid())
+  orderId        String
+  productId      String
+  variantId      String?
+  sku            String
+  name           String
+  variantName    String?
+  quantity       Int
+  unitPrice      Decimal @db.Decimal(12, 2)
+  discountAmount Decimal @default(0) @db.Decimal(12, 2)
+  taxRate        Decimal @db.Decimal(5, 2)
+  taxAmount      Decimal @db.Decimal(12, 2)
+  total          Decimal @db.Decimal(12, 2)
+  metadata       Json? // Opciones, personalización, lote, etc.
 
-  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variant         ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  order        Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product      Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant      ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  RefundItem   RefundItem[]
+  ShipmentItem ShipmentItem[]
+  Review       Review[]
 
   @@index([orderId])
   @@index([productId])
@@ -1319,76 +1353,76 @@ model OrderItem {
 }
 
 model OrderStatusHistory {
-  id          String      @id @default(cuid())
-  orderId     String
-  fromStatus  OrderStatus?
-  toStatus    OrderStatus
-  reason      String?
-  metadata    Json?
-  createdBy   String?
-  createdAt   DateTime    @default(now())
+  id         String       @id @default(cuid())
+  orderId    String
+  fromStatus OrderStatus?
+  toStatus   OrderStatus
+  reason     String?
+  metadata   Json?
+  createdBy  String?
+  createdAt  DateTime     @default(now())
 
-  order       Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([orderId, createdAt])
   @@map("order_status_history")
 }
 
 model OrderCoupon {
-  id        String   @id @default(cuid())
-  orderId   String
-  couponId  String
-  discount  Decimal  @db.Decimal(12, 2)
+  id       String  @id @default(cuid())
+  orderId  String
+  couponId String
+  discount Decimal @db.Decimal(12, 2)
 
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  coupon    Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  order  Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  coupon Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
 
   @@unique([orderId, couponId])
   @@map("order_coupons")
 }
 
 model OrderPromotion {
-  id            String   @id @default(cuid())
-  orderId       String
-  promotionId   String
-  discount      Decimal  @db.Decimal(12, 2)
+  id          String  @id @default(cuid())
+  orderId     String
+  promotionId String
+  discount    Decimal @db.Decimal(12, 2)
 
-  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  promotion     Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  promotion Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
 
   @@unique([orderId, promotionId])
   @@map("order_promotions")
 }
 
 model Payment {
-  id                  String        @id @default(cuid())
-  orderId             String
-  paymentMethod       PaymentMethod
-  provider            String        // mercadopago, yape, plin, manual, etc.
-  providerPaymentId   String?       @unique
-  providerOrderId     String?
-  status              PaymentStatus @default(PENDING)
-  amount              Decimal       @db.Decimal(12, 2)
-  currency            String        @default("PEN")
-  feeAmount           Decimal       @default(0) @db.Decimal(12, 2)
-  netAmount           Decimal       @db.Decimal(12, 2)
-  idempotencyKey      String?       @unique
-  payerEmail          String?
-  payerPhone          String?
-  payerDocument       String?       // DNI/RUC
-  payerName           String?
-  paymentDetails      Json?         // Respuesta completa del proveedor
-  refundedAmount      Decimal       @default(0) @db.Decimal(12, 2)
-  createdAt           DateTime      @default(now())
-  processedAt         DateTime?
-  confirmedAt         DateTime?
-  failedAt            DateTime?
-  failureReason       String?
-  metadata            Json?
+  id                String        @id @default(cuid())
+  orderId           String
+  paymentMethod     PaymentMethod
+  provider          String // mercadopago, yape, plin, manual, etc.
+  providerPaymentId String?       @unique
+  providerOrderId   String?
+  status            PaymentStatus @default(PENDING)
+  amount            Decimal       @db.Decimal(12, 2)
+  currency          String        @default("PEN")
+  feeAmount         Decimal       @default(0) @db.Decimal(12, 2)
+  netAmount         Decimal       @db.Decimal(12, 2)
+  idempotencyKey    String?       @unique
+  payerEmail        String?
+  payerPhone        String?
+  payerDocument     String? // DNI/RUC
+  payerName         String?
+  paymentDetails    Json? // Respuesta completa del proveedor
+  refundedAmount    Decimal       @default(0) @db.Decimal(12, 2)
+  createdAt         DateTime      @default(now())
+  processedAt       DateTime?
+  confirmedAt       DateTime?
+  failedAt          DateTime?
+  failureReason     String?
+  metadata          Json?
 
-  order               Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  events              PaymentEvent[]
-  refunds             Refund[]
+  order   Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  events  PaymentEvent[]
+  refunds Refund[]
 
   @@index([orderId])
   @@index([providerPaymentId])
@@ -1398,17 +1432,17 @@ model Payment {
 }
 
 model PaymentEvent {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   paymentId       String
-  eventType       String   // payment.created, payment.approved, payment.rejected, etc.
-  providerEventId String?  @unique
+  eventType       String // payment.created, payment.approved, payment.rejected, etc.
+  providerEventId String?   @unique
   payload         Json
-  processed       Boolean  @default(false)
+  processed       Boolean   @default(false)
   processedAt     DateTime?
   error           String?
-  createdAt       DateTime @default(now())
+  createdAt       DateTime  @default(now())
 
-  payment         Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
 
   @@index([paymentId, createdAt])
   @@index([providerEventId])
@@ -1417,22 +1451,22 @@ model PaymentEvent {
 }
 
 model Refund {
-  id              String   @id @default(cuid())
-  orderId         String
-  paymentId       String?
-  amount          Decimal  @db.Decimal(12, 2)
-  reason          String
-  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED, PROCESSED, FAILED
-  providerRefundId String? @unique
-  processedBy     String?
-  processedAt     DateTime?
-  notes           String?
-  metadata        Json?
-  createdAt       DateTime @default(now())
+  id               String    @id @default(cuid())
+  orderId          String
+  paymentId        String?
+  amount           Decimal   @db.Decimal(12, 2)
+  reason           String
+  status           String    @default("PENDING") // PENDING, APPROVED, REJECTED, PROCESSED, FAILED
+  providerRefundId String?   @unique
+  processedBy      String?
+  processedAt      DateTime?
+  notes            String?
+  metadata         Json?
+  createdAt        DateTime  @default(now())
 
-  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  payment         Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
-  items           RefundItem[]
+  order   Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  payment Payment?     @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  items   RefundItem[]
 
   @@index([orderId])
   @@index([paymentId])
@@ -1441,15 +1475,15 @@ model Refund {
 }
 
 model RefundItem {
-  id        String     @id @default(cuid())
-  refundId  String
+  id          String  @id @default(cuid())
+  refundId    String
   orderItemId String
-  quantity  Int
-  amount    Decimal    @db.Decimal(12, 2)
-  reason    String?
+  quantity    Int
+  amount      Decimal @db.Decimal(12, 2)
+  reason      String?
 
-  refund    Refund     @relation(fields: [refundId], references: [id], onDelete: Cascade)
-  orderItem OrderItem  @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  refund    Refund    @relation(fields: [refundId], references: [id], onDelete: Cascade)
+  orderItem OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
 
   @@unique([refundId, orderItemId])
   @@map("refund_items")
@@ -1460,36 +1494,38 @@ model RefundItem {
 // ============================================
 
 model Customer {
-  id              String   @id @default(cuid())
-  userId          String?  @unique
-  documentType    String?  // DNI, RUC, CE, PASAPORTE
-  documentNumber  String?  @unique
-  firstName       String
-  lastName        String
-  businessName    String?  // Para RUC
-  email           String
-  phone           String?
-  birthDate       DateTime?
-  gender          String?
-  isWholesale     Boolean  @default(false)
-  wholesaleTier   String?  // Nivel de precio mayorista
-  creditLimit     Decimal? @db.Decimal(12, 2)
-  creditUsed      Decimal  @default(0) @db.Decimal(12, 2)
-  notes           String?
-  tags            String[]
-  marketingConsent Boolean @default(false)
+  id                 String    @id @default(cuid())
+  userId             String?   @unique
+  documentType       String? // DNI, RUC, CE, PASAPORTE
+  documentNumber     String?   @unique
+  firstName          String
+  lastName           String
+  businessName       String? // Para RUC
+  email              String
+  phone              String?
+  birthDate          DateTime?
+  gender             String?
+  isWholesale        Boolean   @default(false)
+  wholesaleTier      String? // Nivel de precio mayorista
+  creditLimit        Decimal?  @db.Decimal(12, 2)
+  creditUsed         Decimal   @default(0) @db.Decimal(12, 2)
+  notes              String?
+  tags               String[]
+  marketingConsent   Boolean   @default(false)
   marketingConsentAt DateTime?
 
-  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  addresses       Address[]
-  orders          Order[]
-  priceList       CustomerPriceList?
-  coupons         CouponCustomer[]
-  wishlist        Wishlist[]
-  reviews         Review[]
-  notifications   Notification[]
-  communications  Communication[]
-  qrScans         QrScan[]
+  user              User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  addresses         Address[]
+  orders            Order[]
+  priceList         CustomerPriceList?
+  coupons           CouponCustomer[]
+  wishlist          Wishlist[]
+  reviews           Review[]
+  notifications     Notification[]
+  communications    Communication[]
+  qrScans           QrScan[]
+  RecipePdfDownload RecipePdfDownload[]
+  AuditLog          AuditLog[]
 
   @@index([userId])
   @@index([documentNumber])
@@ -1499,33 +1535,33 @@ model Customer {
 }
 
 model Address {
-  id            String   @id @default(cuid())
-  userId        String?
-  customerId    String?
-  type          String   @default("shipping") // shipping, billing, both
-  isDefault     Boolean  @default(false)
-  firstName     String
-  lastName      String
-  company       String?
-  addressLine1  String
-  addressLine2  String?
-  neighborhood  String?  // Urbanización
-  district      String   // Distrito
-  province      String   // Provincia
-  department    String   // Departamento
-  postalCode    String?
-  country       String   @default("PE")
-  phone         String?
-  instructions  String?  // Referencias, portería, etc.
-  latitude      Decimal? @db.Decimal(10, 8)
-  longitude     Decimal? @db.Decimal(11, 8)
-  ubigeo        String?  // Código UBIGEO INEI
+  id           String   @id @default(cuid())
+  userId       String?
+  customerId   String?
+  type         String   @default("shipping") // shipping, billing, both
+  isDefault    Boolean  @default(false)
+  firstName    String
+  lastName     String
+  company      String?
+  addressLine1 String
+  addressLine2 String?
+  neighborhood String? // Urbanización
+  district     String // Distrito
+  province     String // Provincia
+  department   String // Departamento
+  postalCode   String?
+  country      String   @default("PE")
+  phone        String?
+  instructions String? // Referencias, portería, etc.
+  latitude     Decimal? @db.Decimal(10, 8)
+  longitude    Decimal? @db.Decimal(11, 8)
+  ubigeo       String? // Código UBIGEO INEI
 
-  user          User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  customer      Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  ordersShipping Order[]  @relation("OrderShippingAddress")
-  ordersBilling  Order[]  @relation("OrderBillingAddress")
-  shipments     Shipment[]
+  user           User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customer       Customer?  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  ordersShipping Order[]    @relation("OrderShippingAddress")
+  ordersBilling  Order[]    @relation("OrderBillingAddress")
+  shipments      Shipment[]
 
   @@index([userId])
   @@index([customerId])
@@ -1534,13 +1570,13 @@ model Address {
 }
 
 model Communication {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   customerId  String
-  type        String   // email, sms, whatsapp, push, in_app
+  type        String // email, sms, whatsapp, push, in_app
   subject     String?
   content     String
   templateId  String?
-  status      String   @default("PENDING") // PENDING, SENT, DELIVERED, FAILED, OPENED, CLICKED
+  status      String    @default("PENDING") // PENDING, SENT, DELIVERED, FAILED, OPENED, CLICKED
   provider    String?
   providerId  String?
   sentAt      DateTime?
@@ -1549,9 +1585,9 @@ model Communication {
   clickedAt   DateTime?
   error       String?
   metadata    Json?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 
-  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@index([customerId, createdAt])
   @@index([status, type])
@@ -1559,7 +1595,7 @@ model Communication {
 }
 
 model Notification {
-  id          String           @id @default(cuid())
+  id          String              @id @default(cuid())
   userId      String
   customerId  String?
   type        NotificationType
@@ -1567,14 +1603,14 @@ model Notification {
   title       String
   message     String
   data        Json?
-  isRead      Boolean          @default(false)
+  isRead      Boolean             @default(false)
   readAt      DateTime?
   sentAt      DateTime?
   deliveredAt DateTime?
-  createdAt   DateTime         @default(now())
+  createdAt   DateTime            @default(now())
 
-  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  customer    Customer?        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customer Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@index([userId, isRead, createdAt])
   @@index([customerId, createdAt])
@@ -1599,13 +1635,14 @@ model Carrier {
   supportsPickup  Boolean  @default(false)
   supportsDropoff Boolean  @default(false)
   maxWeight       Decimal? @db.Decimal(8, 3)
-  maxDimensions   Json?    // {length, width, height}
+  maxDimensions   Json? // {length, width, height}
   isActive        Boolean  @default(true)
-  config          Json?    // Configuración específica del transportista
+  config          Json? // Configuración específica del transportista
   priority        Int      @default(0)
 
-  shipments       Shipment[]
-  shippingZones   ShippingZone[]
+  shipments     Shipment[]
+  shippingZones ShippingZone[]
+  ShippingRule  ShippingRule[]
 
   @@index([slug])
   @@index([code])
@@ -1624,29 +1661,30 @@ model ShippingZone {
   postalCodes String[] // Códigos postales
   isActive    Boolean  @default(true)
 
-  carrier     Carrier  @relation(fields: [carrierId], references: [id], onDelete: Cascade)
-  rates       ShippingRate[]
+  carrier      Carrier        @relation(fields: [carrierId], references: [id], onDelete: Cascade)
+  rates        ShippingRate[]
+  ShippingRule ShippingRule[]
 
   @@index([carrierId])
   @@map("shipping_zones")
 }
 
 model ShippingRate {
-  id              String   @id @default(cuid())
-  zoneId          String
-  name            String
-  minWeight       Decimal  @default(0) @db.Decimal(8, 3)
-  maxWeight       Decimal? @db.Decimal(8, 3)
-  minOrderAmount  Decimal? @db.Decimal(12, 2)
-  maxOrderAmount  Decimal? @db.Decimal(12, 2)
-  basePrice       Decimal  @db.Decimal(12, 2)
-  pricePerKg      Decimal  @default(0) @db.Decimal(12, 2)
-  pricePerKm      Decimal  @default(0) @db.Decimal(12, 2)
-  estimatedDays   Int
-  isActive        Boolean  @default(true)
-  sortOrder       Int      @default(0)
+  id             String   @id @default(cuid())
+  zoneId         String
+  name           String
+  minWeight      Decimal  @default(0) @db.Decimal(8, 3)
+  maxWeight      Decimal? @db.Decimal(8, 3)
+  minOrderAmount Decimal? @db.Decimal(12, 2)
+  maxOrderAmount Decimal? @db.Decimal(12, 2)
+  basePrice      Decimal  @db.Decimal(12, 2)
+  pricePerKg     Decimal  @default(0) @db.Decimal(12, 2)
+  pricePerKm     Decimal  @default(0) @db.Decimal(12, 2)
+  estimatedDays  Int
+  isActive       Boolean  @default(true)
+  sortOrder      Int      @default(0)
 
-  zone            ShippingZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  zone ShippingZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
 
   @@index([zoneId])
   @@index([isActive])
@@ -1654,25 +1692,25 @@ model ShippingRate {
 }
 
 model ShippingRule {
-  id              String   @id @default(cuid())
-  productId       String?
-  variantId       String?
-  categoryId      String?
-  carrierId       String?
-  zoneId          String?
-  freeShipping    Boolean  @default(false)
-  fixedPrice      Decimal? @db.Decimal(12, 2)
-  multiplier      Decimal  @default(1.0) @db.Decimal(3, 2)
-  minQty          Int      @default(1)
-  maxQty          Int?
-  isActive        Boolean  @default(true)
-  priority        Int      @default(0)
+  id           String   @id @default(cuid())
+  productId    String?
+  variantId    String?
+  categoryId   String?
+  carrierId    String?
+  zoneId       String?
+  freeShipping Boolean  @default(false)
+  fixedPrice   Decimal? @db.Decimal(12, 2)
+  multiplier   Decimal  @default(1.0) @db.Decimal(3, 2)
+  minQty       Int      @default(1)
+  maxQty       Int?
+  isActive     Boolean  @default(true)
+  priority     Int      @default(0)
 
-  product         Product?     @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variant         ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
-  category        Category?    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  carrier         Carrier?     @relation(fields: [carrierId], references: [id], onDelete: Cascade)
-  zone            ShippingZone? @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  product  Product?        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant  ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  category Category?       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  carrier  Carrier?        @relation(fields: [carrierId], references: [id], onDelete: Cascade)
+  zone     ShippingZone?   @relation(fields: [zoneId], references: [id], onDelete: Cascade)
 
   @@index([productId])
   @@index([variantId])
@@ -1682,40 +1720,40 @@ model ShippingRule {
 }
 
 model Shipment {
-  id              String         @id @default(cuid())
-  shipmentNumber  String         @unique
-  orderId         String
-  carrierId       String
-  warehouseId     String?
-  addressId       String?
-  status          ShipmentStatus @default(PENDING)
-  trackingNumber  String?        @unique
-  trackingUrl     String?
-  labelUrl        String?
-  labelFormat     String?        // PDF, ZPL, PNG
-  weight          Decimal?       @db.Decimal(8, 3)
-  dimensions      Json?          // {length, width, height}
-  declaredValue   Decimal?       @db.Decimal(12, 2)
-  shippingCost    Decimal        @db.Decimal(12, 2)
-  insuranceCost   Decimal        @default(0) @db.Decimal(12, 2)
-  codAmount       Decimal?       @db.Decimal(12, 2) // Contraentrega
-  pickupDate      DateTime?
-  shippedAt       DateTime?
+  id                String         @id @default(cuid())
+  shipmentNumber    String         @unique
+  orderId           String
+  carrierId         String
+  warehouseId       String?
+  addressId         String?
+  status            ShipmentStatus @default(PENDING)
+  trackingNumber    String?        @unique
+  trackingUrl       String?
+  labelUrl          String?
+  labelFormat       String? // PDF, ZPL, PNG
+  weight            Decimal?       @db.Decimal(8, 3)
+  dimensions        Json? // {length, width, height}
+  declaredValue     Decimal?       @db.Decimal(12, 2)
+  shippingCost      Decimal        @db.Decimal(12, 2)
+  insuranceCost     Decimal        @default(0) @db.Decimal(12, 2)
+  codAmount         Decimal?       @db.Decimal(12, 2) // Contraentrega
+  pickupDate        DateTime?
+  shippedAt         DateTime?
   estimatedDelivery DateTime?
-  deliveredAt     DateTime?
-  failedAttempts  Int            @default(0)
-  failureReason   String?
-  notes           String?
-  metadata        Json?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  deliveredAt       DateTime?
+  failedAttempts    Int            @default(0)
+  failureReason     String?
+  notes             String?
+  metadata          Json?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 
-  order           Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  carrier         Carrier        @relation(fields: [carrierId], references: [id], onDelete: Cascade)
-  warehouse       Warehouse?     @relation(fields: [warehouseId], references: [id], onDelete: SetNull)
-  address         Address?       @relation(fields: [addressId], references: [id], onDelete: SetNull)
-  items           ShipmentItem[]
-  events          TrackingEvent[]
+  order     Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  carrier   Carrier         @relation(fields: [carrierId], references: [id], onDelete: Cascade)
+  warehouse Warehouse?      @relation(fields: [warehouseId], references: [id], onDelete: SetNull)
+  address   Address?        @relation(fields: [addressId], references: [id], onDelete: SetNull)
+  items     ShipmentItem[]
+  events    TrackingEvent[]
 
   @@index([shipmentNumber])
   @@index([orderId])
@@ -1726,15 +1764,15 @@ model Shipment {
 }
 
 model ShipmentItem {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   shipmentId  String
   orderItemId String
   quantity    Int
   lotId       String?
 
-  shipment    Shipment  @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
-  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
-  lot         InventoryLot? @relation(fields: [lotId], references: [id], onDelete: SetNull)
+  shipment  Shipment      @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  orderItem OrderItem     @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  lot       InventoryLot? @relation(fields: [lotId], references: [id], onDelete: SetNull)
 
   @@unique([shipmentId, orderItemId])
   @@index([shipmentId])
@@ -1742,18 +1780,18 @@ model ShipmentItem {
 }
 
 model TrackingEvent {
-  id          String   @id @default(cuid())
+  id          String         @id @default(cuid())
   shipmentId  String
   status      ShipmentStatus
   location    String?
   description String
   eventDate   DateTime
   providerRaw Json?
-  isManual    Boolean  @default(false)
+  isManual    Boolean        @default(false)
   createdBy   String?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime       @default(now())
 
-  shipment    Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
 
   @@index([shipmentId, eventDate])
   @@index([status, eventDate])
@@ -1765,25 +1803,25 @@ model TrackingEvent {
 // ============================================
 
 model Document {
-  id              String        @id @default(cuid())
-  orderId         String
-  type            DocumentType
-  series          String
-  number          Int
-  sunatId         String?       @unique // UUID SUNAT
-  sunatStatus     String?       // ACEPTADO, RECHAZADO, ANULADO, PENDIENTE
-  sunatResponse   Json?
-  xmlContent      String?       @db.Text
-  cdrContent      String?       @db.Text
-  pdfUrl          String?
-  createdAt       DateTime     @default(now())
-  signedAt        DateTime?
-  sentAt          DateTime?
-  voidedAt        DateTime?
-  voidReason      String?
-  metadata        Json?
+  id            String       @id @default(cuid())
+  orderId       String
+  type          DocumentType
+  series        String
+  number        Int
+  sunatId       String?      @unique // UUID SUNAT
+  sunatStatus   String? // ACEPTADO, RECHAZADO, ANULADO, PENDIENTE
+  sunatResponse Json?
+  xmlContent    String?      @db.Text
+  cdrContent    String?      @db.Text
+  pdfUrl        String?
+  createdAt     DateTime     @default(now())
+  signedAt      DateTime?
+  sentAt        DateTime?
+  voidedAt      DateTime?
+  voidReason    String?
+  metadata      Json?
 
-  order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order             Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
   accountingEntries AccountingEntry[]
 
   @@unique([type, series, number])
@@ -1794,28 +1832,30 @@ model Document {
 }
 
 model AccountingEntry {
-  id              String              @id @default(cuid())
-  entryNumber     String              @unique
-  date            DateTime
-  type            AccountingEntryType
-  description     String
-  referenceType   String?             // document, payment, refund, adjustment, etc.
-  referenceId     String?
-  totalDebit      Decimal             @db.Decimal(14, 2)
-  totalCredit     Decimal             @db.Decimal(14, 2)
-  status          String              @default("DRAFT") // DRAFT, POSTED, VOIDED
-  postedBy        String?
-  postedAt        DateTime?
-  voidedBy        String?
-  voidedAt        DateTime?
-  voidReason      String?
-  metadata        Json?
-  createdBy       String
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
+  id            String              @id @default(cuid())
+  entryNumber   String              @unique
+  date          DateTime
+  type          AccountingEntryType
+  description   String
+  referenceType String? // document, payment, refund, adjustment, etc.
+  referenceId   String?
+  totalDebit    Decimal             @db.Decimal(14, 2)
+  totalCredit   Decimal             @db.Decimal(14, 2)
+  status        String              @default("DRAFT") // DRAFT, POSTED, VOIDED
+  postedBy      String?
+  postedAt      DateTime?
+  voidedBy      String?
+  voidedAt      DateTime?
+  voidReason    String?
+  metadata      Json?
+  createdBy     String
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
 
-  lines           AccountingEntryLine[]
-  documents       Document[]
+  lines     AccountingEntryLine[]
+  documents Document[]
+  User      User?                 @relation(fields: [userId], references: [id])
+  userId    String?
 
   @@index([date, status])
   @@index([type, date])
@@ -1824,18 +1864,18 @@ model AccountingEntry {
 }
 
 model AccountingEntryLine {
-  id              String   @id @default(cuid())
-  entryId         String
-  accountId       String
-  description     String?
-  debit           Decimal  @default(0) @db.Decimal(14, 2)
-  credit          Decimal  @default(0) @db.Decimal(14, 2)
-  costCenterId    String?
-  projectId       String?
-  sortOrder       Int      @default(0)
+  id           String  @id @default(cuid())
+  entryId      String
+  accountId    String
+  description  String?
+  debit        Decimal @default(0) @db.Decimal(14, 2)
+  credit       Decimal @default(0) @db.Decimal(14, 2)
+  costCenterId String?
+  projectId    String?
+  sortOrder    Int     @default(0)
 
-  entry           AccountingEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
-  account         Account         @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  entry   AccountingEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  account Account         @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@index([entryId])
   @@index([accountId])
@@ -1843,21 +1883,21 @@ model AccountingEntryLine {
 }
 
 model Account {
-  id          String   @id @default(cuid())
-  code        String   @unique
-  name        String
-  type        String   // asset, liability, equity, income, expense
-  subtype     String?  // current, fixed, bank, receivable, payable, tax, etc.
-  parentId    String?
-  level       Int      @default(0)
-  currency    String   @default("PEN")
-  isActive    Boolean  @default(true)
+  id           String  @id @default(cuid())
+  code         String  @unique
+  name         String
+  type         String // asset, liability, equity, income, expense
+  subtype      String? // current, fixed, bank, receivable, payable, tax, etc.
+  parentId     String?
+  level        Int     @default(0)
+  currency     String  @default("PEN")
+  isActive     Boolean @default(true)
   allowPosting Boolean @default(true)
-  description String?
+  description  String?
 
-  parent      Account?   @relation("AccountHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
-  children    Account[]  @relation("AccountHierarchy")
-  lines       AccountingEntryLine[]
+  parent   Account?              @relation("AccountHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Account[]             @relation("AccountHierarchy")
+  lines    AccountingEntryLine[]
 
   @@index([code])
   @@index([parentId])
@@ -1866,27 +1906,27 @@ model Account {
 }
 
 model CashMovement {
-  id              String           @id @default(cuid())
-  movementNumber  String           @unique
-  date            DateTime
-  type            CashMovementType
-  amount          Decimal          @db.Decimal(12, 2)
-  currency        String           @default("PEN")
-  paymentMethod   PaymentMethod?
-  referenceType   String?          // order, payment, refund, expense, transfer, etc.
-  referenceId     String?
-  description     String
-  status          String           @default("POSTED") // POSTED, VOIDED
-  voidedBy        String?
-  voidedAt        DateTime?
-  voidReason      String?
-  performedBy     String
-  approvedBy      String?
-  approvedAt      DateTime?
-  metadata        Json?
-  createdAt       DateTime         @default(now())
+  id             String           @id @default(cuid())
+  movementNumber String           @unique
+  date           DateTime
+  type           CashMovementType
+  amount         Decimal          @db.Decimal(12, 2)
+  currency       String           @default("PEN")
+  paymentMethod  PaymentMethod?
+  referenceType  String? // order, payment, refund, expense, transfer, etc.
+  referenceId    String?
+  description    String
+  status         String           @default("POSTED") // POSTED, VOIDED
+  voidedBy       String?
+  voidedAt       DateTime?
+  voidReason     String?
+  performedBy    String
+  approvedBy     String?
+  approvedAt     DateTime?
+  metadata       Json?
+  createdAt      DateTime         @default(now())
 
-  user            User             @relation(fields: [performedBy], references: [id], onDelete: Cascade)
+  user User @relation(fields: [performedBy], references: [id], onDelete: Cascade)
 
   @@index([date, type])
   @@index([referenceType, referenceId])
@@ -1895,29 +1935,29 @@ model CashMovement {
 }
 
 model Expense {
-  id              String   @id @default(cuid())
-  expenseNumber   String   @unique
-  date            DateTime
-  category        String   // rent, utilities, marketing, payroll, supplies, etc.
-  subcategory     String?
-  supplierId      String?
-  amount          Decimal  @db.Decimal(12, 2)
-  taxAmount       Decimal  @default(0) @db.Decimal(12, 2)
-  total           Decimal  @db.Decimal(12, 2)
-  currency        String   @default("PEN")
-  paymentMethod   PaymentMethod?
-  paidAt          DateTime?
-  status          String   @default("PENDING") // PENDING, APPROVED, PAID, REJECTED, CANCELLED
-  description     String?
-  receiptUrl      String?
-  approvedBy      String?
-  approvedAt      DateTime?
-  paidBy          String?
-  metadata        Json?
-  createdBy       String
-  createdAt       DateTime @default(now())
+  id            String         @id @default(cuid())
+  expenseNumber String         @unique
+  date          DateTime
+  category      String // rent, utilities, marketing, payroll, supplies, etc.
+  subcategory   String?
+  supplierId    String?
+  amount        Decimal        @db.Decimal(12, 2)
+  taxAmount     Decimal        @default(0) @db.Decimal(12, 2)
+  total         Decimal        @db.Decimal(12, 2)
+  currency      String         @default("PEN")
+  paymentMethod PaymentMethod?
+  paidAt        DateTime?
+  status        String         @default("PENDING") // PENDING, APPROVED, PAID, REJECTED, CANCELLED
+  description   String?
+  receiptUrl    String?
+  approvedBy    String?
+  approvedAt    DateTime?
+  paidBy        String?
+  metadata      Json?
+  createdBy     String
+  createdAt     DateTime       @default(now())
 
-  supplier        Supplier? @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  supplier Supplier? @relation(fields: [supplierId], references: [id], onDelete: SetNull)
 
   @@index([date, status])
   @@index([category, date])
@@ -1930,26 +1970,29 @@ model Expense {
 // ============================================
 
 model QrCode {
-  id          String   @id @default(cuid())
-  code        String   @unique // El contenido del QR (URL, texto, etc.)
-  type        String   // product, recipe, collection, order, tracking, custom
-  referenceId String?  // ID polimórfico del producto, receta, colección, etc.
-  productId   String?
-  recipeId    String?
-  title       String?
-  description String?
-  imageUrl    String?  // URL en Cloudinary
-  scanCount   Int      @default(0)
+  id            String    @id @default(cuid())
+  code          String    @unique // El contenido del QR (URL, texto, etc.)
+  type          String // product, recipe, collection, order, tracking, custom
+  referenceId   String? // ID polimórfico del producto, receta, colección, etc.
+  productId     String?
+  recipeId      String?
+  title         String?
+  description   String?
+  imageUrl      String? // URL en Cloudinary
+  scanCount     Int       @default(0)
   lastScannedAt DateTime?
-  isActive    Boolean  @default(true)
-  expiresAt   DateTime?
-  metadata    Json?
-  createdBy   String
-  createdAt   DateTime @default(now())
+  isActive      Boolean   @default(true)
+  expiresAt     DateTime?
+  metadata      Json?
+  createdBy     String
+  createdAt     DateTime  @default(now())
 
-  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
-  recipe      Recipe?  @relation(fields: [recipeId], references: [id], onDelete: SetNull)
-  scans       QrScan[]
+  product      Product?       @relation(fields: [productId], references: [id], onDelete: SetNull)
+  recipe       Recipe?        @relation(fields: [recipeId], references: [id], onDelete: SetNull)
+  scans        QrScan[]
+  User         User?          @relation(fields: [userId], references: [id])
+  userId       String?
+  PrintedLabel PrintedLabel[]
 
   @@index([type, referenceId])
   @@index([code])
@@ -1958,17 +2001,17 @@ model QrCode {
 }
 
 model QrScan {
-  id          String   @id @default(cuid())
-  qrCodeId    String
-  customerId  String?
-  ipAddress   String?
-  userAgent   String?
-  location    Json?    // {lat, lng, city, country} si está disponible
-  referrer    String?
-  scannedAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  qrCodeId   String
+  customerId String?
+  ipAddress  String?
+  userAgent  String?
+  location   Json? // {lat, lng, city, country} si está disponible
+  referrer   String?
+  scannedAt  DateTime @default(now())
 
-  qrCode      QrCode   @relation(fields: [qrCodeId], references: [id], onDelete: Cascade)
-  customer    Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  qrCode   QrCode    @relation(fields: [qrCodeId], references: [id], onDelete: Cascade)
+  customer Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
   @@index([qrCodeId, scannedAt])
   @@index([customerId, scannedAt])
@@ -1976,27 +2019,27 @@ model QrScan {
 }
 
 model LabelTemplate {
-  id          String   @id @default(cuid())
-  name        String
-  code        String   @unique // SKU, EAN13, CUSTOM, etc.
-  type        String   // product, lot, shipping, shelf, custom
-  format      String   @default("PDF") // PDF, SVG, ZPL, PNG
-  pageSize    String   @default("A4") // A4, 50x30mm, 60x40mm, 100x150mm, custom
-  customWidth Decimal? @db.Decimal(6, 2)
+  id           String   @id @default(cuid())
+  name         String
+  code         String   @unique // SKU, EAN13, CUSTOM, etc.
+  type         String // product, lot, shipping, shelf, custom
+  format       String   @default("PDF") // PDF, SVG, ZPL, PNG
+  pageSize     String   @default("A4") // A4, 50x30mm, 60x40mm, 100x150mm, custom
+  customWidth  Decimal? @db.Decimal(6, 2)
   customHeight Decimal? @db.Decimal(6, 2)
-  margins     Json?    // {top, right, bottom, left} en mm
-  columns     Int      @default(1)
-  rows        Int      @default(1)
-  gapX        Decimal  @default(0) @db.Decimal(4, 2)
-  gapY        Decimal  @default(0) @db.Decimal(4, 2)
-  template    Json     // Estructura del template (campos, posiciones, fuentes, etc.)
-  isDefault   Boolean  @default(false)
-  isActive    Boolean  @default(true)
-  createdBy   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  margins      Json? // {top, right, bottom, left} en mm
+  columns      Int      @default(1)
+  rows         Int      @default(1)
+  gapX         Decimal  @default(0) @db.Decimal(4, 2)
+  gapY         Decimal  @default(0) @db.Decimal(4, 2)
+  template     Json // Estructura del template (campos, posiciones, fuentes, etc.)
+  isDefault    Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  createdBy    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  labels      PrintedLabel[]
+  labels PrintedLabel[]
 
   @@index([code, type])
   @@index([isActive, isDefault])
@@ -2004,27 +2047,29 @@ model LabelTemplate {
 }
 
 model PrintedLabel {
-  id              String   @id @default(cuid())
-  templateId      String
-  productId       String?
-  variantId       String?
-  lotId           String?
-  qrCodeId        String?
-  quantity        Int      @default(1)
-  status          String   @default("PENDING") // PENDING, PRINTED, REPRINTED, VOIDED
-  pdfUrl          String?
-  printedAt       DateTime?
-  printedBy       String?
-  printerName     String?
-  notes           String?
-  createdBy       String
-  createdAt       DateTime @default(now())
+  id          String    @id @default(cuid())
+  templateId  String
+  productId   String?
+  variantId   String?
+  lotId       String?
+  qrCodeId    String?
+  quantity    Int       @default(1)
+  status      String    @default("PENDING") // PENDING, PRINTED, REPRINTED, VOIDED
+  pdfUrl      String?
+  printedAt   DateTime?
+  printedBy   String?
+  printerName String?
+  notes       String?
+  createdBy   String
+  createdAt   DateTime  @default(now())
 
-  template        LabelTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
-  product         Product?       @relation(fields: [productId], references: [id], onDelete: SetNull)
-  variant         ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
-  lot             InventoryLot?  @relation(fields: [lotId], references: [id], onDelete: SetNull)
-  qrCode          QrCode?        @relation(fields: [qrCodeId], references: [id], onDelete: SetNull)
+  template LabelTemplate   @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  product  Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  variant  ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  lot      InventoryLot?   @relation(fields: [lotId], references: [id], onDelete: SetNull)
+  qrCode   QrCode?         @relation(fields: [qrCodeId], references: [id], onDelete: SetNull)
+  User     User?           @relation(fields: [userId], references: [id])
+  userId   String?
 
   @@index([templateId, createdAt])
   @@index([productId, createdAt])
@@ -2038,48 +2083,48 @@ model PrintedLabel {
 // ============================================
 
 model Recipe {
-  id              String   @id @default(cuid())
-  slug            String   @unique
-  title           String
-  subtitle        String?
-  description     String?
-  story           String?  @db.Text // Historia del plato
-  difficulty      String   @default("FÁCIL") // FÁCIL, MEDIO, DIFÍCIL
-  prepTime        Int      @default(0) // minutos
-  cookTime        Int      @default(0) // minutos
-  restTime        Int      @default(0) // minutos
-  totalTime       Int      @default(0) // calculado
-  servings        Int      @default(4)
-  baseServings    Int      @default(4) // Para recálculo
-  image           String?
-  videoUrl        String?
-  cuisineType     String?  // Peruana, Criolla, Marina, Andina, Amazónica, Fusión, Internacional
-  mealType        String[] // DESAYUNO, ALMUERZO, CENA, ENTRADA, POSTRE, BEBIDA, SNACK
-  occasion        String[] // NAVIDAD, FIESTAS PATRIAS, DÍA DE LA MADRE, CUMPLEAÑOS, DÍA A DÍA, CENA ROMÁNTICA
-  tags            String[]
-  nutritionInfo   Json?    // {calories, protein, carbs, fat, fiber, sugar, sodium} por porción
-  tips            String[] @db.Text
-  warnings        String[] // Alérgenos, picante, etc.
-  seoTitle        String?
-  seoDescription  String?
-  seoKeywords     String[]
-  isPublished     Boolean  @default(false)
-  publishedAt     DateTime?
-  featuredUntil   DateTime?
-  viewCount       Int      @default(0)
-  rating          Decimal  @default(0) @db.Decimal(3, 2)
-  ratingCount     Int      @default(0)
-  authorId        String
+  id             String    @id @default(cuid())
+  slug           String    @unique
+  title          String
+  subtitle       String?
+  description    String?
+  story          String?   @db.Text // Historia del plato
+  difficulty     String    @default("FÁCIL") // FÁCIL, MEDIO, DIFÍCIL
+  prepTime       Int       @default(0) // minutos
+  cookTime       Int       @default(0) // minutos
+  restTime       Int       @default(0) // minutos
+  totalTime      Int       @default(0) // calculado
+  servings       Int       @default(4)
+  baseServings   Int       @default(4) // Para recálculo
+  image          String?
+  videoUrl       String?
+  cuisineType    String? // Peruana, Criolla, Marina, Andina, Amazónica, Fusión, Internacional
+  mealType       String[] // DESAYUNO, ALMUERZO, CENA, ENTRADA, POSTRE, BEBIDA, SNACK
+  occasion       String[] // NAVIDAD, FIESTAS PATRIAS, DÍA DE LA MADRE, CUMPLEAÑOS, DÍA A DÍA, CENA ROMÁNTICA
+  tags           String[]
+  nutritionInfo  Json? // {calories, protein, carbs, fat, fiber, sugar, sodium} por porción
+  tips           String[]  @db.Text
+  warnings       String[] // Alérgenos, picante, etc.
+  seoTitle       String?
+  seoDescription String?
+  seoKeywords    String[]
+  isPublished    Boolean   @default(false)
+  publishedAt    DateTime?
+  featuredUntil  DateTime?
+  viewCount      Int       @default(0)
+  rating         Decimal   @default(0) @db.Decimal(3, 2)
+  ratingCount    Int       @default(0)
+  authorId       String
 
   // Relaciones
-  author          User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  ingredients     RecipeIngredient[]
-  products        RecipeProduct[]
-  steps           RecipeStep[]
-  collections     RecipeCollectionRecipe[]
-  ratings         RecipeRating[]
-  qrCodes         QrCode[]
-  pdfDownloads    RecipePdfDownload[]
+  author       User                     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  ingredients  RecipeIngredient[]
+  products     RecipeProduct[]
+  steps        RecipeStep[]
+  collections  RecipeCollectionRecipe[]
+  ratings      RecipeRating[]
+  qrCodes      QrCode[]
+  pdfDownloads RecipePdfDownload[]
 
   @@index([slug])
   @@index([isPublished, publishedAt])
@@ -2092,23 +2137,23 @@ model Recipe {
 }
 
 model RecipeIngredient {
-  id              String   @id @default(cuid())
-  recipeId        String
-  productId       String?
-  variantId       String?
-  name            String   // Nombre si no hay producto vinculado
-  quantity        Decimal  @db.Decimal(10, 3)
-  unit            String   // g, kg, ml, l, unidad, cda, cta, pizca, taza
+  id               String  @id @default(cuid())
+  recipeId         String
+  productId        String?
+  variantId        String?
+  name             String // Nombre si no hay producto vinculado
+  quantity         Decimal @db.Decimal(10, 3)
+  unit             String // g, kg, ml, l, unidad, cda, cta, pizca, taza
   originalQuantity Decimal @db.Decimal(10, 3) // Para recálculo
-  originalUnit    String
-  isOptional      Boolean  @default(false)
-  notes           String?  // "picado finamente", "a temperatura ambiente"
-  sortOrder       Int      @default(0)
-  groupName       String?  // "Para la masa", "Para el relleno"
+  originalUnit     String
+  isOptional       Boolean @default(false)
+  notes            String? // "picado finamente", "a temperatura ambiente"
+  sortOrder        Int     @default(0)
+  groupName        String? // "Para la masa", "Para el relleno"
 
-  recipe          Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  product         Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
-  variant         ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  recipe  Recipe          @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  product Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
 
   @@index([recipeId, sortOrder])
   @@index([productId])
@@ -2116,18 +2161,18 @@ model RecipeIngredient {
 }
 
 model RecipeProduct {
-  id          String   @id @default(cuid())
-  recipeId    String
-  productId   String
-  variantId   String?
-  quantity    Int      @default(1)
-  isRequired  Boolean  @default(true)
-  sortOrder   Int      @default(0)
-  notes       String?
+  id         String  @id @default(cuid())
+  recipeId   String
+  productId  String
+  variantId  String?
+  quantity   Int     @default(1)
+  isRequired Boolean @default(true)
+  sortOrder  Int     @default(0)
+  notes      String?
 
-  recipe      Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variant     ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  recipe  Recipe          @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  product Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
 
   @@unique([recipeId, productId, variantId])
   @@index([recipeId])
@@ -2143,12 +2188,12 @@ model RecipeStep {
   description String   @db.Text
   image       String?
   videoUrl    String?
-  duration    Int?     // minutos
-  temperature String?  // "180°C", "fuego medio"
+  duration    Int? // minutos
+  temperature String? // "180°C", "fuego medio"
   tips        String[]
   sortOrder   Int      @default(0)
 
-  recipe      Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@unique([recipeId, stepNumber])
   @@index([recipeId, sortOrder])
@@ -2156,15 +2201,15 @@ model RecipeStep {
 }
 
 model RecipeCollection {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
-  slug        String   @unique
+  slug        String  @unique
   description String?
   image       String?
-  isActive    Boolean  @default(true)
-  sortOrder   Int      @default(0)
+  isActive    Boolean @default(true)
+  sortOrder   Int     @default(0)
 
-  recipes     RecipeCollectionRecipe[]
+  recipes RecipeCollectionRecipe[]
 
   @@index([slug])
   @@index([isActive])
@@ -2172,13 +2217,13 @@ model RecipeCollection {
 }
 
 model RecipeCollectionRecipe {
-  id              String   @id @default(cuid())
-  collectionId    String
-  recipeId        String
-  sortOrder       Int      @default(0)
+  id           String @id @default(cuid())
+  collectionId String
+  recipeId     String
+  sortOrder    Int    @default(0)
 
-  collection      RecipeCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
-  recipe          Recipe           @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  collection RecipeCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  recipe     Recipe           @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@unique([collectionId, recipeId])
   @@index([collectionId])
@@ -2187,17 +2232,17 @@ model RecipeCollectionRecipe {
 }
 
 model RecipeRating {
-  id          String   @id @default(cuid())
-  recipeId    String
-  userId      String
-  rating      Int      // 1-5
-  comment     String?
-  isVerified  Boolean  @default(false) // Compra verificada
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(cuid())
+  recipeId   String
+  userId     String
+  rating     Int // 1-5
+  comment    String?
+  isVerified Boolean  @default(false) // Compra verificada
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  recipe      Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([recipeId, userId])
   @@index([recipeId, rating])
@@ -2205,17 +2250,17 @@ model RecipeRating {
 }
 
 model RecipePdfDownload {
-  id          String   @id @default(cuid())
-  recipeId    String
-  userId      String?
-  customerId  String?
-  ipAddress   String?
-  userAgent   String?
+  id           String   @id @default(cuid())
+  recipeId     String
+  userId       String?
+  customerId   String?
+  ipAddress    String?
+  userAgent    String?
   downloadedAt DateTime @default(now())
 
-  recipe      Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  customer    Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  recipe   Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  user     User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customer Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
   @@index([recipeId, downloadedAt])
   @@map("recipe_pdf_downloads")
@@ -2226,27 +2271,27 @@ model RecipePdfDownload {
 // ============================================
 
 model Banner {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  title       String?
-  subtitle    String?
-  description String?
-  image       String
-  mobileImage String?
-  linkUrl     String?
-  linkText    String?
-  position    String   // hero, category, product, footer, sidebar, popup
-  targetPage  String?  // home, catalog, collection, product, custom
-  targetId    String?  // ID de colección, categoría, producto
-  startDate   DateTime?
-  endDate     DateTime?
-  isActive    Boolean  @default(true)
-  sortOrder   Int      @default(0)
-  openInNewTab Boolean @default(false)
-  metadata    Json?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String    @id @default(cuid())
+  name         String
+  slug         String    @unique
+  title        String?
+  subtitle     String?
+  description  String?
+  image        String
+  mobileImage  String?
+  linkUrl      String?
+  linkText     String?
+  position     String // hero, category, product, footer, sidebar, popup
+  targetPage   String? // home, catalog, collection, product, custom
+  targetId     String? // ID de colección, categoría, producto
+  startDate    DateTime?
+  endDate      DateTime?
+  isActive     Boolean   @default(true)
+  sortOrder    Int       @default(0)
+  openInNewTab Boolean   @default(false)
+  metadata     Json?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@index([slug])
   @@index([position, isActive, startDate, endDate])
@@ -2255,25 +2300,25 @@ model Banner {
 }
 
 model Page {
-  id              String   @id @default(cuid())
-  slug            String   @unique
-  title           String
-  content         String   @db.Text // HTML/Markdown/JSON del editor
-  excerpt         String?
-  template        String   @default("default") // default, landing, legal, contact, FAQ, about
-  status          String   @default("DRAFT") // DRAFT, PUBLISHED, ARCHIVED
-  isSystem        Boolean  @default(false) // Páginas legales, contacto, etc.
-  seoTitle        String?
-  seoDescription  String?
-  seoKeywords     String[]
-  canonicalUrl    String?
-  ogImage         String?
-  ogType          String   @default("website")
-  publishedAt     DateTime?
-  publishedBy     String?
-  viewCount       Int      @default(0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String    @id @default(cuid())
+  slug           String    @unique
+  title          String
+  content        String    @db.Text // HTML/Markdown/JSON del editor
+  excerpt        String?
+  template       String    @default("default") // default, landing, legal, contact, FAQ, about
+  status         String    @default("DRAFT") // DRAFT, PUBLISHED, ARCHIVED
+  isSystem       Boolean   @default(false) // Páginas legales, contacto, etc.
+  seoTitle       String?
+  seoDescription String?
+  seoKeywords    String[]
+  canonicalUrl   String?
+  ogImage        String?
+  ogType         String    @default("website")
+  publishedAt    DateTime?
+  publishedBy    String?
+  viewCount      Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   @@index([slug])
   @@index([status, publishedAt])
@@ -2282,12 +2327,12 @@ model Page {
 }
 
 model Menu {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  location    String   // header, footer, mobile, sidebar, account
-  isActive    Boolean  @default(true)
-  items       MenuItem[]
+  id       String     @id @default(cuid())
+  name     String
+  slug     String     @unique
+  location String // header, footer, mobile, sidebar, account
+  isActive Boolean    @default(true)
+  items    MenuItem[]
 
   @@index([slug, location])
   @@index([location, isActive])
@@ -2295,40 +2340,40 @@ model Menu {
 }
 
 model MenuItem {
-  id          String   @id @default(cuid())
-  menuId      String
-  parentId    String?
-  label       String
-  url         String?
-  targetPage  String?  // home, catalog, category, collection, product, page, custom
-  targetId    String?
-  icon        String?
-  badge       String?
-  badgeColor  String?
-  openInNewTab Boolean @default(false)
-  sortOrder   Int      @default(0)
-  isActive    Boolean  @default(true)
-  roles       String[] // Roles que pueden ver este item
-  metadata    Json?
+  id           String   @id @default(cuid())
+  menuId       String
+  parentId     String?
+  label        String
+  url          String?
+  targetPage   String? // home, catalog, category, collection, product, page, custom
+  targetId     String?
+  icon         String?
+  badge        String?
+  badgeColor   String?
+  openInNewTab Boolean  @default(false)
+  sortOrder    Int      @default(0)
+  isActive     Boolean  @default(true)
+  roles        String[] // Roles que pueden ver este item
+  metadata     Json?
 
-  menu        Menu     @relation(fields: [menuId], references: [id], onDelete: Cascade)
-  parent      MenuItem? @relation("MenuHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
-  children    MenuItem[] @relation("MenuHierarchy")
+  menu     Menu       @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  parent   MenuItem?  @relation("MenuHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children MenuItem[] @relation("MenuHierarchy")
 
   @@index([menuId, parentId, sortOrder])
   @@map("menu_items")
 }
 
 model SocialLink {
-  id          String   @id @default(cuid())
-  platform    String   // facebook, instagram, tiktok, whatsapp, youtube, twitter, linkedin, pinterest
-  name        String
-  url         String
-  handle      String?
-  icon        String?
-  isActive    Boolean  @default(true)
-  sortOrder   Int      @default(0)
-  metadata    Json?
+  id        String  @id @default(cuid())
+  platform  String // facebook, instagram, tiktok, whatsapp, youtube, twitter, linkedin, pinterest
+  name      String
+  url       String
+  handle    String?
+  icon      String?
+  isActive  Boolean @default(true)
+  sortOrder Int     @default(0)
+  metadata  Json?
 
   @@unique([platform])
   @@index([isActive, sortOrder])
@@ -2336,19 +2381,19 @@ model SocialLink {
 }
 
 model SEOConfig {
-  id              String   @id @default(cuid())
-  pageType        String   @unique // home, catalog, category, product, collection, recipe, cart, checkout, account, search, 404
-  titleTemplate   String
+  id                  String   @id @default(cuid())
+  pageType            String   @unique // home, catalog, category, product, collection, recipe, cart, checkout, account, search, 404
+  titleTemplate       String
   descriptionTemplate String
-  keywords        String[]
-  ogImage         String?
-  twitterCard     String   @default("summary_large_image")
-  robots          String   @default("index, follow")
-  canonical       Boolean  @default(true)
-  structuredData  Json?    // JSON-LD templates
-  customHead      String?  @db.Text
-  customBody      String?  @db.Text
-  updatedAt       DateTime @updatedAt
+  keywords            String[]
+  ogImage             String?
+  twitterCard         String   @default("summary_large_image")
+  robots              String   @default("index, follow")
+  canonical           Boolean  @default(true)
+  structuredData      Json? // JSON-LD templates
+  customHead          String?  @db.Text
+  customBody          String?  @db.Text
+  updatedAt           DateTime @updatedAt
 
   @@map("seo_configs")
 }
@@ -2364,9 +2409,11 @@ model Wishlist {
   variantId String?
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product    Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant    ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  Customer   Customer?       @relation(fields: [customerId], references: [id])
+  customerId String?
 
   @@unique([userId, productId, variantId])
   @@index([userId])
@@ -2380,7 +2427,7 @@ model Review {
   userId      String
   customerId  String?
   orderItemId String?
-  rating      Int      // 1-5
+  rating      Int // 1-5
   title       String?
   content     String?
   pros        String?
@@ -2393,10 +2440,10 @@ model Review {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  customer    Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  orderItem   OrderItem? @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customer  Customer?  @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  orderItem OrderItem? @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
 
   @@unique([userId, productId])
   @@index([productId, isApproved])
@@ -2410,21 +2457,23 @@ model Review {
 // ============================================
 
 model AuditLog {
-  id          String   @id @default(cuid())
-  userId      String?
-  customerId  String?
-  action      String   // CREATE, UPDATE, DELETE, LOGIN, LOGOUT, PAYMENT, SHIPMENT, etc.
-  entityType  String   // Product, Order, User, Payment, etc.
-  entityId    String
-  oldData     Json?
-  newData     Json?
-  ipAddress   String?
-  userAgent   String?
-  metadata    Json?
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  userId     String?
+  customerId String?
+  action     String // CREATE, UPDATE, DELETE, LOGIN, LOGOUT, PAYMENT, SHIPMENT, etc.
+  entityType String // Product, Order, User, Payment, etc.
+  entityId   String
+  oldData    Json?
+  newData    Json?
+  ipAddress  String?
+  userAgent  String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
 
-  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
-  customer    Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  user     User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customer Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  Order    Order?    @relation(fields: [orderId], references: [id])
+  orderId  String?
 
   @@index([userId, createdAt])
   @@index([customerId, createdAt])
@@ -2438,14 +2487,14 @@ model StoreSetting {
   id          String   @id @default(cuid())
   key         String   @unique
   value       Json
-  type        String   // string, number, boolean, json, array, color, image, html
-  group       String   // general, branding, checkout, shipping, payment, tax, email, sms, seo, legal
+  type        String // string, number, boolean, json, array, color, image, html
+  group       String // general, branding, checkout, shipping, payment, tax, email, sms, seo, legal
   label       String
   description String?
   isPublic    Boolean  @default(false) // Visible en frontend
   isEditable  Boolean  @default(true)
   sortOrder   Int      @default(0)
-  validation  Json?    // Reglas de validación
+  validation  Json? // Reglas de validación
   updatedAt   DateTime @updatedAt
   updatedBy   String?
 
@@ -2457,7 +2506,7 @@ model StoreSetting {
 model WebhookEvent {
   id              String           @id @default(cuid())
   eventType       WebhookEventType
-  provider        String           // mercadopago, shalom, sunat, cloudinary, neon, etc.
+  provider        String // mercadopago, shalom, sunat, cloudinary, neon, etc.
   providerEventId String           @unique
   payload         Json
   headers         Json?
@@ -2482,16 +2531,16 @@ model WebhookEvent {
 // ============================================
 
 model BundleItem {
-  id              String   @id @default(cuid())
-  bundleId        String   // Product ID del bundle (type = BUNDLE)
-  componentId     String   // Product ID del componente
+  id                 String  @id @default(cuid())
+  bundleId           String // Product ID del bundle (type = BUNDLE)
+  componentId        String // Product ID del componente
   componentVariantId String?
-  quantity        Int      @default(1)
-  isOptional      Boolean  @default(false)
-  sortOrder       Int      @default(0)
+  quantity           Int     @default(1)
+  isOptional         Boolean @default(false)
+  sortOrder          Int     @default(0)
 
-  bundle          Product  @relation("BundleProducts", fields: [bundleId], references: [id], onDelete: Cascade)
-  component       Product  @relation("BundleComponents", fields: [componentId], references: [id], onDelete: Cascade)
+  bundle           Product         @relation("BundleProducts", fields: [bundleId], references: [id], onDelete: Cascade)
+  component        Product         @relation("BundleComponents", fields: [componentId], references: [id], onDelete: Cascade)
   componentVariant ProductVariant? @relation(fields: [componentVariantId], references: [id], onDelete: SetNull)
 
   @@unique([bundleId, componentId, componentVariantId])
@@ -2505,21 +2554,22 @@ model BundleItem {
 // ============================================
 
 model GiftCard {
-  id              String   @id @default(cuid())
-  code            String   @unique
-  templateId      String?
-  initialBalance  Decimal  @db.Decimal(12, 2)
-  currentBalance  Decimal  @db.Decimal(12, 2)
-  currency        String   @default("PEN")
-  status          String   @default("ACTIVE") // ACTIVE, REDEEMED, EXPIRED, CANCELLED
-  purchaserId     String?
-  recipientEmail  String?
-  recipientName   String?
-  message         String?
-  expiresAt       DateTime?
-  redeemedAt      DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                  String                @id @default(cuid())
+  code                String                @unique
+  templateId          String?
+  initialBalance      Decimal               @db.Decimal(12, 2)
+  currentBalance      Decimal               @db.Decimal(12, 2)
+  currency            String                @default("PEN")
+  status              String                @default("ACTIVE") // ACTIVE, REDEEMED, EXPIRED, CANCELLED
+  purchaserId         String?
+  recipientEmail      String?
+  recipientName       String?
+  message             String?
+  expiresAt           DateTime?
+  redeemedAt          DateTime?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  GiftCardTransaction GiftCardTransaction[]
 
   @@index([code])
   @@index([purchaserId])
@@ -2528,16 +2578,16 @@ model GiftCard {
 }
 
 model GiftCardTransaction {
-  id          String   @id @default(cuid())
-  giftCardId  String
-  type        String   // PURCHASE, REDEEM, REFUND, EXPIRE
-  amount      Decimal  @db.Decimal(12, 2)
-  balance     Decimal  @db.Decimal(12, 2)
-  orderId     String?
-  notes       String?
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  giftCardId String
+  type       String // PURCHASE, REDEEM, REFUND, EXPIRE
+  amount     Decimal  @db.Decimal(12, 2)
+  balance    Decimal  @db.Decimal(12, 2)
+  orderId    String?
+  notes      String?
+  createdAt  DateTime @default(now())
 
-  giftCard    GiftCard @relation(fields: [giftCardId], references: [id], onDelete: Cascade)
+  giftCard GiftCard @relation(fields: [giftCardId], references: [id], onDelete: Cascade)
 
   @@index([giftCardId, createdAt])
   @@map("gift_card_transactions")
@@ -2548,34 +2598,34 @@ model GiftCardTransaction {
 // ============================================
 
 model ComplaintBookEntry {
-  id              String   @id @default(cuid())
-  entryNumber     String   @unique // Formato: R-YYYY-NNNNNN
-  documentType    String   // DNI, RUC, CE, PASAPORTE
-  documentNumber  String
-  firstName       String
-  lastName        String
-  email           String
-  phone           String?
-  address         String?
-  district        String?
-  province        String?
-  department      String?
-  type            String   // RECLAMO, QUEJA
-  subject         String
-  detail          String   @db.Text
-  requestedAmount Decimal? @db.Decimal(12, 2)
-  attachmentUrls  String[]
-  status          String   @default("REGISTRADO") // REGISTRADO, EN_TRAMITE, RESUELTO, ARCHIVADO, RECHAZADO
-  response        String?  @db.Text
-  respondedAt     DateTime?
-  respondedBy     String?
-  resolutionCode  String?  // Código de resolución INDECOPI
-  followUpRequired Boolean @default(false)
-  followUpDate    DateTime?
-  ipAddress       String?
-  userAgent       String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id               String    @id @default(cuid())
+  entryNumber      String    @unique // Formato: R-YYYY-NNNNNN
+  documentType     String // DNI, RUC, CE, PASAPORTE
+  documentNumber   String
+  firstName        String
+  lastName         String
+  email            String
+  phone            String?
+  address          String?
+  district         String?
+  province         String?
+  department       String?
+  type             String // RECLAMO, QUEJA
+  subject          String
+  detail           String    @db.Text
+  requestedAmount  Decimal?  @db.Decimal(12, 2)
+  attachmentUrls   String[]
+  status           String    @default("REGISTRADO") // REGISTRADO, EN_TRAMITE, RESUELTO, ARCHIVADO, RECHAZADO
+  response         String?   @db.Text
+  respondedAt      DateTime?
+  respondedBy      String?
+  resolutionCode   String? // Código de resolución INDECOPI
+  followUpRequired Boolean   @default(false)
+  followUpDate     DateTime?
+  ipAddress        String?
+  userAgent        String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   @@index([entryNumber])
   @@index([documentNumber, status])
