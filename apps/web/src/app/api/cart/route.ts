@@ -309,9 +309,9 @@ export async function PATCH(request: NextRequest) {
     const cart = await getOrCreateCart(userId, sessionCartId);
     const item = cart.items.find((i: any) => i.id === itemId);
 
-    if (!item) {
+    if (!item || !item.variant) {
       return NextResponse.json(
-        { error: 'Item no encontrado en el carrito' },
+        { error: 'Item no encontrado o variante no disponible' },
         { status: 404 }
       );
     }
