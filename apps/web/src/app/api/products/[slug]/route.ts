@@ -67,6 +67,7 @@ export async function GET(
       trackInventory: v.trackInventory,
       inStock: v.trackInventory ? (v.inventory?.availableQty || 0) > 0 : true,
       availableQty: v.inventory?.availableQty || 0,
+      maxQty: v.trackInventory ? Math.max(0, v.inventory?.availableQty ?? 0) : 99,
       attributes: v.attributes.map((a) => ({
         attributeId: a.attribute.id,
         attributeName: a.attribute.name,
