@@ -1,0 +1,477 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths-ignore:
+      - '**.md'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [main, develop]
+    paths-ignore:
+      - '**.md'
+      - '.github/workflows/**'
+
+env:
+  NODE_VERSION: '20.x'
+  PNPM_VERSION: '9.x'
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # LINT & TYPE CHECK
+  # ---------------------------------------------------------------------------
+  lint-and-typecheck:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          NODE_ENV: development
+
+      - name: Run lint
+        run: pnpm lint
+
+      - name: Run type check
+        run: pnpm type-check
+
+  # ---------------------------------------------------------------------------
+  # PRISMA VALIDATE & GENERATE
+  # ---------------------------------------------------------------------------
+  prisma:
+    name: Prisma Validate & Generate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          NODE_ENV: development
+
+      - name: Generate Prisma Client
+        run: pnpm --filter @pizca/database db:generate
+
+      - name: Validate Prisma Schema
+        run: pnpm --filter @pizca/database db:validate
+
+      - name: Check Prisma Format
+        run: pnpm --filter @pizca/database db:format --check
+
+  # ---------------------------------------------------------------------------
+  # DATABASE MIGRATION CHECK (dry-run)
+  # ---------------------------------------------------------------------------
+  migration-check:
+    name: Migration Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: pizca_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          NODE_ENV: development
+
+      - name: Generate Prisma Client
+        run: pnpm --filter @pizca/database db:generate
+
+      - name: Run migrations (dry-run)
+        run: pnpm --filter @pizca/database db:migrate -- --dry-run
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/pizca_test?schema=public
+
+      - name: Check migration status
+        run: pnpm --filter @pizca/database prisma migrate status
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/pizca_test?schema=public
+
+  # ---------------------------------------------------------------------------
+  # BUILD ALL PACKAGES
+  # ---------------------------------------------------------------------------
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [lint-and-typecheck, prisma]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          NODE_ENV: development
+
+      - name: Generate Prisma Client
+        run: pnpm --filter @pizca/database db:generate
+
+      - name: Build all packages
+        run: pnpm build
+
+  # ---------------------------------------------------------------------------
+  # TESTS
+  # ---------------------------------------------------------------------------
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [lint-and-typecheck]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          NODE_ENV: test
+
+      - name: Generate Prisma Client
+        run: pnpm --filter @pizca/database db:generate
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
+
+  # ---------------------------------------------------------------------------
+  # E2E TESTS (Playwright)
+  # ---------------------------------------------------------------------------
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [build]
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          NODE_ENV: development
+
+      - name: Generate Prisma Client
+        run: pnpm --filter @pizca/database db:generate
+
+      - name: Build web app
+        run: pnpm --filter @pizca/web build
+
+      - name: Install Playwright
+        run: pnpm --filter @pizca/web exec playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: pnpm --filter @pizca/web test:e2e
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
+
+      - name: Upload E2E artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/web/test-results/
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # SECURITY AUDIT
+  # ---------------------------------------------------------------------------
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          NODE_ENV: development
+
+      - name: Run npm audit
+        run: pnpm audit --prod --audit-level=high
+        continue-on-error: true
+
+      - name: Run OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'Pizca Del Monte'
+          path: '.'
+          format: 'HTML'
+          out: 'reports'
+          args: '--failOnCVSS 7'
+
+      - name: Upload security report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: reports/
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # DOCKER BUILD (verify Dockerfile works)
+  # ---------------------------------------------------------------------------
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [build]
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build web Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./apps/web
+          push: false
+          load: true
+          tags: pizca/web:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build admin Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./apps/admin
+          push: false
+          load: true
+          tags: pizca/admin:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ---------------------------------------------------------------------------
+  # DEPLOY PREVIEW (on PR)
+  # ---------------------------------------------------------------------------
+  deploy-preview:
+    name: Deploy Preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [build, test, e2e]
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to Render Preview
+        # This would use Render's deploy hook or API
+        # For now, just a placeholder
+        run: echo "Preview deployment would happen here"
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_PREVIEW_DEPLOY_HOOK }}
+
+  # ---------------------------------------------------------------------------
+  # RELEASE (on main branch)
+  # ---------------------------------------------------------------------------
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [build, test, e2e, security, docker]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          NODE_ENV: production
+
+      - name: Generate Prisma Client
+        run: pnpm --filter @pizca/database db:generate
+
+      - name: Build all packages
+        run: pnpm build
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
+          body: |
+            Automated release from CI build #${{ github.run_number }}
+            Commit: ${{ github.sha }}
+          draft: false
+          prerelease: false
+
+      - name: Deploy to Production (Render)
+        run: echo "Production deployment would trigger here"
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_PROD_DEPLOY_HOOK }}
+
+      - name: Run Database Migrations (Production)
+        run: echo "Migrations would run here via Render or separate job"
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+
+  # ---------------------------------------------------------------------------
+  # NOTIFICATIONS
+  # ---------------------------------------------------------------------------
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [lint-and-typecheck, prisma, build, test, e2e, security, docker]
+    if: always()
+    steps:
+      - name: Send Slack notification
+        if: env.SLACK_WEBHOOK_URL != ''
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "CI Pipeline ${{ job.status }} for ${{ github.repository }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*CI Pipeline ${{ job.status }}* for `${{ github.repository }}`\nBranch: `${{ github.ref_name }}`\nCommit: `${{ github.sha }}`\nRun: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

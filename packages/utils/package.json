@@ -1,0 +1,23 @@
+{
+  "name": "@pizca/utils",
+  "version": "0.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "date-fns": "3.6.0",
+    "decimal.js": "10.4.3",
+    "zod": "3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.14.0",
+    "typescript": "5.5.0",
+    "eslint": "8.57.0",
+    "@typescript-eslint/eslint-plugin": "7.10.0",
+    "@typescript-eslint/parser": "7.10.0"
+  }
+}
