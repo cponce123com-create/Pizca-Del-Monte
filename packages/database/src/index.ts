@@ -161,7 +161,7 @@ export const prismaWithExtensions = prisma.$extends({
 
 // Helper para transacciones con reintentos
 export async function withRetry<T>(
-  fn: (tx: PrismaClient) => Promise<T>,
+  fn: (tx: Prisma.TransactionClient) => Promise<T>,
   options: { maxRetries?: number; retryDelay?: number } = {}
 ): Promise<T> {
   const { maxRetries = 3, retryDelay = 100 } = options;
