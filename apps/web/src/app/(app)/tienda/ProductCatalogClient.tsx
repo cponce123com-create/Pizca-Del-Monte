@@ -10,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Loader2, Filter, X, ChevronDown, ChevronUp, ShoppingBag, Tag, Truck, Star } from 'lucide-react';
+import { Loader2, Filter, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, ShoppingBag, Tag, Truck, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatPEN } from '@pizca/utils';
 

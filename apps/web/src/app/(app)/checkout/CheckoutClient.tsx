@@ -12,7 +12,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, ShoppingBag, MapPin, CreditCard, Truck, Lock, Check, ChevronRight, X, Mail, Phone, User, Home, Building2, ArrowLeft, AlertCircle, CheckCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Loader2, ShoppingBag, MapPin, CreditCard, Truck, Lock, Check, ChevronRight, X, Mail, Phone, User, Home, Building2, ArrowLeft, ArrowRight, RotateCcw, AlertCircle, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatPEN } from '@pizca/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -424,6 +426,8 @@ export function CheckoutClient() {
                 formData={shippingForm}
                 setFormData={setShippingForm}
                 errors={errors}
+                selectedShippingMethod={selectedShippingMethod}
+                setSelectedShippingMethod={setSelectedShippingMethod}
                 onNext={handleNext}
               />
             )}
@@ -501,6 +505,8 @@ function ShippingStep({
   formData,
   setFormData,
   errors,
+  selectedShippingMethod,
+  setSelectedShippingMethod,
   onNext,
 }: any) {
   return (
@@ -567,7 +573,7 @@ function ShippingStep({
         <div className="flex items-center justify-between">
           <p className="text-body-sm font-medium">¿Nueva dirección?</p>
           <Button
-            variant={showNewAddress ? 'default' : 'outline'}
+            variant={showNewAddress ? 'primary' : 'outline'}
             size="sm"
             onClick={() => setShowNewAddress(!showNewAddress)}
           >
@@ -604,7 +610,7 @@ function ShippingStep({
                     type="radio"
                     name="shippingMethod"
                     checked={selectedShippingMethod === method.id}
-                    onChange={() => {}}
+                    onChange={() => setSelectedShippingMethod(method.id)}
                     className="sr-only"
                   />
                   <div className="flex-1">
@@ -721,7 +727,7 @@ function PaymentStep({
               <div className="flex items-center justify-between">
                 <p className="text-body-sm font-medium">¿Nueva dirección de facturación?</p>
                 <Button
-                  variant={showNewBillingAddress ? 'default' : 'outline'}
+                  variant={showNewBillingAddress ? 'primary' : 'outline'}
                   size="sm"
                   onClick={() => setShowNewBillingAddress(!showNewBillingAddress)}
                 >
