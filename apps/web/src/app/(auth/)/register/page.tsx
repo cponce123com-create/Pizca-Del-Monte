@@ -115,7 +115,7 @@ export default function RegisterPage() {
         throw new Error(data.message || 'Error al registrar');
       }
 
-      // Redirigir a login con mensaje de éxito
+      // El inicio de sesión se habilita cuando el cliente confirma el correo.
       router.push('/login?registered=true');
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : 'Error al crear la cuenta');
