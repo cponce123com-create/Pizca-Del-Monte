@@ -1007,6 +1007,9 @@ model Warehouse {
 
   inventory   InventoryItem[]
   shipments   Shipment[]
+  stockMovements StockMovement[]
+  fromStockMovements StockMovement[] @relation("FromWarehouseMovements")
+  toStockMovements   StockMovement[] @relation("ToWarehouseMovements")
 
   @@index([code])
   @@index([isActive, isDefault])

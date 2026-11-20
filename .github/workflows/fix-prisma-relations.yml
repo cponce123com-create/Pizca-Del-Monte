@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/fix-prisma-relations.yml'
+      - 'packages/database/prisma/schema.prisma'
 
 permissions:
   contents: write
