@@ -32,6 +32,9 @@ jobs:
         run: node --version && pnpm --version
       - name: Install dependencies (Render)
         run: pnpm install --frozen-lockfile
+      - name: Verify Tailwind plugins
+        run: |
+          pnpm --filter @pizca/web exec node -e "for (const name of ['@tailwindcss/forms', '@tailwindcss/typography', '@tailwindcss/aspect-ratio', '@tailwindcss/container-queries']) require.resolve(name)"
       - name: Validate Prisma schema
         run: pnpm --filter @pizca/database exec prisma validate --schema prisma/schema.prisma
         env:
