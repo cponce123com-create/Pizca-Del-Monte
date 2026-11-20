@@ -208,7 +208,7 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
               <div>
                 <label className="block text-body-sm font-medium mb-2">Ordenar por</label>
                 <Select value={filters.sort} onValueChange={(v) => handleFilterChange('sort', v)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="w-48">
                     <SelectValue placeholder="Seleccionar" />
                   </SelectTrigger>
                   <SelectContent>
@@ -251,7 +251,7 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
               <div>
                 <label className="block text-body-sm font-medium mb-2">Categoría</label>
                 <Select value={filters.category} onValueChange={(v) => handleFilterChange('category', v)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="w-48">
                     <SelectValue placeholder="Todas las categorías" />
                   </SelectTrigger>
                   <SelectContent>
@@ -270,7 +270,7 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
               <div>
                 <label className="block text-body-sm font-medium mb-2">Marca</label>
                 <Select value={filters.brand} onValueChange={(v) => handleFilterChange('brand', v)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="w-48">
                     <SelectValue placeholder="Todas las marcas" />
                   </SelectTrigger>
                   <SelectContent>
@@ -342,8 +342,8 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
               )}
             </div>
             <div className="flex items-center gap-4">
-              <Select value={filters.sort} onValueChange={(v) => handleFilterChange('sort', v)} className="w-48">
-                <SelectTrigger>
+              <Select value={filters.sort} onValueChange={(v) => handleFilterChange('sort', v)}>
+                <SelectTrigger className="w-48">
                   <SelectValue placeholder="Ordenar" />
                 </SelectTrigger>
                 <SelectContent>
