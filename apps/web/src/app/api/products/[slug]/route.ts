@@ -13,30 +13,28 @@ export async function GET(
       where: {
         slug,
         status: 'ACTIVE',
-        deletedAt: null,
       },
       include: {
         brand: true,
         categories: { include: { category: true } },
         media: { orderBy: { sortOrder: 'asc' } },
         variants: {
-          where: { deletedAt: null },
+          
           include: {
             inventory: true,
-            media: { orderBy: { sortOrder: 'asc' } },
             attributes: { include: { attribute: true, attributeValue: true } },
           },
           orderBy: { sortOrder: 'asc' },
         },
         inventory: true,
         reviews: {
-          where: { status: 'APPROVED', deletedAt: null },
-          include: { user: { select: { name: true, image: true } } },
+          where: { isApproved: true },
+          include: { user: { select: { name: true, avatar: true } } },
           orderBy: { createdAt: 'desc' },
           take: 10,
         },
         _count: {
-          select: { reviews: { where: { status: 'APPROVED', deletedAt: null } } },
+          select: { reviews: { where: { isApproved: true } } },
         },
       },
     });
@@ -75,10 +73,10 @@ export async function GET(
         attributeSlug: a.attribute.slug,
         valueId: a.attributeValue.id,
         value: a.attributeValue.value,
-        displayValue: a.attributeValue.displayValue,
+        displayValue: a.attributeValue.value,
         color: a.attributeValue.color,
       })),
-      media: v.media.map((m) => ({
+      media: product.media.map((m) => ({
         id: m.id,
         url: m.url,
         alt: m.alt || product.name,
@@ -141,7 +139,7 @@ export async function GET(
         ? Math.round(product.compareAtPrice.minus(product.basePrice).div(product.compareAtPrice).mul(100).toNumber())
         : 0,
       weight: product.weight?.toNumber(),
-      dimensions: product.dimensions,
+      dimensions: { length: product.length?.toNumber() ?? null, width: product.width?.toNumber() ?? null, height: product.height?.toNumber() ?? null },
       brand: product.brand ? { id: product.brand.id, name: product.brand.name, slug: product.brand.slug, logo: product.brand.logo } : null,
       categories: product.categories.map((c) => ({
         id: c.category.id,
@@ -159,31 +157,31 @@ export async function GET(
       variants,
       attributeGroups: formattedAttributeGroups,
       inventory: product.inventory ? {
-        totalQty: product.inventory.totalQty,
+        totalQty: product.inventory.quantity,
         reservedQty: product.inventory.reservedQty,
         availableQty: product.inventory.availableQty,
-        lowStockThreshold: product.inventory.lowStockThreshold,
+        lowStockThreshold: product.inventory.minStock,
       } : null,
       trackInventory: product.trackInventory,
       inStock: !product.trackInventory || (product.inventory?.availableQty || 0) > 0,
       availableQty: product.inventory?.availableQty || 0,
-      isNew: product.createdAt > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      isNew: Boolean(product.publishedAt && product.publishedAt > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)),
       isBestseller: false,
-      isFeatured: product.featured,
+      isFeatured: Boolean(product.featuredUntil && product.featuredUntil > new Date()),
       rating: Math.round(avgRating * 10) / 10,
       reviewCount: product._count.reviews,
       reviews: product.reviews.map((r) => ({
         id: r.id,
         rating: r.rating,
         title: r.title,
-        comment: r.comment,
+        comment: r.content,
         createdAt: r.createdAt.toISOString(),
-        user: { name: r.user.name, image: r.user.image },
-        verifiedPurchase: r.verifiedPurchase,
+        user: { name: r.user.name, image: r.user.avatar },
+        verifiedPurchase: r.isVerified,
       })),
       metaTitle: product.metaTitle,
       metaDescription: product.metaDescription,
-      tags: product.tags,
+      tags: product.metaKeywords,
       relatedProducts: [], // Se llenaría con una query separada
     };
 
