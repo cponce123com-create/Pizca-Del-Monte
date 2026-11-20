@@ -18,122 +18,94 @@ const removeItemSchema = z.object({
   itemId: z.string().cuid('ID de item inválido'),
 });
 
-async function getOrCreateCart(userId: string | null, sessionCartId: string | null) {
-  if (userId) {
-    // Usuario logueado - buscar o crear carrito asociado al usuario
-    let cart = await prisma.cart.findFirst({
-      where: { userId },
-      include: {
-        items: {
-          
-          include: {
-            variant: {
-              include: {
-                product: {
-                  include: {
-                    brand: true,
-                    media: { where: { isPrimary: true }, take: 1 },
-                    inventory: true,
-                  },
-                },
-                inventory: true,
-                attributes: { include: { attribute: true, attributeValue: true } },
-              },
-            },
-          },
-          
+// Una sola definición de relaciones evita tipos inconsistentes en los carritos nuevos y existentes.
+const cartInclude = {
+  items: {
+    include: {
+      product: {
+        include: {
+          brand: true,
+          media: { where: { isPrimary: true }, take: 1 },
+          inventory: true,
         },
       },
+      variant: {
+        include: {
+          inventory: true,
+          attributes: { include: { attribute: true, attributeValue: true } },
+        },
+      },
+    },
+  },
+} as const;
+
+async function loadCart(cartId: string) {
+  return prisma.cart.findUnique({ where: { id: cartId }, include: cartInclude });
+}
+
+async function getOrCreateCart(userId: string | null, sessionCartId: string | null) {
+  let cart = userId
+    ? await prisma.cart.findUnique({ where: { userId }, include: cartInclude })
+    : sessionCartId
+      ? await loadCart(sessionCartId)
+      : null;
+
+  // Un ID de carrito no permite acceder al carrito de otro usuario registrado.
+  if (cart && (userId ? cart.userId !== userId : cart.userId !== null)) {
+    cart = null;
+  }
+
+  if (!cart) {
+    const created = await prisma.cart.create({ data: userId ? { userId } : {} });
+    cart = await loadCart(created.id);
+  }
+
+  if (!cart) throw new Error('No se pudo cargar el carrito');
+
+  if (userId && sessionCartId && sessionCartId !== cart.id) {
+    const guestCart = await prisma.cart.findUnique({
+      where: { id: sessionCartId },
+      include: { items: true },
     });
-
-    if (!cart) {
-      cart = await prisma.cart.create({
-        data: { userId },
-        include: { items: { include: { variant: { include: { product: { include: { brand: true, media: { where: { isPrimary: true }, take: 1 } }, inventory: true }, inventory: true, attributes: { include: { attribute: true, attributeValue: true } } } } } } },
-      });
-    }
-
-    // Si había carrito de sesión, fusionar
-    if (sessionCartId && sessionCartId !== cart.id) {
-      const sessionCart = await prisma.cart.findUnique({
-        where: { id: sessionCartId },
-        include: { items: true },
-      });
-      if (sessionCart && !sessionCart.userId) {
-        for (const item of sessionCart.items) {
-          const existing = cart.items.find((i) => i.variantId === item.variantId);
+    if (guestCart && !guestCart.userId) {
+      const targetCartId = cart.id;
+      await prisma.$transaction(async (tx) => {
+        for (const item of guestCart.items) {
+          const existing = cart!.items.find((i) =>
+            i.productId === item.productId && i.variantId === item.variantId
+          );
           if (existing) {
-            await prisma.cartItem.update({
+            await tx.cartItem.update({
               where: { id: existing.id },
-              data: { quantity: Math.min(existing.quantity + item.quantity, 99) },
+              data: { quantity: Math.min(99, existing.quantity + item.quantity) },
             });
           } else {
-            await prisma.cartItem.create({
-              data: { cartId: cart.id, productId: item.productId, variantId: item.variantId, price: item.price, quantity: item.quantity },
+            await tx.cartItem.create({
+              data: {
+                cartId: targetCartId,
+                productId: item.productId,
+                variantId: item.variantId,
+                price: item.price,
+                quantity: item.quantity,
+              },
             });
           }
         }
-        await prisma.cart.delete({ where: { id: sessionCartId } });
-        // Refrescar carrito
-        cart = await prisma.cart.findUnique({
-          where: { id: cart.id },
-          include: {
-            items: {
-              
-              include: {
-                variant: {
-                  include: {
-                    product: { include: { brand: true, media: { where: { isPrimary: true }, take: 1 }, inventory: true } },
-                    inventory: true,
-                    attributes: { include: { attribute: true, attributeValue: true } },
-                  },
-                },
-              },
-              
-            },
-          },
-        });
-      }
-    }
-
-    return cart;
-  } else {
-    // Usuario anónimo - carrito por sesión
-    let cart: any = null;
-    if (sessionCartId) {
-      cart = await prisma.cart.findUnique({
-        where: { id: sessionCartId },
-        include: {
-          items: {
-            
-            include: {
-              variant: {
-                include: {
-                  product: { include: { brand: true, media: { where: { isPrimary: true }, take: 1 }, inventory: true } },
-                  inventory: true,
-                  attributes: { include: { attribute: true, attributeValue: true } },
-                },
-              },
-            },
-            
-          },
-        },
+        await tx.cart.delete({ where: { id: guestCart.id } });
       });
+      cart = await loadCart(targetCartId);
     }
-    if (!cart) {
-      cart = await prisma.cart.create({
-        data: { },
-        include: { items: { include: { variant: { include: { product: { include: { brand: true, media: { where: { isPrimary: true }, take: 1 } }, inventory: true }, inventory: true, attributes: { include: { attribute: true, attributeValue: true } } } } } } },
-      });
-    }
-    return cart;
   }
+
+  if (!cart) throw new Error('No se pudo actualizar el carrito');
+  return cart;
 }
 
 function formatCartResponse(cart: any) {
   const items = cart.items.map((item: any) => {
     const variant = item.variant;
-    const product = variant.product;
+    if (!variant) throw new Error('Producto del carrito no disponible');
+    const product = item.product;
     const unitPrice = variant.price?.toNumber() || product.basePrice.toNumber();
     const compareAtPrice = variant.compareAtPrice?.toNumber() || product.compareAtPrice?.toNumber() || null;
     const subtotal = unitPrice * item.quantity;
