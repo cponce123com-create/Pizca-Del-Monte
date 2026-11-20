@@ -168,7 +168,7 @@ const config: Config = {
         'body-sm': ['0.875rem', { lineHeight: '1.6' }],
         'body-xs': ['0.75rem', { lineHeight: '1.5' }],
         'caption': ['0.75rem', { lineHeight: '1.5' }],
-        'overline': ['0.75rem', { lineHeight: '1.5', letterSpacing: '0.1em', textTransform: 'uppercase' }],
+        'overline': ['0.75rem', { lineHeight: '1.5', letterSpacing: '0.1em' }],
       },
       spacing: {
         '0': '0',

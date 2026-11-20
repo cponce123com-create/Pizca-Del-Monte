@@ -81,7 +81,7 @@ export function FeaturedCategories() {
             <article key={category.slug} className="group relative aspect-square overflow-hidden rounded-xl">
               <Link href={`/tienda/categoria/${category.slug}`} className="block h-full">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10" />
-                <div className="absolute inset-0 bg-[var(--color)]/20" style={{ '--color': category.color.split(' ')[1] }} />
+                <div className="absolute inset-0 bg-[var(--color)]/20" style={{ '--color': category.color.split(' ')[1] } as React.CSSProperties} />
                 <img
                   src={category.image}
                   alt={category.name}

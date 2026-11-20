@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Facebook, Instagram, Tiktok, Whatsapp, Youtube, Mail, MapPin, Phone, Truck, Shield, RotateCcw, Heart } from 'lucide-react';
+import { Facebook, Instagram, Music2 as Tiktok, MessageCircle as Whatsapp, Youtube, Mail, MapPin, Phone, Truck, Shield, RotateCcw, Heart } from 'lucide-react';
 
 const footerLinks = {
   empresa: [

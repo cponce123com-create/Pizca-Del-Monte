@@ -30,7 +30,7 @@ export function calculatePercentage(amount: Decimal | number | string, percentag
 export function applyDiscount(price: Decimal | number | string, discountPercent: Decimal | number | string): Decimal {
   const p = toDecimal(price);
   const d = toDecimal(discountPercent);
-  return p.mul(Decimal.from(100).minus(d)).div(100);
+  return p.mul(new Decimal(100).minus(d)).div(100);
 }
 
 export function calculateTax(amount: Decimal | number | string, taxRate: Decimal | number | string): Decimal {
