@@ -775,6 +775,11 @@ function PaymentStep({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
+            {summary.paymentMethods.length === 0 && (
+              <p role="status" className="rounded-md border border-border p-4 text-sm text-muted-foreground">
+                La tienda aún no tiene métodos de pago habilitados. No puedes confirmar pedidos por ahora.
+              </p>
+            )}
             {summary.paymentMethods.map((method: any) => (
               <label
                 key={method.id}
@@ -923,7 +928,7 @@ function ConfirmStep({
           <ArrowLeft className="mr-2 h-4 w-4" />
           Volver
         </Button>
-        <Button onClick={onSubmit} size="lg" disabled={isSubmitting}>
+        <Button onClick={onSubmit} size="lg" disabled={isSubmitting || !paymentMethod || summary.paymentMethods.length === 0}>
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -931,7 +936,7 @@ function ConfirmStep({
             </>
           ) : (
             <>
-              Pagar {summary.formattedTotal}
+              Confirmar pedido {summary.formattedTotal}
               <ArrowRight className="ml-2 h-4 w-4" />
             </>
           )}

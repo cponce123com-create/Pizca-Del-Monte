@@ -544,8 +544,7 @@ export async function GET(request: NextRequest) {
       ...(process.env.BANK_ACCOUNT_INFO?.trim()
         ? [{ id: 'BANK_TRANSFER', name: 'Transferencia bancaria', description: 'Confirmación manual antes del despacho', icon: 'bank' }]
         : []),
-      ...(process.env.CASH_ON_DELIVERY_ENABLED === 'true' &&
-          department?.trim().toLowerCase() === 'lima'
+      ...(process.env.CASH_ON_DELIVERY_ENABLED === 'true'
         ? [{ id: 'CASH_ON_DELIVERY', name: 'Pago contra entrega', description: 'Solo Lima, sujeto a confirmación', icon: 'truck' }]
         : []),
     ];
