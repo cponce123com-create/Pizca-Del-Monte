@@ -1029,7 +1029,7 @@ function AddressForm({
           error={errors[`${prefix}Province`]}
           required={isRequired}
         >
-          <Select value={formData.province} onValueChange={(v) => handleChange('province', v))}>
+          <Select value={formData.province} onValueChange={(v) => handleChange('province', v)}>
             <SelectTrigger>
               <SelectValue placeholder="Seleccionar" />
             </SelectTrigger>
@@ -1044,7 +1044,7 @@ function AddressForm({
           error={errors[`${prefix}District`]}
           required={isRequired}
         >
-          <Select value={formData.district} onValueChange={(v) => handleChange('district', v))}>
+          <Select value={formData.district} onValueChange={(v) => handleChange('district', v)}>
             <SelectTrigger>
               <SelectValue placeholder="Seleccionar" />
             </SelectTrigger>
@@ -1212,7 +1212,7 @@ function BillingAddressForm({
           error={errors.billingProvince}
           required
         >
-          <Select value={formData.province} onValueChange={(v) => handleChange('province', v))}>
+          <Select value={formData.province} onValueChange={(v) => handleChange('province', v)}>
             <SelectTrigger>
               <SelectValue placeholder="Seleccionar" />
             </SelectTrigger>
@@ -1226,7 +1226,7 @@ function BillingAddressForm({
           error={errors.billingDistrict}
           required
         >
-          <Select value={formData.district} onValueChange={(v) => handleChange('district', v))}>
+          <Select value={formData.district} onValueChange={(v) => handleChange('district', v)}>
             <SelectTrigger>
               <SelectValue placeholder="Seleccionar" />
             </SelectTrigger>
