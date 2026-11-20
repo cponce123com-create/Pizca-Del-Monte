@@ -57,6 +57,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         aria-busy={loading}
         {...props}
       >
+        {asChild ? children : <>
         {loading && (
           <svg
             className="animate-spin h-4 w-4"
@@ -81,6 +82,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           </svg>
         )}
         {children}
+        </>}
       </Comp>
     );
   }
