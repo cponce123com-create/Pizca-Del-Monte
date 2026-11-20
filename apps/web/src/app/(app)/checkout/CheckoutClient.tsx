@@ -119,7 +119,7 @@ export function CheckoutClient() {
   const [currentStep, setCurrentStep] = useState(1); // 1: envío, 2: pago, 3: confirmación
   const [selectedShippingAddress, setSelectedShippingAddress] = useState<SavedAddress | null>(null);
   const [selectedBillingAddress, setSelectedBillingAddress] = useState<SavedAddress | null>(null);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('MERCADO_PAGO');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<string | null>(null);
   const [couponCode, setCouponCode] = useState('');
   const [showNewShippingAddress, setShowNewShippingAddress] = useState(false);
@@ -171,6 +171,11 @@ export function CheckoutClient() {
       }
       const data = await response.json();
       setSummary(data);
+      setSelectedPaymentMethod((current) =>
+        data.paymentMethods.some((method: PaymentMethod) => method.id === current)
+          ? current
+          : data.paymentMethods[0]?.id ?? ''
+      );
 
       // Seleccionar dirección por defecto si existe
       const defaultShipping = data.savedAddresses.find((a: SavedAddress) => a.type === 'shipping' && a.isDefault);
@@ -280,6 +285,10 @@ export function CheckoutClient() {
 
   const handleSubmit = async () => {
     if (!validateStep(2)) return;
+    if (!selectedPaymentMethod || !summary?.paymentMethods.some((method) => method.id === selectedPaymentMethod)) {
+      toast({ title: 'Pago no disponible', description: 'No hay un método de pago habilitado.', variant: 'destructive' });
+      return;
+    }
 
     setIsSubmitting(true);
 
