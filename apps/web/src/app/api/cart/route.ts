@@ -57,7 +57,7 @@ async function getOrCreateCart(userId: string | null, sessionCartId: string | nu
     if (sessionCartId && sessionCartId !== cart.id) {
       const sessionCart = await prisma.cart.findUnique({
         where: { id: sessionCartId },
-        include: { items: { where: { deletedAt: null } } },
+        include: { items: true },
       });
       if (sessionCart && !sessionCart.userId) {
         for (const item of sessionCart.items) {
