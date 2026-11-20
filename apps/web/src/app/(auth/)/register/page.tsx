@@ -29,23 +29,24 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState('');
 
-  const validateField = (name: string, value: string) => {
+  const validateField = (name: string, value: string | boolean) => {
     const newErrors = { ...errors };
+    const textValue = typeof value === 'string' ? value : '';
 
     switch (name) {
       case 'firstName':
       case 'lastName':
-        if (!value.trim()) newErrors[name] = 'Este campo es obligatorio';
-        else if (value.length < 2) newErrors[name] = 'Mínimo 2 caracteres';
+        if (!textValue.trim()) newErrors[name] = 'Este campo es obligatorio';
+        else if (textValue.length < 2) newErrors[name] = 'Mínimo 2 caracteres';
         else delete newErrors[name];
         break;
       case 'email':
-        if (!value.trim()) newErrors[name] = 'El correo es obligatorio';
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) newErrors[name] = 'Correo inválido';
+        if (!textValue.trim()) newErrors[name] = 'El correo es obligatorio';
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(textValue)) newErrors[name] = 'Correo inválido';
         else delete newErrors[name];
         break;
       case 'phone':
-        if (value && !/^\+?51\s?9\d{8}$/.test(value.replace(/\s/g, ''))) {
+        if (value && !/^\+?51\s?9\d{8}$/.test(textValue.replace(/\s/g, ''))) {
           newErrors[name] = 'Formato: +51 999 888 777';
         } else {
           delete newErrors[name];
@@ -53,10 +54,10 @@ export default function RegisterPage() {
         break;
       case 'password':
         if (!value) newErrors[name] = 'La contraseña es obligatoria';
-        else if (value.length < 8) newErrors[name] = 'Mínimo 8 caracteres';
-        else if (!/[A-Z]/.test(value)) newErrors[name] = 'Debe tener una mayúscula';
-        else if (!/[a-z]/.test(value)) newErrors[name] = 'Debe tener una minúscula';
-        else if (!/[0-9]/.test(value)) newErrors[name] = 'Debe tener un número';
+        else if (textValue.length < 8) newErrors[name] = 'Mínimo 8 caracteres';
+        else if (!/[A-Z]/.test(textValue)) newErrors[name] = 'Debe tener una mayúscula';
+        else if (!/[a-z]/.test(textValue)) newErrors[name] = 'Debe tener una minúscula';
+        else if (!/[0-9]/.test(textValue)) newErrors[name] = 'Debe tener un número';
         else delete newErrors[name];
         break;
       case 'confirmPassword':

@@ -69,13 +69,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Asignar rol por defecto (cliente)
-    const customerRole = await prisma.roleModel.findUnique({
-      where: { name: 'CUSTOMER' },
-    });
-
-    // Si no existe rol CUSTOMER, no asignamos (se manejará en frontend)
-    // El usuario tendrá rol básico por defecto
+    // Los compradores no reciben permisos administrativos.
 
     return NextResponse.json(
       { message: 'Cuenta creada exitosamente', userId: user.id },

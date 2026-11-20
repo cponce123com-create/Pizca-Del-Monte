@@ -61,6 +61,9 @@ jobs:
   prisma:
     name: Prisma Validate & Generate
     runs-on: ubuntu-latest
+    env:
+      # Prisma solo necesita una URL sintácticamente válida para validar y generar el cliente.
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/pizca_ci
     timeout-minutes: 10
     steps:
       - name: Checkout repository

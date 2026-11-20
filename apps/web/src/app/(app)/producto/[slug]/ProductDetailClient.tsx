@@ -429,20 +429,20 @@ export function ProductDetailClient({ initialProduct }: ProductDetailClientProps
                       onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
                       className="w-16 text-center border-none focus:ring-0 bg-transparent"
                       min="1"
-                      max={variant.maxQty}
+                      max={(selectedVariant?.maxQty ?? (product.trackInventory ? product.availableQty : 99))}
                       disabled={!variant.inStock}
                     />
                     <button
                       className="p-3 hover:bg-muted transition-colors"
-                      onClick={() => setQuantity(Math.min(variant.maxQty, quantity + 1))}
-                      disabled={quantity >= variant.maxQty}
+                      onClick={() => setQuantity(Math.min((selectedVariant?.maxQty ?? (product.trackInventory ? product.availableQty : 99)), quantity + 1))}
+                      disabled={quantity >= (selectedVariant?.maxQty ?? (product.trackInventory ? product.availableQty : 99))}
                       aria-label="Aumentar cantidad"
                     >
                       <Plus className="h-5 w-5" />
                     </button>
                   </div>
                   <span className="text-body-sm text-muted-foreground">
-                    Máx: {variant.maxQty}
+                    Máx: {(selectedVariant?.maxQty ?? (product.trackInventory ? product.availableQty : 99))}
                   </span>
                 </div>
               </div>

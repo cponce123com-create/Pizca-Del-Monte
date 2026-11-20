@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { Decimal } from 'decimal.js';
 
 // Configuración global para Prisma Client en desarrollo (evita múltiples instancias en hot reload)
@@ -23,12 +23,12 @@ export const prismaWithExtensions = prisma.$extends({
     product: {
       async findActiveBySlug(slug: string) {
         return prisma.product.findFirst({
-          where: { slug, status: 'ACTIVE', deletedAt: null },
+          where: { slug, status: 'ACTIVE' },
           include: {
             brand: true,
             categories: { include: { category: true } },
-            variants: { where: { deletedAt: null }, include: { attributes: { include: { attribute: true, attributeValue: true } } } },
-            media: { where: { deletedAt: null }, orderBy: { sortOrder: 'asc' } },
+            variants: { include: { attributes: { include: { attribute: true, attributeValue: true } } } },
+            media: { orderBy: { sortOrder: 'asc' } },
             inventory: true,
           },
         });
@@ -40,8 +40,8 @@ export const prismaWithExtensions = prisma.$extends({
             brand: true,
             categories: { include: { category: true } },
             collections: { include: { collection: true } },
-            variants: { where: { deletedAt: null }, include: { attributes: { include: { attribute: true, attributeValue: true } }, inventory: true } },
-            media: { where: { deletedAt: null }, orderBy: { sortOrder: 'asc' } },
+            variants: { include: { attributes: { include: { attribute: true, attributeValue: true } }, inventory: true } },
+            media: { orderBy: { sortOrder: 'asc' } },
             inventory: true,
             attributes: { include: { attribute: true, attributeValue: true } },
             relatedProducts: { include: { related: { include: { media: { where: { isPrimary: true } } } } } },
@@ -57,7 +57,7 @@ export const prismaWithExtensions = prisma.$extends({
           where: { orderNumber },
           include: {
             user: true,
-            items: { include: { product: { include: { media: { where: { isPrimary: true } } }, variant: true } } },
+            items: { include: { product: { include: { media: { where: { isPrimary: true } } } }, variant: true } },
             payments: true,
             shipments: { include: { carrier: true, events: { orderBy: { eventDate: 'asc' } } } },
             documents: true,
@@ -71,7 +71,7 @@ export const prismaWithExtensions = prisma.$extends({
         return prisma.order.findUnique({
           where: { guestToken: token },
           include: {
-            items: { include: { product: { include: { media: { where: { isPrimary: true } } }, variant: true } } },
+            items: { include: { product: { include: { media: { where: { isPrimary: true } } } }, variant: true } },
             payments: true,
             shipments: { include: { carrier: true, events: { orderBy: { eventDate: 'asc' } } } },
             documents: true,
@@ -84,7 +84,7 @@ export const prismaWithExtensions = prisma.$extends({
     inventoryItem: {
       async reserveStock(productId: string, quantity: number, variantId?: string, lotId?: string) {
         return prisma.$transaction(async (tx) => {
-          const where = variantId ? { variantId } : { productId, variantId: null };
+          const where = variantId ? { variantId } : { productId };
           const item = await tx.inventoryItem.findUnique({ where });
           if (!item) throw new Error('Inventario no encontrado');
           const available = item.availableQty - (lotId ? 0 : 0); // TODO: lógica por lote
@@ -96,7 +96,7 @@ export const prismaWithExtensions = prisma.$extends({
         });
       },
       async releaseReservation(productId: string, quantity: number, variantId?: string) {
-        const where = variantId ? { variantId } : { productId, variantId: null };
+        const where = variantId ? { variantId } : { productId };
         const item = await prisma.inventoryItem.findUnique({ where });
         if (!item) return;
         return prisma.inventoryItem.update({
@@ -106,7 +106,7 @@ export const prismaWithExtensions = prisma.$extends({
       },
       async confirmSale(productId: string, quantity: number, variantId?: string, lotId?: string) {
         return prisma.$transaction(async (tx) => {
-          const where = variantId ? { variantId } : { productId, variantId: null };
+          const where = variantId ? { variantId } : { productId };
           const item = await tx.inventoryItem.findUnique({ where });
           if (!item) throw new Error('Inventario no encontrado');
           // Decrementar reserved y quantity
@@ -138,13 +138,7 @@ export const prismaWithExtensions = prisma.$extends({
           return 0;
         },
       },
-      inStock: {
-        needs: { trackInventory: true, inventory: true },
-        compute(product) {
-          if (!product.trackInventory) return true;
-          return (product.inventory?.availableQty ?? 0) > 0;
-        },
-      },
+
     },
     order: {
       formattedTotal: {
@@ -167,7 +161,7 @@ export const prismaWithExtensions = prisma.$extends({
 
 // Helper para transacciones con reintentos
 export async function withRetry<T>(
-  fn: (tx: PrismaClient) => Promise<T>,
+  fn: (tx: Prisma.TransactionClient) => Promise<T>,
   options: { maxRetries?: number; retryDelay?: number } = {}
 ): Promise<T> {
   const { maxRetries = 3, retryDelay = 100 } = options;
@@ -204,5 +198,5 @@ export function parsePEN(amount: string): Decimal {
 }
 
 // Tipos extendidos
-export type PrismaClientExtended = ReturnType<typeof prismaWithExtensions>;
-export type PrismaTransaction = Parameters<Parameters<typeof prisma.$transaction>[0]>[0];
+export type PrismaClientExtended = typeof prismaWithExtensions;
+export type PrismaTransaction = Prisma.TransactionClient;

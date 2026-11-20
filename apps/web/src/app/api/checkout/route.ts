@@ -38,7 +38,7 @@ const checkoutSchema = z.object({
   // Método de pago
   paymentMethod: z.enum(['MERCADO_PAGO', 'BANK_TRANSFER', 'CASH_ON_DELIVERY']),
   // Envío
-  shippingMethodId: z.string().cuid().optional(),
+  shippingMethodId: z.string().cuid().nullable().optional(),
   // Notas
   notes: z.string().max(500).optional(),
   // Cupones
@@ -49,7 +49,7 @@ const checkoutSchema = z.object({
   savedBillingAddressId: z.string().cuid().optional(),
 });
 
-async function calculateShipping(cart: any, shippingMethodId?: string, department?: string) {
+async function calculateShipping(cart: any, shippingMethodId?: string | null, department?: string) {
   // Si se proporciona un shippingMethodId, buscar la tarifa en la BD
   if (shippingMethodId) {
     const rate = await prisma.shippingRate.findUnique({
@@ -101,26 +101,27 @@ async function calculateShipping(cart: any, shippingMethodId?: string, departmen
 
 async function applyCoupon(cart: any, couponCode: string) {
   const coupon = await prisma.coupon.findUnique({
-    where: { code: couponCode.toUpperCase(), deletedAt: null },
+    where: { code: couponCode.toUpperCase() },
+    include: { products: true },
   });
 
   if (!coupon) {
     return { valid: false, error: 'Cupón no encontrado' };
   }
 
-  if (coupon.status !== 'ACTIVE') {
+  if (!coupon.isActive) {
     return { valid: false, error: 'Cupón no válido' };
   }
 
-  if (coupon.startsAt && new Date() < coupon.startsAt) {
+  if (coupon.startDate && new Date() < coupon.startDate) {
     return { valid: false, error: 'Cupón aún no válido' };
   }
 
-  if (coupon.expiresAt && new Date() > coupon.expiresAt) {
+  if (coupon.endDate && new Date() > coupon.endDate) {
     return { valid: false, error: 'Cupón expirado' };
   }
 
-  if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
+  if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit) {
     return { valid: false, error: 'Cupón agotado' };
   }
 
@@ -128,13 +129,17 @@ async function applyCoupon(cart: any, couponCode: string) {
     return { valid: false, error: `Mínimo de compra: ${formatPEN(coupon.minOrderAmount)}` };
   }
 
-  // Verificar productos/categorías aplicables
-  if (coupon.applicableProducts.length > 0 || coupon.applicableCategories.length > 0) {
-    const hasApplicable = cart.items.some((item: any) => {
-      if (coupon.applicableProducts.includes(item.variantId)) return true;
-      // Verificar categorías - requeriría query adicional
-      return false;
-    });
+  // Respetar las restricciones de productos, variantes o categorías del cupón.
+  if (!coupon.appliesToAll && coupon.products.length > 0) {
+    const hasApplicable = cart.items.some((item: any) =>
+      coupon.products.some((allowed) =>
+        (allowed.productId && allowed.productId === item.productId) ||
+        (allowed.variantId && allowed.variantId === item.variantId) ||
+        (allowed.categoryId && item.variant?.product?.categories?.some(
+          (relation: { categoryId: string }) => relation.categoryId === allowed.categoryId
+        ))
+      )
+    );
     if (!hasApplicable) {
       return { valid: false, error: 'Cupón no aplica a productos en el carrito' };
     }
@@ -143,8 +148,8 @@ async function applyCoupon(cart: any, couponCode: string) {
   let discount = 0;
   if (coupon.type === 'PERCENTAGE') {
     discount = cart.subtotal * (coupon.value.toNumber() / 100);
-    if (coupon.maxDiscountAmount && discount > coupon.maxDiscountAmount.toNumber()) {
-      discount = coupon.maxDiscountAmount.toNumber();
+    if (coupon.maxDiscount && discount > coupon.maxDiscount.toNumber()) {
+      discount = coupon.maxDiscount.toNumber();
     }
   } else if (coupon.type === 'FIXED_AMOUNT') {
     discount = Math.min(coupon.value.toNumber(), cart.subtotal);
@@ -193,17 +198,15 @@ export async function POST(request: NextRequest) {
     // Obtener carrito
     const cart = await prisma.cart.findFirst({
       where: {
-        OR: [{ userId }, { id: sessionCartId }],
-        status: 'ACTIVE',
-        deletedAt: null,
+        userId,
       },
       include: {
         items: {
-          where: { deletedAt: null },
+          
           include: {
             variant: {
               include: {
-                product: { include: { brand: true, media: { where: { isPrimary: true }, take: 1 }, inventory: true } },
+                product: { include: { brand: true, media: { where: { isPrimary: true }, take: 1 }, inventory: true, categories: true } },
                 inventory: true,
                 attributes: { include: { attribute: true, attributeValue: true } },
               },
@@ -223,6 +226,7 @@ export async function POST(request: NextRequest) {
     // Verificar stock de todos los items
     for (const item of cart.items) {
       const variant = item.variant;
+        if (!variant) throw new Error('La variante del carrito ya no está disponible');
       if (variant.trackInventory && variant.inventory) {
         if (variant.inventory.availableQty < item.quantity) {
           return NextResponse.json(
@@ -250,7 +254,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-      couponDiscount = couponResult.discount;
+      couponDiscount = couponResult.discount ?? 0;
       appliedCoupon = couponResult.coupon;
     }
 
@@ -280,7 +284,7 @@ export async function POST(request: NextRequest) {
           firstName: session.user.name?.split(' ')[0] || 'Cliente',
           lastName: session.user.name?.split(' ').slice(1).join(' ') || '',
           email: session.user.email || '',
-          phone: session.user.phone || null,
+          phone: data.shippingAddress.phone,
         },
       });
     }
@@ -289,7 +293,7 @@ export async function POST(request: NextRequest) {
     const shippingAddress = await prisma.address.create({
       data: {
         customerId: customer.id,
-        type: 'SHIPPING',
+        type: 'shipping',
         isDefault: true,
         firstName: data.shippingAddress.firstName,
         lastName: data.shippingAddress.lastName,
@@ -299,10 +303,10 @@ export async function POST(request: NextRequest) {
         department: data.shippingAddress.department,
         province: data.shippingAddress.province,
         district: data.shippingAddress.district,
-        urbanization: data.shippingAddress.urbanization,
-        reference: data.shippingAddress.reference,
+        neighborhood: data.shippingAddress.urbanization,
+        
         postalCode: data.shippingAddress.postalCode,
-        instructions: data.shippingAddress.instructions,
+        instructions: [data.shippingAddress.reference, data.shippingAddress.instructions].filter(Boolean).join(' / ') || undefined,
       },
     });
 
@@ -312,12 +316,11 @@ export async function POST(request: NextRequest) {
       billingAddress = await prisma.address.create({
         data: {
           customerId: customer.id,
-          type: 'BILLING',
+          type: 'billing',
           isDefault: true,
           firstName: data.billingAddress.firstName,
           lastName: data.billingAddress.lastName,
           phone: data.billingAddress.phone,
-          email: data.billingAddress.email,
           addressLine1: data.billingAddress.addressLine1,
           addressLine2: data.billingAddress.addressLine2,
           department: data.billingAddress.department,
@@ -335,24 +338,25 @@ export async function POST(request: NextRequest) {
           orderNumber,
           customerId: customer.id,
           userId,
-          status: 'PENDING',
-          paymentStatus: 'PENDING',
-          fulfillmentStatus: 'PENDING',
+          status: 'PENDING_PAYMENT',
+          paymentMethod: data.paymentMethod,
           currency: 'PEN',
           subtotal,
           discountAmount: couponDiscount,
           shippingAmount: shipping.cost,
           taxAmount: tax,
-          totalAmount: total,
+          total,
+          balanceDue: total,
           shippingAddressId: shippingAddress.id,
           billingAddressId: billingAddress.id,
           shippingMethod: data.shippingMethodId ? 'STANDARD' : 'STANDARD',
           estimatedDelivery: new Date(Date.now() + (shipping.estimatedDays === '2-3' ? 3 : 5) * 24 * 60 * 60 * 1000),
-          notes: data.notes,
+          customerNotes: data.notes,
           couponId: appliedCoupon?.id,
           items: {
             create: cart.items.map((item: any) => {
               const variant = item.variant;
+        if (!variant) throw new Error('La variante del carrito ya no está disponible');
               const product = variant.product;
               const unitPrice = variant.price?.toNumber() || product.basePrice.toNumber();
               const compareAtPrice = variant.compareAtPrice?.toNumber() || product.compareAtPrice?.toNumber() || null;
@@ -362,18 +366,17 @@ export async function POST(request: NextRequest) {
                 variantId: variant.id,
                 productId: product.id,
                 sku: variant.sku,
-                productName: product.name,
+                name: product.name,
                 variantName: variant.name,
                 quantity: item.quantity,
                 unitPrice,
-                compareAtPrice,
-                totalPrice,
-                weight: variant.weight?.toNumber() || product.weight?.toNumber(),
-                attributes: variant.attributes.map((a: any) => ({
+                taxRate: product.taxRate,
+                taxAmount: Math.round(totalPrice * (product.taxRate.toNumber() / 100) * 100) / 100,
+                total: totalPrice,
+                metadata: { attributes: variant.attributes.map((a: any) => ({
                   attribute: a.attribute.name,
                   value: a.attributeValue.value,
-                  displayValue: a.attributeValue.displayValue,
-                })),
+                })) },
               };
             }),
           },
@@ -385,15 +388,16 @@ export async function POST(request: NextRequest) {
       if (appliedCoupon) {
         await tx.coupon.update({
           where: { id: appliedCoupon.id },
-          data: { usedCount: { increment: 1 } },
+          data: { usageCount: { increment: 1 } },
         });
       }
 
       // Reservar inventario
       for (const item of cart.items) {
         const variant = item.variant;
+        if (!variant) throw new Error('La variante del carrito ya no está disponible');
         if (variant.trackInventory && variant.inventory) {
-          await tx.inventory.update({
+          await tx.inventoryItem.update({
             where: { id: variant.inventory.id },
             data: { reservedQty: { increment: item.quantity } },
           });
@@ -401,10 +405,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Marcar carrito como convertido
-      await tx.cart.update({
-        where: { id: cart.id },
-        data: { status: 'CONVERTED', convertedAt: new Date() },
-      });
+      await tx.cart.delete({ where: { id: cart.id } });
 
       return newOrder;
     });
@@ -426,10 +427,7 @@ export async function POST(request: NextRequest) {
       };
     } else if (data.paymentMethod === 'BANK_TRANSFER') {
       // Generar instrucciones de transferencia
-      const bankAccounts = await prisma.paymentMethod.findMany({
-        where: { type: 'BANK_TRANSFER', isActive: true },
-      });
-      paymentResult = { bankAccounts };
+      paymentResult = { bankAccountInfo: process.env.BANK_ACCOUNT_INFO ?? null, status: 'PENDING' };
     } else if (data.paymentMethod === 'CASH_ON_DELIVERY') {
       // Verificar si el distrito permite pago contra entrega
       paymentResult = { allowed: true };
@@ -440,9 +438,9 @@ export async function POST(request: NextRequest) {
         id: order.id,
         orderNumber: order.orderNumber,
         status: order.status,
-        paymentStatus: order.paymentStatus,
-        totalAmount: order.totalAmount.toNumber(),
-        formattedTotal: formatPEN(order.totalAmount),
+        paymentStatus: 'PENDING',
+        totalAmount: order.total.toNumber(),
+        formattedTotal: formatPEN(order.total),
         estimatedDelivery: order.estimatedDelivery,
       },
       payment: {
@@ -485,17 +483,15 @@ export async function GET(request: NextRequest) {
 
     const cart = await prisma.cart.findFirst({
       where: {
-        OR: [{ userId }, { id: sessionCartId }],
-        status: 'ACTIVE',
-        deletedAt: null,
+        userId,
       },
       include: {
         items: {
-          where: { deletedAt: null },
+          
           include: {
             variant: {
               include: {
-                product: { include: { brand: true, media: { where: { isPrimary: true }, take: 1 }, inventory: true } },
+                product: { include: { brand: true, media: { where: { isPrimary: true }, take: 1 }, inventory: true, categories: true } },
                 inventory: true,
               },
             },
@@ -521,7 +517,7 @@ export async function GET(request: NextRequest) {
     if (couponCode) {
       const couponResult = await applyCoupon({ subtotal, items: cart.items }, couponCode);
       if (couponResult.valid) {
-        couponDiscount = couponResult.discount;
+        couponDiscount = couponResult.discount ?? 0;
         appliedCoupon = couponResult.coupon;
       }
     }
@@ -536,7 +532,7 @@ export async function GET(request: NextRequest) {
     let savedAddresses: any[] = [];
     if (customer) {
       savedAddresses = await prisma.address.findMany({
-        where: { customerId: customer.id, deletedAt: null },
+        where: { customerId: customer.id },
         orderBy: { isDefault: 'desc' },
       });
     }
@@ -552,7 +548,7 @@ export async function GET(request: NextRequest) {
     const carriers = await prisma.carrier.findMany({
       where: { isActive: true },
       include: {
-        zones: {
+        shippingZones: {
           where: { isActive: true },
           include: { rates: { where: { isActive: true } } },
         },
@@ -561,7 +557,7 @@ export async function GET(request: NextRequest) {
     });
 
     const shippingMethods = carriers.flatMap((carrier) =>
-      carrier.zones.flatMap((zone) =>
+      carrier.shippingZones.flatMap((zone) =>
         zone.rates.map((rate) => ({
           id: rate.id,
           carrierId: carrier.id,

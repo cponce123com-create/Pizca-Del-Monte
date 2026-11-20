@@ -17,6 +17,8 @@ const querySchema = z.object({
   onSale: z.coerce.boolean().optional(),
 });
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -35,7 +37,6 @@ export async function GET(request: NextRequest) {
     // Construir where
     const where: any = {
       status: 'ACTIVE',
-      deletedAt: null,
     };
 
     if (category) {
@@ -61,14 +62,14 @@ export async function GET(request: NextRequest) {
     }
 
     if (inStock) {
-      where.OR = [
+      where.AND = [...(where.AND || []), { OR: [
         { trackInventory: false },
-        { inventory: { availableQty: { gt: 0 } } },
-      ];
+        { inventory: { is: { availableQty: { gt: 0 } } } },
+      ] }];
     }
 
     if (featured) {
-      where.featured = true;
+      where.featuredUntil = { gt: new Date() };
     }
 
     if (onSale) {
@@ -76,7 +77,7 @@ export async function GET(request: NextRequest) {
     }
 
     // OrderBy
-    let orderBy: any = { createdAt: 'desc' };
+    let orderBy: any = { publishedAt: 'desc' };
     switch (sort) {
       case 'price_asc':
         orderBy = { basePrice: 'asc' };
@@ -91,7 +92,7 @@ export async function GET(request: NextRequest) {
         orderBy = { name: 'desc' };
         break;
       case 'popular':
-        orderBy = { orders: { _count: 'desc' } };
+        orderBy = { orderItems: { _count: 'desc' } };
         break;
     }
 
@@ -107,7 +108,7 @@ export async function GET(request: NextRequest) {
           categories: { include: { category: true } },
           media: { where: { isPrimary: true }, take: 1 },
           variants: {
-            where: { deletedAt: null },
+            
             include: {
               inventory: true,
               attributes: { include: { attribute: true, attributeValue: true } },
@@ -163,7 +164,7 @@ export async function GET(request: NextRequest) {
       inStock: !product.trackInventory || (product.inventory?.availableQty || 0) > 0,
       availableQty: product.inventory?.availableQty || 0,
       trackInventory: product.trackInventory,
-      isNew: product.createdAt > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      isNew: Boolean(product.publishedAt && product.publishedAt > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)),
       isBestseller: false, // Se calcularía con analytics
     }));
 

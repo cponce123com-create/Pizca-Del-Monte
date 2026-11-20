@@ -284,8 +284,18 @@ export function CheckoutClient() {
     setIsSubmitting(true);
 
     try {
-      const shippingAddress = selectedShippingAddress || shippingForm;
-      const billingAddress = sameAsShipping ? shippingAddress : (selectedBillingAddress || billingForm);
+      const shippingAddress = selectedShippingAddress ? {
+        ...shippingForm,
+        ...selectedShippingAddress,
+        phone: selectedShippingAddress.phone ?? shippingForm.phone,
+        urbanization: selectedShippingAddress.neighborhood ?? '',
+        reference: selectedShippingAddress.instructions ?? '',
+      } : shippingForm;
+      const billingAddress = selectedBillingAddress ? {
+        ...billingForm,
+        ...selectedBillingAddress,
+        phone: selectedBillingAddress.phone ?? billingForm.phone,
+      } : billingForm;
 
       const response = await fetch('/api/checkout', {
         method: 'POST',
@@ -296,14 +306,14 @@ export function CheckoutClient() {
             lastName: shippingAddress.lastName,
             phone: shippingAddress.phone,
             addressLine1: shippingAddress.addressLine1,
-            addressLine2: shippingAddress.addressLine2,
+            addressLine2: shippingAddress.addressLine2 ?? undefined,
             department: shippingAddress.department,
             province: shippingAddress.province,
             district: shippingAddress.district,
-            urbanization: shippingAddress.urbanization || shippingAddress.neighborhood,
-            reference: shippingAddress.reference || shippingAddress.instructions,
-            postalCode: shippingAddress.postalCode,
-            instructions: shippingAddress.instructions,
+            urbanization: shippingAddress.urbanization,
+            reference: shippingAddress.reference,
+            postalCode: shippingAddress.postalCode ?? undefined,
+            instructions: shippingAddress.instructions ?? undefined,
           },
           billingAddress: sameAsShipping ? undefined : {
             firstName: billingAddress.firstName,
@@ -311,10 +321,10 @@ export function CheckoutClient() {
             documentType: billingAddress.documentType,
             documentNumber: billingAddress.documentNumber,
             businessName: billingAddress.businessName,
-            phone: billingAddress.phone,
+            phone: billingAddress.phone ?? '',
             email: billingAddress.email,
             addressLine1: billingAddress.addressLine1,
-            addressLine2: billingAddress.addressLine2,
+            addressLine2: billingAddress.addressLine2 ?? undefined,
             department: billingAddress.department,
             province: billingAddress.province,
             district: billingAddress.district,
@@ -339,7 +349,7 @@ export function CheckoutClient() {
       if (data.payment.paymentUrl) {
         window.location.href = data.payment.paymentUrl;
       } else {
-        router.push(`/orden/${data.order.orderNumber}?success=true`);
+        router.push(`/orden/${data.order.orderNumber}?pendiente=true`);
       }
     } catch (error) {
       console.error('Error creating order:', error);
@@ -519,7 +529,7 @@ function ShippingStep({
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Direcciones guardadas */}
-        {savedAddresses.filter(a => a.type === 'shipping' || a.type === 'both').length > 0 && (
+        {savedAddresses.filter((a: SavedAddress) => a.type === 'shipping' || a.type === 'both').length > 0 && (
           <div className="space-y-3">
             <p className="text-body-sm font-medium">Direcciones guardadas</p>
             {savedAddresses
@@ -678,7 +688,7 @@ function PaymentStep({
           {!sameAsShipping && (
             <>
               <Separator />
-              {savedAddresses.filter(a => a.type === 'billing' || a.type === 'both').length > 0 && (
+              {savedAddresses.filter((a: SavedAddress) => a.type === 'billing' || a.type === 'both').length > 0 && (
                 <div className="space-y-3">
                   <p className="text-body-sm font-medium">Direcciones guardadas</p>
                   {savedAddresses
@@ -945,7 +955,7 @@ function AddressForm({
   isRequired,
 }: any) {
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev: Record<string, string>) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -1080,7 +1090,7 @@ function BillingAddressForm({
   errors,
 }: any) {
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev: Record<string, string>) => ({ ...prev, [field]: value }));
   };
 
   return (
