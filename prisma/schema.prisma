@@ -695,7 +695,6 @@ model AttributeValue {
 
   attribute   Attribute  @relation(fields: [attributeId], references: [id], onDelete: Cascade)
   products    ProductAttributeValue[]
-  variants    ProductAttributeValue[]
 
   @@unique([attributeId, slug])
   @@index([attributeId])
