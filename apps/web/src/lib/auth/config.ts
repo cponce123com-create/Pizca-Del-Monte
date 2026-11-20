@@ -30,7 +30,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (!parsed.success) return null;
 
-        const { email, password } = parsed.data;
+        const { password } = parsed.data;
+        const email = parsed.data.email.trim().toLowerCase();
 
         const user = await prisma.user.findUnique({
           where: { email },
@@ -42,7 +43,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const isValid = await compare(password, user.passwordHash);
         if (!isValid) return null;
 
-        if (user.status !== 'ACTIVE') return null;
+        // Las cuentas pendientes o no verificadas no reciben sesión.
+        if (user.status !== 'ACTIVE' || !user.emailVerified) return null;
+        if (user.lockedUntil && user.lockedUntil > new Date()) return null;
 
         return {
           id: user.id,

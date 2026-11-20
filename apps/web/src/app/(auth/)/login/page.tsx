@@ -26,6 +26,25 @@ function LoginContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formError, setFormError] = useState('');
+  const [verificationMessage, setVerificationMessage] = useState('');
+
+  const resendVerification = async () => {
+    if (!email.trim()) {
+      setVerificationMessage('Escribe primero tu correo electrónico.');
+      return;
+    }
+    try {
+      const response = await fetch('/api/auth/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const result = await response.json();
+      setVerificationMessage(result.message || 'No fue posible reenviar el enlace.');
+    } catch {
+      setVerificationMessage('No fue posible conectar con el servicio de correo.');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,6 +97,17 @@ function LoginContent() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {searchParams.get('registered') === 'true' && (
+              <p role="status" className="rounded-lg border border-primary/30 p-3 text-sm">
+                Revisa tu correo y confirma el enlace de verificación antes de iniciar sesión.
+              </p>
+            )}
+            {searchParams.get('verified') === 'true' && (
+              <p role="status" className="rounded-lg border border-primary/30 p-3 text-sm">
+                Correo verificado. Ya puedes iniciar sesión.
+              </p>
+            )}
+            {verificationMessage && <p role="status" className="text-sm text-muted-foreground">{verificationMessage}</p>}
             {(error || formError) && (
               <div
                 className={cn(
@@ -155,6 +185,9 @@ function LoginContent() {
               </Button>
             </form>
 
+            <button type="button" onClick={resendVerification} className="text-sm text-primary underline">
+              Reenviar correo de verificación
+            </button>
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-border" />

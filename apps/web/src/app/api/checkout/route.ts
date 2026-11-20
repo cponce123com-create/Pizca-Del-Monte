@@ -195,6 +195,20 @@ export async function POST(request: NextRequest) {
 
     const data = parsed.data;
 
+    // No aceptar órdenes de proveedores de pago que aún no funcionan.
+    if (data.paymentMethod === 'MERCADO_PAGO') {
+      return NextResponse.json({ error: 'Mercado Pago todavía no está disponible.' }, { status: 503 });
+    }
+    if (data.paymentMethod === 'BANK_TRANSFER' &&
+        (process.env.BANK_TRANSFER_ENABLED !== 'true' || !process.env.BANK_ACCOUNT_INFO?.trim())) {
+      return NextResponse.json({ error: 'La transferencia bancaria no está configurada.' }, { status: 503 });
+    }
+    if (data.paymentMethod === 'CASH_ON_DELIVERY' &&
+        (process.env.CASH_ON_DELIVERY_ENABLED !== 'true' ||
+         data.shippingAddress.department.trim().toLowerCase() !== 'lima')) {
+      return NextResponse.json({ error: 'El pago contra entrega no está disponible para esta dirección.' }, { status: 400 });
+    }
+
     // Obtener carrito
     const cart = await prisma.cart.findFirst({
       where: {
@@ -414,23 +428,12 @@ export async function POST(request: NextRequest) {
     let paymentResult: any = null;
     let paymentUrl: string | null = null;
 
-    if (data.paymentMethod === 'MERCADO_PAGO') {
-      // TODO: Integrar con Mercado Pago SDK
-      // const mpPreference = await createMercadoPagoPreference(order, data.shippingAddress);
-      // paymentUrl = mpPreference.init_point;
-      // paymentResult = { preferenceId: mpPreference.id };
-
-      // Placeholder para desarrollo
-      paymentResult = {
-        message: 'Integración Mercado Pago pendiente',
-        sandbox: true,
-      };
-    } else if (data.paymentMethod === 'BANK_TRANSFER') {
+    if (data.paymentMethod === 'BANK_TRANSFER') {
       // Generar instrucciones de transferencia
       paymentResult = { bankAccountInfo: process.env.BANK_ACCOUNT_INFO ?? null, status: 'PENDING' };
     } else if (data.paymentMethod === 'CASH_ON_DELIVERY') {
       // Verificar si el distrito permite pago contra entrega
-      paymentResult = { allowed: true };
+      paymentResult = { allowed: true, status: 'PENDING' };
     }
 
     return NextResponse.json({
@@ -539,9 +542,12 @@ export async function GET(request: NextRequest) {
 
     // Métodos de pago disponibles (desde enum + configuración)
     const paymentMethods = [
-      { id: 'MERCADO_PAGO', name: 'Mercado Pago', description: 'Tarjetas, Yape, Plin, transferencia', icon: 'credit-card' },
-      { id: 'BANK_TRANSFER', name: 'Transferencia Bancaria', description: 'BCP, Interbank, BBVA, Scotiabank', icon: 'bank' },
-      { id: 'CASH_ON_DELIVERY', name: 'Pago contra entrega', description: 'Efectivo al recibir (solo Lima)', icon: 'truck' },
+      ...(process.env.BANK_TRANSFER_ENABLED === 'true' && process.env.BANK_ACCOUNT_INFO?.trim()
+        ? [{ id: 'BANK_TRANSFER', name: 'Transferencia bancaria', description: 'Confirmación manual antes del despacho', icon: 'bank' }]
+        : []),
+      ...(process.env.CASH_ON_DELIVERY_ENABLED === 'true'
+        ? [{ id: 'CASH_ON_DELIVERY', name: 'Pago contra entrega', description: 'Solo Lima, sujeto a confirmación', icon: 'truck' }]
+        : []),
     ];
 
     // Métodos de envío - usar carriers y shipping zones

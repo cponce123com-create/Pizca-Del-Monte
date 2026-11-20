@@ -49,6 +49,11 @@ jobs:
         env:
           NODE_ENV: development
 
+      - name: Generate Prisma Client for type checks
+        run: pnpm db:generate
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/pizca_ci
+
       - name: Run lint
         run: pnpm lint
 
