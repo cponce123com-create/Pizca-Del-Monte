@@ -226,6 +226,7 @@ export async function POST(request: NextRequest) {
     // Verificar stock de todos los items
     for (const item of cart.items) {
       const variant = item.variant;
+        if (!variant) throw new Error('La variante del carrito ya no está disponible');
       if (variant.trackInventory && variant.inventory) {
         if (variant.inventory.availableQty < item.quantity) {
           return NextResponse.json(
@@ -355,6 +356,7 @@ export async function POST(request: NextRequest) {
           items: {
             create: cart.items.map((item: any) => {
               const variant = item.variant;
+        if (!variant) throw new Error('La variante del carrito ya no está disponible');
               const product = variant.product;
               const unitPrice = variant.price?.toNumber() || product.basePrice.toNumber();
               const compareAtPrice = variant.compareAtPrice?.toNumber() || product.compareAtPrice?.toNumber() || null;
@@ -393,6 +395,7 @@ export async function POST(request: NextRequest) {
       // Reservar inventario
       for (const item of cart.items) {
         const variant = item.variant;
+        if (!variant) throw new Error('La variante del carrito ya no está disponible');
         if (variant.trackInventory && variant.inventory) {
           await tx.inventoryItem.update({
             where: { id: variant.inventory.id },
