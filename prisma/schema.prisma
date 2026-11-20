@@ -4,7 +4,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
@@ -323,15 +322,6 @@ enum WebhookEventType {
 // MODELOS BASE Y UTILIDADES
 // ============================================
 
-model BaseModel {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
-
-  @@abstract
-}
-
 // ============================================
 // IDENTIDAD, ROLES Y PERMISOS
 // ============================================
@@ -585,10 +575,9 @@ model Product {
 
   @@index([slug])
   @@index([sku])
-  @@index([status, isActive])
+  @@index([status])
   @@index([brandId])
   @@index([publishedAt])
-  @@fulltextsearch([name, description, shortDescription])
   @@map("products")
 }
 
@@ -1179,7 +1168,7 @@ model Cart {
   userId      String?  @unique
   sessionId   String?  @unique
   currency    String   @default("PEN")
-  expiresAt   DateTime @default(now() + interval '30 days')
+  expiresAt   DateTime @default(dbgenerated("(now() + interval '30 days')"))
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -2092,7 +2081,6 @@ model Recipe {
   @@index([mealType])
   @@index([occasion])
   @@index([difficulty])
-  @@fulltextsearch([title, description, tags])
   @@map("recipes")
 }
 
@@ -2283,7 +2271,6 @@ model Page {
   @@index([slug])
   @@index([status, publishedAt])
   @@index([template, isSystem])
-  @@fulltextsearch([title, content])
   @@map("pages")
 }
 
