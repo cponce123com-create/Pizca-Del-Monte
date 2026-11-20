@@ -44,8 +44,8 @@ export const prismaWithExtensions = prisma.$extends({
             media: { where: { deletedAt: null }, orderBy: { sortOrder: 'asc' } },
             inventory: true,
             attributes: { include: { attribute: true, attributeValue: true } },
-            relatedProducts: { include: { related: { include: { media: { where: { isPrimary: true } } } } },
-            bundles: { include: { component: { include: { media: { where: { isPrimary: true } }, inventory: true } }, componentVariant: true },
+            relatedProducts: { include: { related: { include: { media: { where: { isPrimary: true } } } } } },
+            bundles: { include: { component: { include: { media: { where: { isPrimary: true } }, inventory: true } }, componentVariant: true } },
           },
         });
       },
@@ -57,7 +57,7 @@ export const prismaWithExtensions = prisma.$extends({
           where: { orderNumber },
           include: {
             user: true,
-            items: { include: { product: { include: { media: { where: { isPrimary: true } } }, variant: true } },
+            items: { include: { product: { include: { media: { where: { isPrimary: true } } }, variant: true } } },
             payments: true,
             shipments: { include: { carrier: true, events: { orderBy: { eventDate: 'asc' } } } },
             documents: true,
@@ -71,7 +71,7 @@ export const prismaWithExtensions = prisma.$extends({
         return prisma.order.findUnique({
           where: { guestToken: token },
           include: {
-            items: { include: { product: { include: { media: { where: { isPrimary: true } } }, variant: true } },
+            items: { include: { product: { include: { media: { where: { isPrimary: true } } }, variant: true } } },
             payments: true,
             shipments: { include: { carrier: true, events: { orderBy: { eventDate: 'asc' } } } },
             documents: true,

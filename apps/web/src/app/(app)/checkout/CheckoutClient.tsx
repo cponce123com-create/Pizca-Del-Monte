@@ -1335,7 +1335,7 @@ function OrderSummary({
 
           <p className="text-body-xs text-muted-foreground text-center">
             Incluye IGV. Pago seguro.
-          </div>
+          </p>
 
           {/* Beneficios */}
           <div className="border-t pt-4 space-y-3">
