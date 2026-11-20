@@ -529,7 +529,7 @@ function ShippingStep({
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Direcciones guardadas */}
-        {savedAddresses.filter(a => a.type === 'shipping' || a.type === 'both').length > 0 && (
+        {savedAddresses.filter((a: SavedAddress) => a.type === 'shipping' || a.type === 'both').length > 0 && (
           <div className="space-y-3">
             <p className="text-body-sm font-medium">Direcciones guardadas</p>
             {savedAddresses
@@ -688,7 +688,7 @@ function PaymentStep({
           {!sameAsShipping && (
             <>
               <Separator />
-              {savedAddresses.filter(a => a.type === 'billing' || a.type === 'both').length > 0 && (
+              {savedAddresses.filter((a: SavedAddress) => a.type === 'billing' || a.type === 'both').length > 0 && (
                 <div className="space-y-3">
                   <p className="text-body-sm font-medium">Direcciones guardadas</p>
                   {savedAddresses
@@ -955,7 +955,7 @@ function AddressForm({
   isRequired,
 }: any) {
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev: Record<string, string>) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -1090,7 +1090,7 @@ function BillingAddressForm({
   errors,
 }: any) {
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev: Record<string, string>) => ({ ...prev, [field]: value }));
   };
 
   return (
