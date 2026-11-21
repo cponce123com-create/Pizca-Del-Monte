@@ -18,7 +18,7 @@ const products = [
     description: 'El alma de la cocina criolla: causa, huancaína, ají de gallina',
     price: 18.00,
     compareAtPrice: 22.00,
-    image: '/images/products/aji-amarillo.jpg',
+    image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=900&q=85',
     brand: 'Pizca del Monte',
     category: 'Especias',
     inStock: true,
@@ -31,7 +31,7 @@ const products = [
     description: 'Cosechada a mano en las milenarias salineras de Maras, Cusco',
     price: 45.00,
     compareAtPrice: 55.00,
-    image: '/images/products/sal-maras.jpg',
+    image: 'https://images.unsplash.com/photo-1518110925495-5fe2b0ba94a9?w=900&q=85',
     brand: 'Maras',
     category: 'Sales Gourmet',
     inStock: true,
@@ -44,7 +44,7 @@ const products = [
     description: 'Cosecha temprana en Ica, notas a manzana verde y almendra',
     price: 89.00,
     compareAtPrice: 110.00,
-    image: '/images/products/aceite-arbequina.jpg',
+    image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=900&q=85',
     brand: 'Oliva del Sur',
     category: 'Aceites',
     inStock: true,
@@ -56,7 +56,7 @@ const products = [
     description: 'Sales, ajíes, aceite y chimichurri en caja de madera grabada',
     price: 289.00,
     compareAtPrice: 349.00,
-    image: '/images/products/pack-parrilla.jpg',
+    image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=900&q=85',
     brand: 'Pizca del Monte',
     category: 'Packs Gourmet',
     inStock: true,
@@ -122,6 +122,7 @@ function ProductCard({ product }: { product: typeof products[0] }) {
       <Link href={`/tienda/${product.slug}`} className="block relative aspect-square overflow-hidden">
         {!imageError ? (
           <Image
+            unoptimized
             src={product.image}
             alt={product.name}
             fill
