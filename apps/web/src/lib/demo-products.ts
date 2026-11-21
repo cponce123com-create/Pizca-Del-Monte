@@ -1,6 +1,6 @@
 import { formatPEN } from '@pizca/utils';
 
-const categories = [
+export const demoCategories = [
   { slug: 'especias', name: 'Especias' },
   { slug: 'sales-gourmet', name: 'Sales Gourmet' },
   { slug: 'aceites-vinagres', name: 'Aceites y Vinagres' },
@@ -27,7 +27,7 @@ const items: [string, string, number, number][] = [
 ];
 
 export const demoProducts = items.map(([name, slug, price, index], i) => {
-  const category = categories[index];
+  const category = demoCategories[index];
   return {
     id: `demo-${i + 1}`, sku: `DEMO-${String(i + 1).padStart(3, '0')}`, name, slug,
     shortDescription: `Una propuesta referencial de ${category.name.toLowerCase()} para tu cocina.`,
