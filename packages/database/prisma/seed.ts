@@ -129,7 +129,7 @@ async function main() {
     { key: 'guest_checkout', value: true, type: 'boolean', group: 'checkout', label: 'Permitir compra como invitado', isPublic: true },
     { key: 'require_phone', value: true, type: 'boolean', group: 'checkout', label: 'Requerir teléfono', isPublic: true },
     { key: 'min_order_amount', value: 0, type: 'number', group: 'checkout', label: 'Monto mínimo de pedido', isPublic: true },
-    { key: 'free_shipping_threshold', value: 0, type: 'number', group: 'checkout', label: 'Envío gratis desde (PEN)', isPublic: true },
+    // El umbral de envío gratis se configura al confirmar tarifas; no asumir 0.
 
     // Shipping
     { key: 'default_shipping_carrier', value: '', type: 'string', group: 'shipping', label: 'Transportista por defecto', isPublic: false },
