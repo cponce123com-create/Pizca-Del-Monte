@@ -41,23 +41,23 @@ export function Hero() {
         <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           <Feature
             icon={Truck}
-            title="Envío Gratis + S/150"
-            description="A todo el Perú con Shalom"
+            title="Envíos"
+            description="Cobertura y tarifas por confirmar"
           />
           <Feature
             icon={Shield}
-            title="Pago Seguro"
-            description="Mercado Pago, Yape, Plin, Transferencia"
+            title="Medios de pago"
+            description="Disponibilidad por confirmar"
           />
           <Feature
             icon={RotateCcw}
-            title="Devoluciones Fáciles"
-            description="30 días para cambios"
+            title="Cambios y devoluciones"
+            description="Condiciones por confirmar"
           />
           <Feature
             icon={Sparkles}
-            title="Calidad Garantizada"
-            description="Productos 100% peruanos"
+            title="Sabores peruanos"
+            description="Una selección para explorar"
           />
         </div>
       </div>

@@ -5,29 +5,29 @@ import { Award, Leaf, Truck, Heart } from 'lucide-react';
 const badges = [
   {
     icon: Award,
-    title: 'Origen Certificado',
-    description: 'Productos con denominación de origen',
+    title: 'Sabores del Perú',
+    description: 'Una selección para descubrir',
   },
   {
     icon: Leaf,
-    title: '100% Natural',
-    description: 'Sin aditivos ni conservantes artificiales',
+    title: 'Ingredientes',
+    description: 'Ideas para tu cocina',
   },
   {
     icon: Truck,
-    title: 'Envío Nacional',
-    description: 'Llegamos a todo el Perú con Shalom',
+    title: 'Envíos',
+    description: 'Cobertura por confirmar',
   },
   {
     icon: Heart,
     title: 'Hecho con Amor',
-    description: 'Pequeños productores peruanos',
+    description: 'Inspirado en nuestra cocina',
   },
 ];
 
 export function TrustBadges() {
   return (
-    <section className="py-12 border-y border-border bg-muted/30" aria-label="Garantías de calidad">
+    <section className="py-12 border-y border-border bg-muted/30" aria-label="Nuestra tienda">
       <div className="container">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {badges.map((badge, index) => (

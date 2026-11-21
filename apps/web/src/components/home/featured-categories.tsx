@@ -12,7 +12,7 @@ const categories = [
     slug: 'especias',
     description: 'Ajíes, hierbas, semillas y mezclas',
     image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=900&q=85',
-    count: 24,
+    count: 8,
     color: 'from-forest-600 to-forest-800',
     icon: Leaf,
   },
@@ -21,7 +21,7 @@ const categories = [
     slug: 'sales-gourmet',
     description: 'Maras, aromatizadas y de origen',
     image: 'https://images.unsplash.com/photo-1518110925495-5fe2b0ba94a9?w=900&q=85',
-    count: 12,
+    count: 5,
     color: 'from-terracotta-500 to-terracotta-700',
     icon: Droplet,
   },
@@ -30,7 +30,7 @@ const categories = [
     slug: 'aceites-vinagres',
     description: 'AOVE, infusionados y artesanales',
     image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=900&q=85',
-    count: 18,
+    count: 5,
     color: 'from-ochre-500 to-ochre-700',
     icon: Package,
   },
@@ -39,7 +39,7 @@ const categories = [
     slug: 'mezclas-salsas',
     description: 'Huancaína, ocopa, aderezos',
     image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=900&q=85',
-    count: 15,
+    count: 5,
     color: 'from-amber-500 to-amber-700',
     icon: Utensils,
   },
@@ -48,7 +48,7 @@ const categories = [
     slug: 'packs-gourmet',
     description: 'Regalos curados y temáticos',
     image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=900&q=85',
-    count: 8,
+    count: 4,
     color: 'from-rose-500 to-rose-700',
     icon: Sparkles,
   },
@@ -57,7 +57,7 @@ const categories = [
     slug: 'accesorios',
     description: 'Morteros, molinillos, frascos',
     image: 'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=900&q=85',
-    count: 10,
+    count: 3,
     color: 'from-stone-500 to-stone-700',
     icon: Wrench,
   },
@@ -122,9 +122,7 @@ function CategoryCard({ category }: { category: typeof categories[0] }) {
           <h3 className="text-heading-md font-semibold text-white">
             {category.name}
           </h3>
-          <p className="text-body-sm text-white/80 mt-1">
-            {category.count} productos
-          </p>
+          <p className="text-body-sm text-white/80 mt-1">{category.description}</p>
         </div>
       </Link>
     </article>

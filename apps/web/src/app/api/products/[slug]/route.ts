@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@pizca/database';
 import { formatPEN } from '@pizca/utils';
+import { isDemoMode } from '@/lib/demo-mode';
+import { demoProducts } from '@/lib/demo-products';
 
 export async function GET(
   request: NextRequest,
@@ -8,6 +10,10 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
+    if (isDemoMode()) {
+      const product = demoProducts.find(item => item.slug === slug);
+      return product ? NextResponse.json(product, { headers: { 'Cache-Control': 'no-store' } }) : NextResponse.json({ error: 'Producto no encontrado' }, { status: 404 });
+    }
 
     const product = await prisma.product.findFirst({
       where: {

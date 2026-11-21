@@ -252,18 +252,19 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
               {/* Categorías */}
               <div>
                 <label className="block text-body-sm font-medium mb-2">Categoría</label>
-                <Select value={filters.category} onValueChange={(v) => handleFilterChange('category', v)}>
+                <Select value={filters.category || 'all'} onValueChange={(v) => handleFilterChange('category', v === 'all' ? '' : v)}>
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="Todas las categorías" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todas las categorías</SelectItem>
+                    <SelectItem value="all">Todas las categorías</SelectItem>
                     <SelectItem value="especias">Especias</SelectItem>
-                    <SelectItem value="sales">Sales</SelectItem>
-                    <SelectItem value="aceites">Aceites</SelectItem>
-                    <SelectItem value="vinagres">Vinagres</SelectItem>
-                    <SelectItem value="salsas">Salsas</SelectItem>
-                    <SelectItem value="packs">Packs Gourmet</SelectItem>
+                    <SelectItem value="sales-gourmet">Sales Gourmet</SelectItem>
+                    <SelectItem value="aceites-vinagres">Aceites y Vinagres</SelectItem>
+
+                    <SelectItem value="mezclas-salsas">Mezclas y Salsas</SelectItem>
+                    <SelectItem value="packs-gourmet">Packs Gourmet</SelectItem>
+                    <SelectItem value="accesorios">Accesorios</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -271,12 +272,12 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
               {/* Marcas */}
               <div>
                 <label className="block text-body-sm font-medium mb-2">Marca</label>
-                <Select value={filters.brand} onValueChange={(v) => handleFilterChange('brand', v)}>
+                <Select value={filters.brand || 'all'} onValueChange={(v) => handleFilterChange('brand', v === 'all' ? '' : v)}>
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="Todas las marcas" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todas las marcas</SelectItem>
+                    <SelectItem value="all">Todas las marcas</SelectItem>
                     <SelectItem value="pizca-del-monte">Pizca del Monte</SelectItem>
                     <SelectItem value="marcas-de-casa">Marcas de Casa</SelectItem>
                     <SelectItem value="artesanos">Artesanos Peruanos</SelectItem>

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@pizca/database';
 import { z } from 'zod';
 import { formatPEN } from '@pizca/utils';
+import { isDemoMode } from '@/lib/demo-mode';
+import { listDemoProducts } from '@/lib/demo-products';
 
 const querySchema = z.object({
   page: z.coerce.number().int().positive().max(100000).default(1),
@@ -35,6 +37,7 @@ export async function GET(request: NextRequest) {
     if (minPrice !== undefined && maxPrice !== undefined && minPrice > maxPrice) {
       return NextResponse.json({ error: 'El precio mínimo no puede superar al máximo' }, { status: 400 });
     }
+    if (isDemoMode()) return NextResponse.json(listDemoProducts({ page, limit, sort, category, brand, minPrice, maxPrice, search, inStock, featured, onSale }), { headers: { 'Cache-Control': 'no-store' } });
     const skip = (page - 1) * limit;
 
     // Construir where

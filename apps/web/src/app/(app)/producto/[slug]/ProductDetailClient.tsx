@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 import { DemoProductImage } from '@/components/products/demo-product-image';
 import { formatPEN } from '@pizca/utils';
 import { useToast } from '@/hooks/use-toast';
+import { addDemoCartItem } from '@/lib/demo-cart';
 
 interface ProductVariant {
   id: string;
@@ -42,6 +43,7 @@ interface AttributeGroup {
 }
 
 interface Product {
+  isDemo?: boolean;
   id: string;
   sku: string;
   name: string;
@@ -135,6 +137,11 @@ export function ProductDetailClient({ initialProduct }: ProductDetailClientProps
   const handleAddToCart = async () => {
     if (!selectedVariant || !selectedVariant.inStock) return;
 
+    if (product.isDemo) {
+      addDemoCartItem(product.slug, quantity);
+      router.push('/carrito');
+      return;
+    }
     setIsAddingToCart(true);
     try {
       const response = await fetch('/api/cart', {
@@ -382,7 +389,7 @@ export function ProductDetailClient({ initialProduct }: ProductDetailClientProps
                   ) : (
                     <span className="flex items-center gap-1 text-success">
                       <Package className="h-4 w-4" />
-                      Disponible
+                      {product.isDemo ? 'Producto de demostración' : 'Disponible'}
                     </span>
                   )}
                 </div>
@@ -520,15 +527,15 @@ export function ProductDetailClient({ initialProduct }: ProductDetailClientProps
               <div className="border-t pt-4 space-y-3">
                 <div className="flex items-center gap-3 text-body-sm text-muted-foreground">
                   <Truck className="h-5 w-5 text-primary" />
-                  <span>Envío gratis en compras mayores a S/ 200</span>
+                  <span>Cobertura y tarifas de envío por confirmar</span>
                 </div>
                 <div className="flex items-center gap-3 text-body-sm text-muted-foreground">
                   <RotateCcw className="h-5 w-5 text-primary" />
-                  <span>Devoluciones gratuitas en 30 días</span>
+                  <span>Condiciones de cambios y devoluciones por confirmar</span>
                 </div>
                 <div className="flex items-center gap-3 text-body-sm text-muted-foreground">
                   <MapPin className="h-5 w-5 text-primary" />
-                  <span>Entrega en 2-3 días hábiles (Lima)</span>
+                  <span>Plazos de entrega por confirmar</span>
                 </div>
               </div>
             </div>
