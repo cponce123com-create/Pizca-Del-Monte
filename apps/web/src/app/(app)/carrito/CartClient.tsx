@@ -1,4 +1,5 @@
 'use client';
+import { logger } from '@/lib/logger';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -71,7 +72,7 @@ export function CartClient() {
       const newCartId = response.headers.get('x-cart-id');
       if (newCartId) setCartId(newCartId);
     } catch (error) {
-      console.error('Error fetching cart:', error);
+      logger.error('Error fetching cart:', error);
     } finally {
       setIsLoading(false);
     }
@@ -103,7 +104,7 @@ export function CartClient() {
 
       await fetchCart();
     } catch (error) {
-      console.error('Error updating cart:', error);
+      logger.error('Error updating cart:', error);
       toast({ title: 'Error', description: error instanceof Error ? error.message : 'Error al actualizar cantidad', variant: 'destructive' });
     } finally {
       setUpdatingItems(prev => {
@@ -134,7 +135,7 @@ export function CartClient() {
 
       await fetchCart();
     } catch (error) {
-      console.error('Error removing item:', error);
+      logger.error('Error removing item:', error);
       toast({ title: 'Error', description: 'Error al eliminar producto', variant: 'destructive' });
     }
   };
@@ -159,7 +160,7 @@ export function CartClient() {
 
       await fetchCart();
     } catch (error) {
-      console.error('Error clearing cart:', error);
+      logger.error('Error clearing cart:', error);
       toast({ title: 'Error', description: 'Error al vaciar carrito', variant: 'destructive' });
     }
   };

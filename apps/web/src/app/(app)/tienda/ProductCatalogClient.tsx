@@ -1,4 +1,5 @@
 'use client';
+import { logger } from '@/lib/logger';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -33,7 +34,7 @@ interface Product {
   brand: { id: string; name: string; slug: string } | null;
   categories: { id: string; name: string; slug: string; isPrimary: boolean }[];
   primaryImage: { url: string; alt: string } | null;
-  variants: any[];
+  variants: unknown[];
   inStock: boolean;
   availableQty: number;
   trackInventory: boolean;
@@ -124,7 +125,7 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
       setProducts(data.products);
       setPagination(data.pagination);
     } catch (error) {
-      console.error('Error fetching products:', error);
+      logger.error('Error fetching products:', error);
     } finally {
       setIsLoading(false);
     }
@@ -134,7 +135,7 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
     fetchProducts();
   }, [fetchProducts]);
 
-  const handleFilterChange = (key: string, value: any) => {
+  const handleFilterChange = (key: keyof typeof filters, value: string | boolean) => {
     setFilters(prev => ({ ...prev, [key]: value }));
     // Update URL
     const params = new URLSearchParams(searchParams.toString());
@@ -442,7 +443,7 @@ function ProductCard({ product }: { product: Product }) {
         window.location.href = `/producto/${product.slug}`;
       }, 500);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast({ title: 'Error', description: 'No se pudo procesar la acción', variant: 'destructive' });
     } finally {
       setIsAdding(false);

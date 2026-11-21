@@ -1,5 +1,6 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@pizca/database';
+import { prisma, type Prisma } from '@pizca/database';
 import { z } from 'zod';
 import { formatPEN } from '@pizca/utils';
 import { isDemoMode } from '@/lib/demo-mode';
@@ -41,7 +42,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Construir where
-    const where: any = {
+    const where: Prisma.ProductWhereInput = {
       status: 'ACTIVE',
     };
 
@@ -68,7 +69,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (inStock) {
-      where.AND = [...(where.AND || []), { OR: [
+      where.AND = [{ OR: [
         { trackInventory: false },
         { inventory: { is: { availableQty: { gt: 0 } } } },
       ] }];
@@ -83,7 +84,7 @@ export async function GET(request: NextRequest) {
     }
 
     // OrderBy
-    let orderBy: any = { publishedAt: 'desc' };
+    let orderBy: Prisma.ProductOrderByWithRelationInput = { publishedAt: 'desc' };
     switch (sort) {
       case 'price_asc':
         orderBy = { basePrice: 'asc' };
@@ -190,7 +191,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching products:', error);
+    logger.error('Error fetching products:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

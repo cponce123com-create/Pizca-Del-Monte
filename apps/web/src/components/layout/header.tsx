@@ -1,4 +1,5 @@
 'use client';
+import { logger } from '@/lib/logger';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -40,7 +41,7 @@ function CartCount({ isDemo }: { isDemo: boolean }) {
           setCount(data.itemCount || 0);
         }
       } catch (error) {
-        console.error('Error fetching cart count:', error);
+        logger.error('Error fetching cart count:', error);
       }
     };
 

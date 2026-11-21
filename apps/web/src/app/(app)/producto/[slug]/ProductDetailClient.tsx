@@ -1,4 +1,5 @@
 'use client';
+import { logger } from '@/lib/logger';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -57,7 +58,7 @@ interface Product {
   formattedCompareAtPrice: string | null;
   discountPercent: number;
   weight: number | null;
-  dimensions: any;
+  dimensions: { length: number | null; width: number | null; height: number | null } | null;
   brand: { id: string; name: string; slug: string; logo: string | null } | null;
   categories: { id: string; name: string; slug: string; isPrimary: boolean }[];
   media: { id: string; url: string; alt: string; type: string; sortOrder: number }[];
@@ -161,7 +162,7 @@ export function ProductDetailClient({ initialProduct }: ProductDetailClientProps
       toast({ title: 'Éxito', description: 'Producto agregado al carrito', variant: 'default' });
       router.push('/carrito');
     } catch (error) {
-      console.error('Error adding to cart:', error);
+      logger.error('Error adding to cart:', error);
       toast({ title: 'Error', description: error instanceof Error ? error.message : 'Error al agregar al carrito', variant: 'destructive' });
     } finally {
       setIsAddingToCart(false);

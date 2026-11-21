@@ -1,5 +1,6 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 import { Decimal } from 'decimal.js';
+export type { Prisma };
 
 // Configuración global para Prisma Client en desarrollo (evita múltiples instancias en hot reload)
 const globalForPrisma = globalThis as unknown as {

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth/config';
 import { prisma } from '@pizca/database';
@@ -101,8 +102,8 @@ async function getOrCreateCart(userId: string | null, sessionCartId: string | nu
   return cart;
 }
 
-function formatCartResponse(cart: any) {
-  const items = cart.items.map((item: any) => {
+function formatCartResponse(cart: NonNullable<Awaited<ReturnType<typeof loadCart>>>) {
+  const items = cart.items.map((item) => {
     const variant = item.variant;
     if (!variant) throw new Error('Producto del carrito no disponible');
     const product = item.product;
@@ -132,7 +133,7 @@ function formatCartResponse(cart: any) {
       maxQty: variant.trackInventory ? (variant.inventory?.availableQty ?? 0) : 99,
       image: product.media[0] ? { url: product.media[0].url, alt: product.media[0].alt || product.name } : null,
       brand: product.brand ? { name: product.brand.name, slug: product.brand.slug } : null,
-      attributes: variant.attributes.map((a: any) => ({
+      attributes: variant.attributes.map((a) => ({
         name: a.attribute.name,
         value: a.attributeValue.value,
         displayValue: a.attributeValue.value,
@@ -141,8 +142,8 @@ function formatCartResponse(cart: any) {
     };
   });
 
-  const subtotal = items.reduce((sum: number, item: any) => sum + item.subtotal, 0);
-  const itemCount = items.reduce((sum: number, item: any) => sum + item.quantity, 0);
+  const subtotal = items.reduce((sum, item) => sum + item.subtotal, 0);
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   return {
     id: cart.id,
@@ -171,7 +172,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching cart:', error);
+    logger.error('Error fetching cart:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }
@@ -228,7 +229,7 @@ export async function POST(request: NextRequest) {
     const cart = await getOrCreateCart(userId, sessionCartId);
 
     // Verificar si ya existe el item
-    const existingItem = cart.items.find((item: any) => item.variantId === variantId);
+    const existingItem = cart.items.find((item) => item.variantId === variantId);
 
     if (existingItem) {
       const newQuantity = Math.min(existingItem.quantity + quantity, 99);
@@ -264,7 +265,7 @@ export async function POST(request: NextRequest) {
       status: 201,
     });
   } catch (error) {
-    console.error('Error adding to cart:', error);
+    logger.error('Error adding to cart:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }
@@ -292,7 +293,7 @@ export async function PATCH(request: NextRequest) {
     const { itemId, quantity } = parsed.data;
 
     const cart = await getOrCreateCart(userId, sessionCartId);
-    const item = cart.items.find((i: any) => i.id === itemId);
+    const item = cart.items.find((i) => i.id === itemId);
 
     if (!item || !item.variant) {
       return NextResponse.json(
@@ -330,7 +331,7 @@ export async function PATCH(request: NextRequest) {
       headers: { 'x-cart-id': cart.id },
     });
   } catch (error) {
-    console.error('Error updating cart:', error);
+    logger.error('Error updating cart:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }
@@ -359,7 +360,7 @@ export async function DELETE(request: NextRequest) {
 
     if (parsed.success && parsed.data.itemId) {
       // Eliminar item específico
-      const item = cart.items.find((i: any) => i.id === parsed.data.itemId);
+      const item = cart.items.find((i) => i.id === parsed.data.itemId);
       if (!item) {
         return NextResponse.json(
           { error: 'Item no encontrado' },
@@ -382,7 +383,7 @@ export async function DELETE(request: NextRequest) {
       headers: { 'x-cart-id': cart.id },
     });
   } catch (error) {
-    console.error('Error removing from cart:', error);
+    logger.error('Error removing from cart:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }
