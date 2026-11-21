@@ -106,7 +106,7 @@ function formatCartResponse(cart: any) {
     const variant = item.variant;
     if (!variant) throw new Error('Producto del carrito no disponible');
     const product = item.product;
-    const unitPrice = variant.price?.toNumber() || product.basePrice.toNumber();
+    const unitPrice = variant.price?.toNumber() ?? product.basePrice.toNumber();
     const compareAtPrice = variant.compareAtPrice?.toNumber() || product.compareAtPrice?.toNumber() || null;
     const subtotal = unitPrice * item.quantity;
 
@@ -129,7 +129,7 @@ function formatCartResponse(cart: any) {
       weight: variant.weight?.toNumber() || product.weight?.toNumber(),
       inStock: !variant.trackInventory || (variant.inventory?.availableQty || 0) >= item.quantity,
       availableQty: variant.inventory?.availableQty || 0,
-      maxQty: variant.trackInventory ? (variant.inventory?.availableQty || 99) : 99,
+      maxQty: variant.trackInventory ? (variant.inventory?.availableQty ?? 0) : 99,
       image: product.media[0] ? { url: product.media[0].url, alt: product.media[0].alt || product.name } : null,
       brand: product.brand ? { name: product.brand.name, slug: product.brand.slug } : null,
       attributes: variant.attributes.map((a: any) => ({
@@ -215,8 +215,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar stock
-    if (variant.trackInventory && variant.inventory) {
-      const available = variant.inventory.availableQty;
+    if (variant.trackInventory) {
+      const available = variant.inventory?.availableQty ?? 0;
       if (available < quantity) {
         return NextResponse.json(
           { error: `Stock insuficiente. Disponible: ${available}` },
@@ -234,10 +234,11 @@ export async function POST(request: NextRequest) {
       const newQuantity = Math.min(existingItem.quantity + quantity, 99);
 
       // Verificar stock para la nueva cantidad
-      if (variant.trackInventory && variant.inventory) {
-        if (variant.inventory.availableQty < newQuantity) {
+      if (variant.trackInventory) {
+        const available = variant.inventory?.availableQty ?? 0;
+        if (available < newQuantity) {
           return NextResponse.json(
-            { error: `Stock insuficiente. Disponible: ${variant.inventory.availableQty}` },
+            { error: `Stock insuficiente. Disponible: ${available}` },
             { status: 400 }
           );
         }
@@ -254,26 +255,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Refrescar carrito
-    const updatedCart = await prisma.cart.findUnique({
-      where: { id: cart.id },
-      include: {
-        items: {
-          
-          include: {
-            variant: {
-              include: {
-                product: { include: { brand: true, media: { where: { isPrimary: true }, take: 1 }, inventory: true } },
-                inventory: true,
-                attributes: { include: { attribute: true, attributeValue: true } },
-              },
-            },
-          },
-          
-        },
-      },
-    });
+    const updatedCart = await loadCart(cart.id);
+    if (!updatedCart) throw new Error('No se pudo cargar el carrito');
 
-    const response = formatCartResponse(updatedCart!);
+    const response = formatCartResponse(updatedCart);
     return NextResponse.json(response, {
       headers: { 'x-cart-id': cart.id },
       status: 201,
@@ -317,10 +302,11 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Verificar stock
-    if (item.variant.trackInventory && item.variant.inventory) {
-      if (item.variant.inventory.availableQty < quantity) {
+    if (quantity > 0 && item.variant.trackInventory) {
+      const available = item.variant.inventory?.availableQty ?? 0;
+      if (available < quantity) {
         return NextResponse.json(
-          { error: `Stock insuficiente. Disponible: ${item.variant.inventory.availableQty}` },
+          { error: `Stock insuficiente. Disponible: ${available}` },
           { status: 400 }
         );
       }
@@ -336,26 +322,10 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Refrescar carrito
-    const updatedCart = await prisma.cart.findUnique({
-      where: { id: cart.id },
-      include: {
-        items: {
-          
-          include: {
-            variant: {
-              include: {
-                product: { include: { brand: true, media: { where: { isPrimary: true }, take: 1 }, inventory: true } },
-                inventory: true,
-                attributes: { include: { attribute: true, attributeValue: true } },
-              },
-            },
-          },
-          
-        },
-      },
-    });
+    const updatedCart = await loadCart(cart.id);
+    if (!updatedCart) throw new Error('No se pudo cargar el carrito');
 
-    const response = formatCartResponse(updatedCart!);
+    const response = formatCartResponse(updatedCart);
     return NextResponse.json(response, {
       headers: { 'x-cart-id': cart.id },
     });
@@ -375,8 +345,15 @@ export async function DELETE(request: NextRequest) {
     const userId = session?.user?.id || null;
     const sessionCartId = request.headers.get('x-cart-id');
 
-    const body = await request.json().catch(() => ({}));
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
+    }
+    const clearCart = Object.keys(body).length === 0;
     const parsed = removeItemSchema.safeParse(body);
+    if (!clearCart && !parsed.success) {
+      return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
+    }
 
     const cart = await getOrCreateCart(userId, sessionCartId);
 
@@ -397,26 +374,10 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Refrescar carrito
-    const updatedCart = await prisma.cart.findUnique({
-      where: { id: cart.id },
-      include: {
-        items: {
-          
-          include: {
-            variant: {
-              include: {
-                product: { include: { brand: true, media: { where: { isPrimary: true }, take: 1 }, inventory: true } },
-                inventory: true,
-                attributes: { include: { attribute: true, attributeValue: true } },
-              },
-            },
-          },
-          
-        },
-      },
-    });
+    const updatedCart = await loadCart(cart.id);
+    if (!updatedCart) throw new Error('No se pudo cargar el carrito');
 
-    const response = formatCartResponse(updatedCart!);
+    const response = formatCartResponse(updatedCart);
     return NextResponse.json(response, {
       headers: { 'x-cart-id': cart.id },
     });
