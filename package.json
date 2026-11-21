@@ -32,7 +32,8 @@
   "pnpm": {
     "overrides": {
       "postcss": "^8.5.18",
-      "zod": "^4.6.6"
+      "zod": "^4.6.6",
+      "nodemailer": ">=10.1.4"
     }
   }
 }
