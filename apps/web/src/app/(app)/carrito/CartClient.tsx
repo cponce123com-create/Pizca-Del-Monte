@@ -232,6 +232,7 @@ export function CartClient() {
               subtotal={cart.subtotal}
               formattedSubtotal={cart.formattedSubtotal}
               itemCount={cart.itemCount}
+              router={router}
             />
           </div>
         </div>
@@ -396,7 +397,7 @@ function CartItemCard({
   );
 }
 
-function CartSummary({ subtotal, formattedSubtotal, itemCount }: { subtotal: number; formattedSubtotal: string; itemCount: number }) {
+function CartSummary({ subtotal, formattedSubtotal, itemCount, router }: { subtotal: number; formattedSubtotal: string; itemCount: number; router: ReturnType<typeof useRouter> }) {
   const shipping = subtotal >= 200 ? 0 : 15;
   const tax = Math.round((subtotal + shipping) * 0.18 * 100) / 100;
   const total = subtotal + shipping + tax;
