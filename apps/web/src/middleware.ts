@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth';
 import { NextResponse } from 'next/server';
+import { requiresSession } from '@/lib/route-access';
 
 // Middleware Edge: nunca importar Prisma ni bcryptjs aquí.
 const { auth } = NextAuth({
@@ -8,10 +9,9 @@ const { auth } = NextAuth({
   pages: { signIn: '/login', error: '/login' },
 });
 
-const protectedRoutes = ['/cuenta', '/pedidos', '/direcciones', '/favoritos'];
 export default auth((req) => {
   const pathname = req.nextUrl.pathname;
-  const isProtected = protectedRoutes.some((route) => pathname === route || pathname.startsWith(route + '/'));
+  const isProtected = requiresSession(pathname);
   if (isProtected && !req.auth) {
     const url = new URL('/login', req.nextUrl);
     url.searchParams.set('callbackUrl', pathname);
