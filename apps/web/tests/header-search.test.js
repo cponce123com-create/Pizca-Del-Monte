@@ -3,7 +3,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Header } from '../src/components/layout/header';
 const mockPush = jest.fn();
-jest.mock('next/navigation', () => ({ useRouter: () => ({ push: mockPush }) }));
+jest.mock('next/navigation', () => ({ useRouter: () => ({ push: mockPush }), usePathname: () => '/'  }));
 test('la búsqueda visible abre formulario, navega y cierra', () => {
   render(<Header isDemo />);
   fireEvent.click(screen.getByRole('button', { name: 'Buscar productos' }));
@@ -12,4 +12,10 @@ test('la búsqueda visible abre formulario, navega y cierra', () => {
   expect(mockPush).toHaveBeenCalledWith('/tienda?search=aj%C3%AD%20amarillo');
   expect(screen.queryByRole('dialog', { name: 'Buscar productos' })).toBeNull();
   expect(screen.queryByRole('link', { name: 'Ofertas' })).toBeNull();
+});
+
+test('la navegación usa enlaces reales para favoritos y carrito', () => {
+  render(<Header isDemo />);
+  expect(screen.getByRole('link', { name: 'Favoritos' }).getAttribute('href')).toBe('/favoritos');
+  expect(screen.getByRole('link', { name: 'Carrito' }).getAttribute('href')).toBe('/carrito');
 });
