@@ -43,3 +43,9 @@ test('en demo no hay ofertas ni marcas ajenas al fixture', async () => {
   expect(sale.pagination.total).toBe(0);
   expect(new Set(demoProducts.map(product => product.brand.slug))).toEqual(new Set(['pizca-del-monte']));
 });
+
+test('popular prioriza destacados sin inventar ventas', async () => {
+  const result = await (await list(request('?sort=popular&limit=100'))).json();
+  const firstNonFeatured = result.products.findIndex(product => !product.isFeatured);
+  expect(result.products.slice(0, firstNonFeatured).every(product => product.isFeatured)).toBe(true);
+});

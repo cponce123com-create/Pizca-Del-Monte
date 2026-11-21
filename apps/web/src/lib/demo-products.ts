@@ -8,7 +8,8 @@ export const demoCategories = [
   { slug: 'packs-gourmet', name: 'Packs Gourmet' },
   { slug: 'accesorios', name: 'Accesorios' },
 ];
-const items: [string, string, number, number][] = [
+type DemoFixture = readonly [name: string, slug: string, price: number, categoryIndex: 0 | 1 | 2 | 3 | 4 | 5];
+const items: readonly DemoFixture[] = [
   ['Ají Amarillo Molido','aji-amarillo-molido',18,0], ['Ají Panca Molido','aji-panca-molido',16,0],
   ['Ají Charapita','aji-charapita',35,0], ['Rocoto Molido','rocoto-molido',19,0],
   ['Cúrcuma Molida','curcuma-molida',15,0], ['Comino Molido','comino-molido',12,0],
@@ -89,6 +90,7 @@ export function listDemoProducts(filters: Filters) {
     (!filters.search || `${product.name} ${product.description} ${product.sku}`.toLocaleLowerCase('es').includes(filters.search.toLocaleLowerCase('es'))) &&
     (!filters.featured || product.isFeatured) && !filters.onSale
   );
+  if (filters.sort === 'popular') result = result.sort((a,b) => Number(b.isFeatured) - Number(a.isFeatured) || a.name.localeCompare(b.name, 'es'));
   if (filters.sort === 'price_asc') result = result.sort((a,b) => a.basePrice - b.basePrice);
   if (filters.sort === 'price_desc') result = result.sort((a,b) => b.basePrice - a.basePrice);
   if (filters.sort === 'name_asc') result = result.sort((a,b) => a.name.localeCompare(b.name, 'es'));
