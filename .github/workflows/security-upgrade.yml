@@ -29,8 +29,20 @@ jobs:
         run: pnpm install --frozen-lockfile --prod=false --ignore-scripts
       - name: Upgrade patched security dependencies across workspaces
         run: |
-          pnpm --filter @pizca/web --filter @pizca/admin up next@15.5.29 next-auth@5.0.0-beta.32 cloudinary@^2.7.0 sharp@^0.35.5
+          pnpm --filter @pizca/web --filter @pizca/admin up next@15.5.29 next-auth@5.0.0-beta.32 cloudinary@^2.7.0 sharp@^0.35.5 nodemailer@10.0.6 @playwright/test@^1.55.1 postcss@^8.5.18 eslint-config-next@15.5.29
+          pnpm --filter @pizca/web --filter @pizca/admin up zod@^4.6.6
           pnpm install --no-frozen-lockfile --prod=false --ignore-scripts
+      - name: Verify updated dependencies compile
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/pizca_ci
+          NEXTAUTH_SECRET: ci-only-not-for-production-32-characters-long
+          NEXTAUTH_URL: http://localhost:3000
+        run: |
+          pnpm db:generate
+          pnpm --filter @pizca/web type-check
+          pnpm --filter @pizca/admin type-check
+          pnpm --filter @pizca/web build
+          pnpm --filter @pizca/admin build
       - name: Commit manifest and lockfile together
         run: |
           git config user.name "github-actions[bot]"
