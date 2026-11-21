@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ProductDetailClient } from './ProductDetailClient';
+import { GET } from '@/app/api/products/[slug]/route';
+import { NextRequest } from 'next/server';
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -17,10 +19,8 @@ export async function generateMetadata({ params }: ProductDetailPageProps): Prom
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { slug } = await params;
 
-  // Fetch product data server-side for SEO
-  const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/products/${slug}`, {
-    next: { revalidate: 60 },
-  });
+  // Consultar directamente el manejador evita depender del dominio público durante SSR.
+  const response = await GET(new NextRequest('http://localhost/api/products/' + encodeURIComponent(slug)), { params: Promise.resolve({ slug }) });
 
   if (!response.ok) {
     notFound();

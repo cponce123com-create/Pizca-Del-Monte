@@ -79,7 +79,7 @@ export function FeaturedProducts() {
             </p>
           </div>
           <Button variant="ghost" asChild>
-            <Link href="/tienda?sort=featured">
+            <Link href="/tienda?featured=true">
               Ver catálogo completo
               <ChevronRight className="h-4 w-4 ml-2" />
             </Link>

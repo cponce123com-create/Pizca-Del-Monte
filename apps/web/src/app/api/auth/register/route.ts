@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { hash } from 'bcryptjs';
 import { prisma } from '@pizca/database';
 import { z } from 'zod';
+import { isDemoMode } from '@/lib/demo-mode';
 
 const registerSchema = z.object({
   firstName: z.string().min(2, 'Nombre muy corto'),
@@ -13,6 +14,7 @@ const registerSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  if (isDemoMode()) return NextResponse.json({ message: 'El registro estará disponible cuando la tienda esté configurada.' }, { status: 503 });
   try {
     const body = await request.json();
     const parsed = registerSchema.safeParse(body);

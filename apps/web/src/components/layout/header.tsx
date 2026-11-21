@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Menu, X, Search, ShoppingCart, User, Heart, Truck, RotateCcw, Shield, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { readDemoCart } from '@/lib/demo-cart';
 
 const navigation = [
   { name: 'Inicio', href: '/' },
@@ -26,11 +27,12 @@ const dropdownItems = [
 ];
 
 // Componente para el contador del carrito que obtiene los datos dinámicamente
-function CartCount() {
+function CartCount({ isDemo }: { isDemo: boolean }) {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
     const fetchCartCount = async () => {
+      if (isDemo) { setCount(readDemoCart().reduce((sum, item) => sum + item.quantity, 0)); return; }
       try {
         const response = await fetch('/api/cart');
         if (response.ok) {
@@ -43,7 +45,10 @@ function CartCount() {
     };
 
     fetchCartCount();
-  }, []);
+    window.addEventListener('pizca-demo-cart-change', fetchCartCount);
+    window.addEventListener('storage', fetchCartCount);
+    return () => { window.removeEventListener('pizca-demo-cart-change', fetchCartCount); window.removeEventListener('storage', fetchCartCount); };
+  }, [isDemo]);
 
   if (count === 0) return null;
 
@@ -54,7 +59,7 @@ function CartCount() {
   );
 }
 
-export function Header() {
+export function Header({ isDemo = false }: { isDemo?: boolean }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -162,7 +167,7 @@ export function Header() {
             </Button>
             <Button variant="ghost" size="icon" className="relative" onClick={() => handleNavigate('/carrito')} aria-label="Carrito">
               <ShoppingCart className="h-5 w-5" />
-              <CartCount />
+              <CartCount isDemo={isDemo} />
             </Button>
             <Button variant="ghost" size="icon" onClick={() => handleNavigate('/mi-cuenta')} aria-label="Mi cuenta">
               <User className="h-5 w-5" />
