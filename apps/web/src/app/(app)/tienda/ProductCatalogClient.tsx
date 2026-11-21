@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { DemoProductImage } from '@/components/products/demo-product-image';
 import { formatPEN } from '@pizca/utils';
 import { useToast } from '@/hooks/use-toast';
+import { demoCategories, demoProducts } from '@/lib/demo-products';
 
 interface Product {
   id: string;
@@ -258,13 +259,7 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todas las categorías</SelectItem>
-                    <SelectItem value="especias">Especias</SelectItem>
-                    <SelectItem value="sales-gourmet">Sales Gourmet</SelectItem>
-                    <SelectItem value="aceites-vinagres">Aceites y Vinagres</SelectItem>
-
-                    <SelectItem value="mezclas-salsas">Mezclas y Salsas</SelectItem>
-                    <SelectItem value="packs-gourmet">Packs Gourmet</SelectItem>
-                    <SelectItem value="accesorios">Accesorios</SelectItem>
+                    {demoCategories.map(category => <SelectItem key={category.slug} value={category.slug}>{category.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -278,9 +273,7 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todas las marcas</SelectItem>
-                    <SelectItem value="pizca-del-monte">Pizca del Monte</SelectItem>
-                    <SelectItem value="marcas-de-casa">Marcas de Casa</SelectItem>
-                    <SelectItem value="artesanos">Artesanos Peruanos</SelectItem>
+                    {Array.from(new Map(demoProducts.map(product => [product.brand.slug, product.brand])).values()).map(brand => <SelectItem key={brand.slug} value={brand.slug}>{brand.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>

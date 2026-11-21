@@ -62,6 +62,8 @@ function CartCount({ isDemo }: { isDemo: boolean }) {
 export function Header({ isDemo = false }: { isDemo?: boolean }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const visibleNavigation = isDemo ? navigation.filter(item => item.href !== '/ofertas') : navigation;
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const router = useRouter();
 
@@ -116,7 +118,7 @@ export function Header({ isDemo = false }: { isDemo?: boolean }) {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex md:items-center md:gap-1">
-            {navigation.map((item) => (
+            {visibleNavigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
@@ -162,6 +164,7 @@ export function Header({ isDemo = false }: { isDemo?: boolean }) {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={() => setSearchOpen(true)} aria-label="Buscar productos"><Search className="h-5 w-5" /></Button>
             <Button variant="ghost" size="icon" className="relative" onClick={() => handleNavigate('/favoritos')} aria-label="Favoritos">
               <Heart className="h-5 w-5" />
             </Button>
@@ -195,7 +198,7 @@ export function Header({ isDemo = false }: { isDemo?: boolean }) {
         {mobileMenuOpen && (
           <div id="mobile-menu" className="md:hidden py-4 border-t border-border animate-slide-in-from-top">
             <div className="flex flex-col gap-2">
-              {navigation.map((item) => (
+              {visibleNavigation.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
@@ -238,18 +241,22 @@ export function Header({ isDemo = false }: { isDemo?: boolean }) {
               className="w-full max-w-2xl mx-4 bg-background rounded-xl shadow-xl overflow-hidden animate-zoom-in"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="p-4 border-b border-border">
+              <form className="p-4 border-b border-border" onSubmit={(event) => { event.preventDefault(); const term = searchTerm.trim(); setSearchOpen(false); handleNavigate(term ? `/tienda?search=${encodeURIComponent(term)}` : '/tienda'); }}>
                 <div className="relative">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <input
                     type="search"
+                    aria-label="Buscar productos"
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
                     placeholder="Buscar productos, recetas, marcas..."
                     className="w-full pl-12 pr-4 py-3 text-body-lg border-border bg-muted rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
                     autoFocus
                     onClick={(e) => e.stopPropagation()}
                   />
                 </div>
-              </div>
+                <Button type="submit" className="mt-3">Buscar</Button>
+              </form>
               <div className="p-4">
                 <p className="text-body-sm text-muted-foreground mb-4">Categorías populares</p>
                 <div className="flex flex-wrap gap-2">
