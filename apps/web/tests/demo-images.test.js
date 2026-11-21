@@ -11,3 +11,7 @@ test('los 30 productos tienen imágenes locales y datos referenciales completos'
   }
   expect(new Set(demoProducts.map(product => product.shortDescription)).size).toBe(30);
 });
+test('las recetas usan ilustraciones locales', () => {
+  const { demoRecipes } = require('../src/lib/demo-recipes');
+  for (const recipe of demoRecipes) expect(existsSync(path.join(process.cwd(), 'public', recipe.image))).toBe(true);
+});
