@@ -72,15 +72,15 @@ export function Header() {
         <div className="flex items-center gap-6">
           <span className="flex items-center gap-1.5 text-muted-foreground">
             <Truck className="h-3.5 w-3.5" />
-            Envío gratis en compras + S/150
+            Envíos sujetos a cobertura y confirmación
           </span>
           <span className="flex items-center gap-1.5 text-muted-foreground">
             <Shield className="h-3.5 w-3.5" />
-            Pago seguro: Mercado Pago, Yape, Plin
+            Consulta los medios de pago disponibles
           </span>
           <span className="flex items-center gap-1.5 text-muted-foreground">
             <RotateCcw className="h-3.5 w-3.5" />
-            Devoluciones en 30 días
+            Consulta las condiciones de devolución
           </span>
         </div>
         <div className="flex items-center gap-4">
