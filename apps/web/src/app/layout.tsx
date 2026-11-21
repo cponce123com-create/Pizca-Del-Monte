@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter, Playfair_Display, JetBrains_Mono } from 'next/font/google';
 import '../styles/globals.css';
 import { Providers } from './providers';
+import { isDemoMode } from '@/lib/demo-mode';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -29,7 +30,7 @@ const jetbrains = JetBrains_Mono({
 const publicUrl = process.env.NEXT_PUBLIC_APP_URL;
 const siteUrl = publicUrl && /^https?:\/\//.test(publicUrl) ? new URL(publicUrl) : undefined;
 
-export const metadata: Metadata = {
+const metadata: Metadata = {
   ...(siteUrl ? { metadataBase: siteUrl } : {}),
   title: {
     default: 'Pizca del Monte - Especias, Sales y Aceites Gourmet Peruanos',
@@ -93,6 +94,10 @@ export const metadata: Metadata = {
   manifest: '/site.webmanifest',
 
 };
+
+export function generateMetadata(): Metadata {
+  return isDemoMode() ? { ...metadata, robots: { index: false, follow: false } } : metadata;
+}
 
 export const viewport: Viewport = {
   themeColor: [
