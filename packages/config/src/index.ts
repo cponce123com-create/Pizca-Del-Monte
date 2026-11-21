@@ -129,14 +129,20 @@ export const envSchema = z.object({
   NEXT_PUBLIC_DEFAULT_OG_IMAGE: z.string().default('/images/og-default.jpg'),
 });
 
-export type Env = z.infer<typeof envSchema>;
+export const demoEnvSchema = z.object({
+  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  DEMO_MODE: z.enum(['true', 'false']).optional(),
+  NEXT_PUBLIC_APP_URL: z.string().url().optional(),
+});
+export type Env = z.infer<typeof envSchema> | z.infer<typeof demoEnvSchema>;
 
 let cachedEnv: Env | null = null;
 
 export function getEnv(): Env {
   if (cachedEnv) return cachedEnv;
 
-  const parsed = envSchema.safeParse(process.env);
+  const demo = process.env.DEMO_MODE === 'true' || !process.env.DATABASE_URL?.trim();
+  const parsed = (demo ? demoEnvSchema : envSchema).safeParse(process.env);
 
   if (!parsed.success) {
     console.error('❌ Invalid environment variables:', parsed.error.flatten().fieldErrors);

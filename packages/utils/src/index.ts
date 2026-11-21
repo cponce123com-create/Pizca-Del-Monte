@@ -1,6 +1,13 @@
 // Shared utilities for Pizca del Monte
 import { Decimal } from 'decimal.js';
 import { z } from 'zod';
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+export function cn(...inputs: ClassValue[]) { return twMerge(clsx(inputs)); }
+export function formatPrice(amount: number | string, currency = 'PEN', locale = 'es-PE') {
+  return new Intl.NumberFormat(locale, { style: 'currency', currency, minimumFractionDigits: 2 }).format(typeof amount === 'string' ? parseFloat(amount) : amount);
+}
 
 // ============================================
 // DECIMAL HELPERS

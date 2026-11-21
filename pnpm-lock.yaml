@@ -430,6 +430,9 @@ importers:
 
   packages/database:
     dependencies:
+      '@pizca/utils':
+        specifier: workspace:*
+        version: link:../utils
       '@prisma/client':
         specifier: ^5.17.0
         version: 5.22.0(prisma@5.22.0)
@@ -452,6 +455,9 @@ importers:
 
   packages/ui:
     dependencies:
+      '@pizca/utils':
+        specifier: workspace:*
+        version: link:../utils
       '@radix-ui/react-alert-dialog':
         specifier: 1.0.5
         version: 1.0.5(@types/react-dom@18.3.0)(@types/react@18.3.0)(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
@@ -564,12 +570,18 @@ importers:
 
   packages/utils:
     dependencies:
+      clsx:
+        specifier: 2.1.1
+        version: 2.1.1
       date-fns:
         specifier: 3.6.0
         version: 3.6.0
       decimal.js:
         specifier: 10.4.3
         version: 10.4.3
+      tailwind-merge:
+        specifier: 2.3.0
+        version: 2.3.0
       zod:
         specifier: ^4.6.6
         version: 4.6.7

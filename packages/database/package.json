@@ -18,7 +18,8 @@
   },
   "dependencies": {
     "@prisma/client": "^5.17.0",
-    "decimal.js": "^10.4.3"
+    "decimal.js": "^10.4.3",
+    "@pizca/utils": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
