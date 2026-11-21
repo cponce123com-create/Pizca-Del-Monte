@@ -1,6 +1,12 @@
-import { auth } from '@/lib/auth/config';
+import NextAuth from 'next-auth';
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+// Edge middleware must not import the server-side auth configuration (Prisma/bcryptjs).
+// JWT sessions are verified with the same AUTH_SECRET as the server.
+const { auth } = NextAuth({
+  providers: [],
+  session: { strategy: 'jwt' },
+  pages: { signIn: '/login', error: '/login' },
+});
 
 // Rutas que requieren autenticación
 const protectedRoutes = ['/cuenta', '/checkout', '/pedidos', '/direcciones', '/favoritos'];
