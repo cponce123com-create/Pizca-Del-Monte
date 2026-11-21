@@ -14,7 +14,7 @@ const recipes = [
     title: 'Papa a la Huancaína Clásica',
     slug: 'papa-huancaina-clasica',
     description: 'El plato bandera de la cocina limeña, cremoso y picante con ají amarillo y queso fresco.',
-    image: '/images/recipes/huancaina.jpg',
+    image: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=1200&q=85',
     difficulty: 'FÁCIL',
     time: 35,
     servings: 4,
@@ -26,7 +26,7 @@ const recipes = [
     title: 'Lomo Saltado Tradicional',
     slug: 'lomo-saltado-tradicional',
     description: 'El mestizaje perfecto: wok chino, ingredientes peruanos. Tiras de lomo salteadas con cebolla y tomate.',
-    image: '/images/recipes/lomo-saltado.jpg',
+    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=1200&q=85',
     difficulty: 'MEDIO',
     time: 30,
     servings: 4,
@@ -38,7 +38,7 @@ const recipes = [
     title: 'Ceviche Clásico Peruano',
     slug: 'ceviche-clasico',
     description: 'Pescado fresco "cocido" en limón, el orgullo de la costa. Con camote, choclo y cancha.',
-    image: '/images/recipes/ceviche.jpg',
+    image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=1200&q=85',
     difficulty: 'FÁCIL',
     time: 35,
     servings: 4,
@@ -86,6 +86,7 @@ function RecipeCard({ recipe }: { recipe: typeof recipes[0] }) {
       <Link href={`/recetas/${recipe.slug}`} className="block relative aspect-video overflow-hidden">
         {!imageError ? (
           <Image
+            unoptimized
             src={recipe.image}
             alt={recipe.title}
             fill
