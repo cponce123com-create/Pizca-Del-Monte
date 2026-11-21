@@ -26,12 +26,16 @@ const jetbrains = JetBrains_Mono({
   fallback: ['monospace'],
 });
 
+const publicUrl = process.env.NEXT_PUBLIC_APP_URL;
+const siteUrl = publicUrl && /^https?:\/\//.test(publicUrl) ? new URL(publicUrl) : undefined;
+
 export const metadata: Metadata = {
+  ...(siteUrl ? { metadataBase: siteUrl } : {}),
   title: {
     default: 'Pizca del Monte - Especias, Sales y Aceites Gourmet Peruanos',
     template: '%s | Pizca del Monte',
   },
-  description: 'Descubre la mejor selección de especias, sales de Maras, aceites de oliva y productos gourmet peruanos. Envío a todo el Perú.',
+  description: 'Explora especias, sales y aceites gourmet en Pizca del Monte.',
   keywords: [
     'especias peruanas',
     'sal de Maras',
@@ -61,7 +65,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'es_PE',
-    url: 'https://pizca-del-monte.onrender.com',
+    ...(siteUrl ? { url: siteUrl.toString() } : {}),
     siteName: 'Pizca del Monte',
     title: 'Pizca del Monte - Especias, Sales y Aceites Gourmet Peruanos',
     description: 'Descubre la mejor selección de especias, sales de Maras, aceites de oliva y productos gourmet peruanos. Envío a todo el Perú.',
