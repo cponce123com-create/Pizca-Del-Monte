@@ -37,3 +37,9 @@ test('no se muestra demo automáticamente al configurar una base', () => {
   process.env.DEMO_MODE = 'true';
   expect(isDemoMode()).toBe(true);
 });
+
+test('en demo no hay ofertas ni marcas ajenas al fixture', async () => {
+  const sale = await (await list(request('?onSale=true'))).json();
+  expect(sale.pagination.total).toBe(0);
+  expect(new Set(demoProducts.map(product => product.brand.slug))).toEqual(new Set(['pizca-del-monte']));
+});
