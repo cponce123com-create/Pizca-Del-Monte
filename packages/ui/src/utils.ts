@@ -1,18 +1,4 @@
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
-
-export function formatPrice(amount: number | string, currency = 'PEN', locale = 'es-PE') {
-  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 2,
-  }).format(num);
-}
+export { cn, formatPrice, slugify } from '@pizca/utils';
 
 export function formatNumber(num: number, locale = 'es-PE') {
   return new Intl.NumberFormat(locale).format(num);
@@ -26,15 +12,6 @@ export function formatDate(date: Date | string, locale = 'es-PE', options?: Intl
     day: 'numeric',
     ...options,
   }).format(d);
-}
-
-export function slugify(text: string) {
-  return text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
 }
 
 export function truncate(text: string, length: number) {

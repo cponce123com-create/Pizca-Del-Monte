@@ -1,6 +1,6 @@
 import { formatPEN } from '@pizca/utils';
 
-const categories = [
+export const demoCategories = [
   { slug: 'especias', name: 'Especias' },
   { slug: 'sales-gourmet', name: 'Sales Gourmet' },
   { slug: 'aceites-vinagres', name: 'Aceites y Vinagres' },
@@ -8,7 +8,8 @@ const categories = [
   { slug: 'packs-gourmet', name: 'Packs Gourmet' },
   { slug: 'accesorios', name: 'Accesorios' },
 ];
-const items: [string, string, number, number][] = [
+type DemoFixture = readonly [name: string, slug: string, price: number, categoryIndex: 0 | 1 | 2 | 3 | 4 | 5];
+const items: readonly DemoFixture[] = [
   ['Ají Amarillo Molido','aji-amarillo-molido',18,0], ['Ají Panca Molido','aji-panca-molido',16,0],
   ['Ají Charapita','aji-charapita',35,0], ['Rocoto Molido','rocoto-molido',19,0],
   ['Cúrcuma Molida','curcuma-molida',15,0], ['Comino Molido','comino-molido',12,0],
@@ -26,19 +27,56 @@ const items: [string, string, number, number][] = [
   ['Frasco de Vidrio','frasco-de-vidrio',15,5], ['Mortero de Cocina','mortero-de-cocina',55,5],
 ];
 
+const descriptions: readonly string[] = [
+  "Ají amarillo molido para dar color y sabor a tus preparaciones.",
+  "Ají panca molido para aderezos y guisos.",
+  "Ají charapita para explorar sabores de la Amazonía.",
+  "Rocoto molido para dar intensidad a tus platos.",
+  "Cúrcuma molida para arroces y mezclas de especias.",
+  "Comino molido para sazonar guisos y aderezos.",
+  "Pimienta negra entera para moler al momento.",
+  "Orégano para salsas, marinados y preparaciones caseras.",
+  "Flor de sal de presentación referencial para terminar tus platos.",
+  "Sal rosada referencial para acompañar tu cocina.",
+  "Sal ahumada para aportar un toque aromático.",
+  "Sal mezclada con hierbas para sazonar.",
+  "Sal con ají para quienes disfrutan sabores intensos.",
+  "Aceite estilo arbequina para aderezos y ensaladas.",
+  "Aceite de oliva de presentación referencial para cocinar.",
+  "Aceite con notas de romero para acompañar platos.",
+  "Aceite con notas de ajo para preparaciones saladas.",
+  "Vinagre de manzana para ensaladas y aderezos.",
+  "Mezcla de especias para preparaciones a la parrilla.",
+  "Mezcla tipo chimichurri para carnes y verduras.",
+  "Salsa referencial de ají amarillo para acompañar comidas.",
+  "Salsa referencial de rocoto para dar un toque picante.",
+  "Mezcla de hierbas inspirada en sabores andinos.",
+  "Selección de productos referenciales para la parrilla.",
+  "Selección de sabores peruanos para explorar.",
+  "Selección de sales referenciales para la cocina.",
+  "Selección de ingredientes para la cocina criolla.",
+  "Molinillo referencial para especias enteras.",
+  "Frasco referencial para guardar ingredientes secos.",
+  "Mortero referencial para preparar mezclas de especias."
+];
+
 export const demoProducts = items.map(([name, slug, price, index], i) => {
-  const category = categories[index];
+  const category = demoCategories[index];
+  const image = { id: `demo-image-${i + 1}`, url: `/demo/${category.slug}.webp`, alt: `Ilustración referencial de ${name}`, type: 'IMAGE', sortOrder: 0 };
+  const weight = index === 0 ? 0.05 : index === 1 ? 0.25 : index === 2 ? 0.5 : index === 3 ? 0.2 : null;
+  const presentation = weight ? `${weight * 1000} ${index === 2 ? 'ml' : 'g'} (referencial)` : 'Unidad referencial';
   return {
     id: `demo-${i + 1}`, sku: `DEMO-${String(i + 1).padStart(3, '0')}`, name, slug,
-    shortDescription: `Una propuesta referencial de ${category.name.toLowerCase()} para tu cocina.`,
-    description: `${name}: producto de demostración para explorar la tienda. Su presentación, precio y disponibilidad son referenciales.`,
+    shortDescription: descriptions[i],
+    description: `${descriptions[i]} Presentación, precio y disponibilidad de demostración.`,
+    presentation, origin: 'Origen por confirmar',
     type: 'SIMPLE', basePrice: price, compareAtPrice: null, formattedPrice: formatPEN(price),
     formattedCompareAtPrice: null, discountPercent: 0, brand: { id: 'demo-brand', name: 'Pizca del Monte', slug: 'pizca-del-monte', logo: null },
-    categories: [{ id: category.slug, ...category, isPrimary: true }], primaryImage: null,
-    media: [], variants: [{ id: `demo-variant-${i + 1}`, sku: `DEMO-${String(i + 1).padStart(3, '0')}`, name: 'Presentación referencial', price, formattedPrice: formatPEN(price), compareAtPrice: null, formattedCompareAtPrice: null, discountPercent: 0, weight: null, trackInventory: false, inStock: true, availableQty: 99, maxQty: 99, attributes: [], media: [] }],
+    categories: [{ id: category.slug, ...category, isPrimary: true }], primaryImage: { url: image.url, alt: image.alt },
+    media: [image], variants: [{ id: `demo-variant-${i + 1}`, sku: `DEMO-${String(i + 1).padStart(3, '0')}`, name: 'Presentación referencial', price, formattedPrice: formatPEN(price), compareAtPrice: null, formattedCompareAtPrice: null, discountPercent: 0, weight, trackInventory: false, inStock: true, availableQty: 99, maxQty: 99, attributes: [], media: [image] }],
     attributeGroups: [], inventory: null, trackInventory: false, inStock: true, availableQty: 99,
     isNew: false, isBestseller: false, isFeatured: i < 8, rating: 0, reviewCount: 0, reviews: [],
-    weight: null, dimensions: null, metaTitle: null, metaDescription: null, tags: [], isDemo: true,
+    weight, dimensions: null, metaTitle: null, metaDescription: null, tags: [], isDemo: true,
   };
 });
 
@@ -52,6 +90,7 @@ export function listDemoProducts(filters: Filters) {
     (!filters.search || `${product.name} ${product.description} ${product.sku}`.toLocaleLowerCase('es').includes(filters.search.toLocaleLowerCase('es'))) &&
     (!filters.featured || product.isFeatured) && !filters.onSale
   );
+  if (filters.sort === 'popular') result = result.sort((a,b) => Number(b.isFeatured) - Number(a.isFeatured) || a.name.localeCompare(b.name, 'es'));
   if (filters.sort === 'price_asc') result = result.sort((a,b) => a.basePrice - b.basePrice);
   if (filters.sort === 'price_desc') result = result.sort((a,b) => b.basePrice - a.basePrice);
   if (filters.sort === 'name_asc') result = result.sort((a,b) => a.name.localeCompare(b.name, 'es'));

@@ -1,6 +1,7 @@
 'use client';
+import { logger } from '@/lib/logger';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,7 @@ import { cn } from '@/lib/utils';
 import { DemoProductImage } from '@/components/products/demo-product-image';
 import { formatPEN } from '@pizca/utils';
 import { useToast } from '@/hooks/use-toast';
+import { demoCategories, demoProducts } from '@/lib/demo-products';
 
 interface Product {
   id: string;
@@ -32,7 +34,7 @@ interface Product {
   brand: { id: string; name: string; slug: string } | null;
   categories: { id: string; name: string; slug: string; isPrimary: boolean }[];
   primaryImage: { url: string; alt: string } | null;
-  variants: any[];
+  variants: unknown[];
   inStock: boolean;
   availableQty: number;
   trackInventory: boolean;
@@ -49,12 +51,13 @@ interface Pagination {
   hasPrev: boolean;
 }
 
-interface ProductsResponse {
+export interface ProductsResponse {
   products: Product[];
   pagination: Pagination;
 }
 
 interface ProductCatalogClientProps {
+  initialData?: ProductsResponse;
   initialParams: {
     page?: string;
     sort?: string;
@@ -86,81 +89,71 @@ const PERU_DEPARTMENTS = [
   'Tumbes', 'Ucayali'
 ];
 
-export function ProductCatalogClient({ initialParams }: ProductCatalogClientProps) {
+export function ProductCatalogClient({ initialParams, initialData }: ProductCatalogClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [pagination, setPagination] = useState<Pagination | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [products, setProducts] = useState<Product[]>(initialData?.products || []);
+  const [pagination, setPagination] = useState<Pagination | null>(initialData?.pagination || null);
+  const [isLoading, setIsLoading] = useState(!initialData);
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({
-    sort: initialParams.sort || 'newest',
-    category: initialParams.category || '',
-    brand: initialParams.brand || '',
-    minPrice: initialParams.minPrice || '',
-    maxPrice: initialParams.maxPrice || '',
-    search: initialParams.search || '',
-    inStock: initialParams.inStock === 'true',
-    featured: initialParams.featured === 'true',
-    onSale: initialParams.onSale === 'true',
-  });
+  const filterPanelRef = useRef<HTMLElement>(null);
+  const filterButtonRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!showFilters) return;
+    const panel = filterPanelRef.current;
+    panel?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { event.preventDefault(); setShowFilters(false); filterButtonRef.current?.focus(); return; }
+      if (event.key !== 'Tab' || !panel) return;
+      const focusable = Array.from(panel.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])')).filter(element => element.offsetParent !== null);
+      if (!focusable.length) { event.preventDefault(); panel.focus(); return; }
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (event.shiftKey && (document.activeElement === first || document.activeElement === panel)) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [showFilters]);
+  const [error, setError] = useState(false);
+  const requestVersion = useRef(0);
+  const query = searchParams.toString();
+  const filters = useMemo(() => {
+    const params = new URLSearchParams(query);
+    return { sort: params.get('sort') || 'newest', category: params.get('category') || '', brand: params.get('brand') || '', minPrice: params.get('minPrice') || '', maxPrice: params.get('maxPrice') || '', search: params.get('search') || '', inStock: params.get('inStock') === 'true', featured: params.get('featured') === 'true', onSale: params.get('onSale') === 'true' };
+  }, [query]);
+  const [searchDraft, setSearchDraft] = useState(initialParams.search || '');
+  useEffect(() => { setSearchDraft(filters.search); }, [filters.search]);
+  const handleFilterChange = useCallback((key: keyof typeof filters, value: string | boolean) => {
+    const params = new URLSearchParams(query);
+    if (value !== '' && value !== false) params.set(key, String(value)); else params.delete(key);
+    params.set('page', '1');
+    router.replace(`/tienda?${params.toString()}`);
+  }, [query, router]);
+  useEffect(() => {
+    if (searchDraft === filters.search) return;
+    const timer = setTimeout(() => handleFilterChange('search', searchDraft), 300);
+    return () => clearTimeout(timer);
+  }, [searchDraft, filters.search, handleFilterChange]);
 
   const fetchProducts = useCallback(async () => {
-    setIsLoading(true);
+    const version = ++requestVersion.current;
+    setIsLoading(true); setError(false);
     try {
-      const params = new URLSearchParams();
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== '' && value !== false) {
-          params.set(key, String(value));
-        }
-      });
-      params.set('page', String(searchParams.get('page') || '1'));
-
+      const params = new URLSearchParams(query);
+      params.delete('view');
       const response = await fetch(`/api/products?${params.toString()}`);
       if (!response.ok) throw new Error('Error al cargar productos');
-
       const data: ProductsResponse = await response.json();
-      setProducts(data.products);
-      setPagination(data.pagination);
+      if (version === requestVersion.current) { setProducts(data.products); setPagination(data.pagination); }
     } catch (error) {
-      console.error('Error fetching products:', error);
+      logger.error('Error fetching products:', error);
+      if (version === requestVersion.current) setError(true);
     } finally {
-      setIsLoading(false);
+      if (version === requestVersion.current) setIsLoading(false);
     }
-  }, [filters, searchParams]);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
-
-  const handleFilterChange = (key: string, value: any) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-    // Update URL
-    const params = new URLSearchParams(searchParams.toString());
-    if (value !== '' && value !== false) {
-      params.set(key, String(value));
-    } else {
-      params.delete(key);
-    }
-    params.set('page', '1');
-    router.push(`/tienda?${params.toString()}`);
-  };
-
-  const clearFilters = () => {
-    const clearedFilters = {
-      sort: 'newest',
-      category: '',
-      brand: '',
-      minPrice: '',
-      maxPrice: '',
-      search: '',
-      inStock: false,
-      featured: false,
-      onSale: false,
-    };
-    setFilters(clearedFilters);
-    router.push('/tienda');
-  };
+  }, [query]);
+  useEffect(() => { const version = requestVersion; fetchProducts(); return () => { version.current++; }; }, [fetchProducts]);
+  const clearFilters = () => { setSearchDraft(''); router.replace('/tienda'); };
 
   const hasActiveFilters = Object.entries(filters).some(([key, value]) => {
     if (key === 'sort') return value !== 'newest';
@@ -173,7 +166,7 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
       <div className="border-b bg-white sticky top-0 z-40 lg:hidden">
         <div className="flex items-center justify-between p-4">
           <h1 className="text-heading-md font-heading font-semibold">Tienda</h1>
-          <Button variant="outline" size="icon" onClick={() => setShowFilters(true)}>
+          <Button ref={filterButtonRef} variant="outline" size="icon" aria-label="Abrir filtros" onClick={() => setShowFilters(true)}>
             <Filter className="h-5 w-5" />
           </Button>
         </div>
@@ -181,7 +174,7 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
 
       <div className="flex">
         {/* Sidebar de filtros */}
-        <aside className={cn(
+        <aside ref={filterPanelRef} role={showFilters ? 'dialog' : undefined} aria-modal={showFilters ? true : undefined} aria-label="Filtros de productos" tabIndex={-1} className={cn(
           'fixed inset-y-0 left-0 z-50 w-72 bg-white border-r lg:static lg:relative lg:z-auto lg:inset-0 lg:w-64',
           showFilters ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}>
@@ -189,7 +182,7 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
             {/* Header del sidebar */}
             <div className="flex items-center justify-between p-4 border-b lg:hidden">
               <h2 className="text-heading-sm font-heading font-semibold">Filtros</h2>
-              <Button variant="ghost" size="icon" onClick={() => setShowFilters(false)}>
+              <Button variant="ghost" size="icon" aria-label="Cerrar filtros" onClick={() => { setShowFilters(false); filterButtonRef.current?.focus(); }}>
                 <X className="h-5 w-5" />
               </Button>
             </div>
@@ -200,8 +193,8 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
                 <label className="block text-body-sm font-medium mb-2">Buscar productos</label>
                 <Input
                   placeholder="Especias, sales, aceites..."
-                  value={filters.search}
-                  onChange={(e) => handleFilterChange('search', e.target.value)}
+                  value={searchDraft}
+                  onChange={(e) => setSearchDraft(e.target.value)}
                   className="mb-2"
                 />
               </div>
@@ -258,13 +251,7 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todas las categorías</SelectItem>
-                    <SelectItem value="especias">Especias</SelectItem>
-                    <SelectItem value="sales-gourmet">Sales Gourmet</SelectItem>
-                    <SelectItem value="aceites-vinagres">Aceites y Vinagres</SelectItem>
-
-                    <SelectItem value="mezclas-salsas">Mezclas y Salsas</SelectItem>
-                    <SelectItem value="packs-gourmet">Packs Gourmet</SelectItem>
-                    <SelectItem value="accesorios">Accesorios</SelectItem>
+                    {demoCategories.map(category => <SelectItem key={category.slug} value={category.slug}>{category.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -278,9 +265,7 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todas las marcas</SelectItem>
-                    <SelectItem value="pizca-del-monte">Pizca del Monte</SelectItem>
-                    <SelectItem value="marcas-de-casa">Marcas de Casa</SelectItem>
-                    <SelectItem value="artesanos">Artesanos Peruanos</SelectItem>
+                    {Array.from(new Map(demoProducts.map(product => [product.brand.slug, product.brand])).values()).map(brand => <SelectItem key={brand.slug} value={brand.slug}>{brand.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -368,6 +353,8 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
                   <ProductCardSkeleton key={i} />
                 ))}
               </div>
+            ) : error ? (
+              <div role="alert" className="py-16 text-center"><h2 className="font-semibold">No pudimos cargar los productos</h2><p className="my-4 text-muted-foreground">Inténtalo nuevamente.</p><Button variant="outline" onClick={fetchProducts}>Reintentar</Button></div>
             ) : products.length === 0 ? (
               <div className="text-center py-16">
                 <ShoppingBag className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
@@ -449,7 +436,7 @@ function ProductCard({ product }: { product: Product }) {
         window.location.href = `/producto/${product.slug}`;
       }, 500);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast({ title: 'Error', description: 'No se pudo procesar la acción', variant: 'destructive' });
     } finally {
       setIsAdding(false);

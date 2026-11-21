@@ -1,5 +1,6 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 import { Decimal } from 'decimal.js';
+export type { Prisma };
 
 // Configuración global para Prisma Client en desarrollo (evita múltiples instancias en hot reload)
 const globalForPrisma = globalThis as unknown as {
@@ -192,10 +193,7 @@ export function toDecimal(value: number | string | Decimal): Decimal {
   return value instanceof Decimal ? value : new Decimal(value);
 }
 
-export function formatPEN(amount: Decimal | number | string): string {
-  const dec = toDecimal(amount);
-  return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN', minimumFractionDigits: 2 }).format(dec.toNumber());
-}
+export { formatPEN } from '@pizca/utils';
 
 export function parsePEN(amount: string): Decimal {
   return new Decimal(amount.replace(/[^\d.,]/g, '').replace(',', '.'));

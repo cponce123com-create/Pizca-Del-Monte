@@ -20,8 +20,7 @@
     "db:migrate": "pnpm --filter @pizca/database db:migrate",
     "db:seed": "pnpm --filter @pizca/database db:seed",
     "db:studio": "pnpm --filter @pizca/database db:studio",
-    "test": "pnpm -r --if-present test",
-    "test:e2e": "pnpm --filter @pizca/web test:e2e"
+    "test": "pnpm -r --if-present test"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
@@ -32,7 +31,8 @@
   "pnpm": {
     "overrides": {
       "postcss": "^8.5.18",
-      "zod": "^4.6.6"
+      "zod": "^4.6.6",
+      "nodemailer": ">=10.1.4"
     }
   }
 }

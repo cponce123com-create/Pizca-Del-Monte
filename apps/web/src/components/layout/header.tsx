@@ -1,8 +1,9 @@
 'use client';
+import { logger } from '@/lib/logger';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Menu, X, Search, ShoppingCart, User, Heart, Truck, RotateCcw, Shield, ChevronDown } from 'lucide-react';
@@ -40,7 +41,7 @@ function CartCount({ isDemo }: { isDemo: boolean }) {
           setCount(data.itemCount || 0);
         }
       } catch (error) {
-        console.error('Error fetching cart count:', error);
+        logger.error('Error fetching cart count:', error);
       }
     };
 
@@ -62,8 +63,12 @@ function CartCount({ isDemo }: { isDemo: boolean }) {
 export function Header({ isDemo = false }: { isDemo?: boolean }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const visibleNavigation = isDemo ? navigation.filter(item => item.href !== '/ofertas') : navigation;
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
+  useEffect(() => { setMobileMenuOpen(false); setDropdownOpen(false); }, [pathname]);
 
   const handleNavigate = (href: string) => {
     router.push(href);
@@ -89,13 +94,13 @@ export function Header({ isDemo = false }: { isDemo?: boolean }) {
           </span>
         </div>
         <div className="flex items-center gap-4">
-          <Link href="/login" className="text-muted-foreground hover:text-foreground transition-colors" onClick={(e) => { e.preventDefault(); handleNavigate('/login'); }}>
+          <Link href="/login" className="text-muted-foreground hover:text-foreground transition-colors">
             Iniciar sesión
           </Link>
-          <Link href="/register" className="text-muted-foreground hover:text-foreground transition-colors" onClick={(e) => { e.preventDefault(); handleNavigate('/register'); }}>
+          <Link href="/register" className="text-muted-foreground hover:text-foreground transition-colors">
             Registrarse
           </Link>
-          <Link href="/mi-cuenta" className="text-primary hover:text-primary-light transition-colors font-medium" onClick={(e) => { e.preventDefault(); handleNavigate('/mi-cuenta'); }}>
+          <Link href="/mi-cuenta" className="text-primary hover:text-primary-light transition-colors font-medium">
             Mi cuenta
           </Link>
         </div>
@@ -105,7 +110,7 @@ export function Header({ isDemo = false }: { isDemo?: boolean }) {
       <nav className="container mx-auto px-4" aria-label="Navegación principal">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2" aria-label="Pizca del Monte - Inicio" onClick={(e) => { e.preventDefault(); handleNavigate('/'); }}>
+          <Link href="/" className="flex items-center gap-2" aria-label="Pizca del Monte - Inicio">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
               <span className="text-primary-foreground font-heading font-bold text-xl">P</span>
             </div>
@@ -116,12 +121,11 @@ export function Header({ isDemo = false }: { isDemo?: boolean }) {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex md:items-center md:gap-1">
-            {navigation.map((item) => (
+            {visibleNavigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
                 className="px-4 py-2 text-body-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg"
-                onClick={(e) => { e.preventDefault(); handleNavigate(item.href); }}
               >
                 {item.name}
               </Link>
@@ -149,7 +153,6 @@ export function Header({ isDemo = false }: { isDemo?: boolean }) {
                       key={item.name}
                       href={item.href}
                       className="flex items-start gap-3 px-3 py-2.5 rounded-lg text-body-sm hover:bg-muted transition-colors"
-                      onClick={(e) => { e.preventDefault(); handleNavigate(item.href); }}
                     >
                       <span className="font-medium text-foreground">{item.name}</span>
                       <span className="text-muted-foreground">{item.description}</span>
@@ -162,19 +165,11 @@ export function Header({ isDemo = false }: { isDemo?: boolean }) {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="relative" onClick={() => handleNavigate('/favoritos')} aria-label="Favoritos">
-              <Heart className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" className="relative" onClick={() => handleNavigate('/carrito')} aria-label="Carrito">
-              <ShoppingCart className="h-5 w-5" />
-              <CartCount isDemo={isDemo} />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => handleNavigate('/mi-cuenta')} aria-label="Mi cuenta">
-              <User className="h-5 w-5" />
-            </Button>
-            <Button variant="primary" size="sm" className="hidden sm:flex" onClick={() => handleNavigate('/tienda')}>
-              Comprar
-            </Button>
+            <Button variant="ghost" size="icon" onClick={() => setSearchOpen(true)} aria-label="Buscar productos"><Search className="h-5 w-5" /></Button>
+            <Button variant="ghost" size="icon" className="relative" asChild><Link href="/favoritos" aria-label="Favoritos"><Heart className="h-5 w-5" /></Link></Button>
+            <Button variant="ghost" size="icon" className="relative" asChild><Link href="/carrito" aria-label="Carrito"><ShoppingCart className="h-5 w-5" /><CartCount isDemo={isDemo} /></Link></Button>
+            <Button variant="ghost" size="icon" asChild><Link href="/mi-cuenta" aria-label="Mi cuenta"><User className="h-5 w-5" /></Link></Button>
+            <Button variant="primary" size="sm" className="hidden sm:flex" asChild><Link href="/tienda">Comprar</Link></Button>
 
             {/* Mobile Menu Button */}
             <Button
@@ -195,12 +190,11 @@ export function Header({ isDemo = false }: { isDemo?: boolean }) {
         {mobileMenuOpen && (
           <div id="mobile-menu" className="md:hidden py-4 border-t border-border animate-slide-in-from-top">
             <div className="flex flex-col gap-2">
-              {navigation.map((item) => (
+              {visibleNavigation.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
                   className="px-3 py-2 text-body-md font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-                  onClick={(e) => { e.preventDefault(); handleNavigate(item.href); }}
                 >
                   {item.name}
                 </Link>
@@ -214,7 +208,6 @@ export function Header({ isDemo = false }: { isDemo?: boolean }) {
                       key={item.name}
                       href={item.href}
                       className="px-3 py-2 text-body-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-                      onClick={(e) => { e.preventDefault(); handleNavigate(item.href); }}
                     >
                       {item.name}
                     </Link>
@@ -238,18 +231,22 @@ export function Header({ isDemo = false }: { isDemo?: boolean }) {
               className="w-full max-w-2xl mx-4 bg-background rounded-xl shadow-xl overflow-hidden animate-zoom-in"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="p-4 border-b border-border">
+              <form className="p-4 border-b border-border" onSubmit={(event) => { event.preventDefault(); const term = searchTerm.trim(); setSearchOpen(false); handleNavigate(term ? `/tienda?search=${encodeURIComponent(term)}` : '/tienda'); }}>
                 <div className="relative">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <input
                     type="search"
+                    aria-label="Buscar productos"
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
                     placeholder="Buscar productos, recetas, marcas..."
                     className="w-full pl-12 pr-4 py-3 text-body-lg border-border bg-muted rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
                     autoFocus
                     onClick={(e) => e.stopPropagation()}
                   />
                 </div>
-              </div>
+                <Button type="submit" className="mt-3">Buscar</Button>
+              </form>
               <div className="p-4">
                 <p className="text-body-sm text-muted-foreground mb-4">Categorías populares</p>
                 <div className="flex flex-wrap gap-2">

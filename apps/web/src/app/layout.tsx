@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter, Playfair_Display, JetBrains_Mono } from 'next/font/google';
 import '../styles/globals.css';
 import { Providers } from './providers';
+import { isDemoMode } from '@/lib/demo-mode';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -29,7 +30,7 @@ const jetbrains = JetBrains_Mono({
 const publicUrl = process.env.NEXT_PUBLIC_APP_URL;
 const siteUrl = publicUrl && /^https?:\/\//.test(publicUrl) ? new URL(publicUrl) : undefined;
 
-export const metadata: Metadata = {
+const metadata: Metadata = {
   ...(siteUrl ? { metadataBase: siteUrl } : {}),
   title: {
     default: 'Pizca del Monte - Especias, Sales y Aceites Gourmet Peruanos',
@@ -94,11 +95,12 @@ export const metadata: Metadata = {
 
 };
 
+export function generateMetadata(): Metadata {
+  return isDemoMode() ? { ...metadata, robots: { index: false, follow: false } } : metadata;
+}
+
 export const viewport: Viewport = {
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#FDFBF7' },
-    { media: '(prefers-color-scheme: dark)', color: '#1A1A1A' },
-  ],
+  themeColor: '#FDFBF7',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
@@ -114,8 +116,6 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
-        <link rel="preconnect" href="https://api.mercadopago.com" />
-        <link rel="dns-prefetch" href="https://api.mercadopago.com" />
       </head>
       <body className="min-h-screen bg-background font-sans antialiased">
         <Providers>

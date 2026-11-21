@@ -37,3 +37,20 @@ test('no se muestra demo automáticamente al configurar una base', () => {
   process.env.DEMO_MODE = 'true';
   expect(isDemoMode()).toBe(true);
 });
+
+test('en demo no hay ofertas ni marcas ajenas al fixture', async () => {
+  const sale = await (await list(request('?onSale=true'))).json();
+  expect(sale.pagination.total).toBe(0);
+  expect(new Set(demoProducts.map(product => product.brand.slug))).toEqual(new Set(['pizca-del-monte']));
+});
+
+test('popular prioriza destacados sin inventar ventas', async () => {
+  const result = await (await list(request('?sort=popular&limit=100'))).json();
+  const firstNonFeatured = result.products.findIndex(product => !product.isFeatured);
+  expect(result.products.slice(0, firstNonFeatured).every(product => product.isFeatured)).toBe(true);
+});
+
+test('el catálogo demo expone caché corta para revalidación', async () => {
+  const response = await list(request());
+  expect(response.headers.get('cache-control')).toContain('s-maxage=60');
+});

@@ -1,5 +1,3 @@
-import createNextIntlPlugin from 'next-intl/plugin';
-const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -15,6 +13,8 @@ const nextConfig = {
   experimental: { optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'], serverActions: { bodySizeLimit: '2mb' } },
   async headers() {
     return [{ source: '/:path*', headers: [
+      { key: 'Strict-Transport-Security', value: 'max-age=31536000' },
+      { key: 'Content-Security-Policy-Report-Only', value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'self'" },
       { key: 'X-Content-Type-Options', value: 'nosniff' },
       { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
       { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
@@ -30,4 +30,4 @@ const nextConfig = {
     ];
   },
 };
-export default withNextIntl(nextConfig);
+export default nextConfig;
