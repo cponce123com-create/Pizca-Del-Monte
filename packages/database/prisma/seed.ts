@@ -526,6 +526,20 @@ async function main() {
   const valSinGluten = await prisma.attributeValue.findFirst({ where: { attributeId: attrCert.id, value: 'Libre de gluten' } })!;
   const valVegano = await prisma.attributeValue.findFirst({ where: { attributeId: attrCert.id, value: 'Vegano' } })!;
 
+  // Helper for Cloudinary placeholder images
+  const cloudinaryBase = 'https://res.cloudinary.com/pizcadelmonte/image/upload';
+  const productImage = (name: string) => `${cloudinaryBase}/v1700000000/products/${name}.jpg`;
+
+  // Additional attribute values needed for new products
+  const val20g = await prisma.attributeValue.findFirst({ where: { attributeId: attrPeso.id, value: '20g' } })!;
+  const val25g = await prisma.attributeValue.findFirst({ where: { attributeId: attrPeso.id, value: '25g' } })!;
+  const val30g = await prisma.attributeValue.findFirst({ where: { attributeId: attrPeso.id, value: '30g' } })!;
+  const val60g = await prisma.attributeValue.findFirst({ where: { attributeId: attrPeso.id, value: '60g' } })!;
+  const val200g = await prisma.attributeValue.findFirst({ where: { attributeId: attrPeso.id, value: '200g' } })!;
+  const val200ml = await prisma.attributeValue.findFirst({ where: { attributeId: attrPeso.id, value: '200ml' } })!;
+  const valExtremo = await prisma.attributeValue.findFirst({ where: { attributeId: attrPicor.id, value: 'Extremo' } })!;
+  const valImportado = await prisma.attributeValue.findFirst({ where: { attributeId: attrOrigen.id, value: 'Importado' } })!;
+
   const products = [
     {
       sku: 'PDM-AJI-AMA-050G',
@@ -562,6 +576,10 @@ async function main() {
         { sku: 'PDM-AJI-AMA-100G', name: '100g', price: new Decimal('32.00'), weight: new Decimal('0.100'), attributes: [{ attributeId: attrPeso.id, attributeValueId: val100g.id }] },
         { sku: 'PDM-AJI-AMA-250G', name: '250g (Ahorro)', price: new Decimal('70.00'), weight: new Decimal('0.250'), attributes: [{ attributeId: attrPeso.id, attributeValueId: val250g.id }] },
       ],
+      images: [
+        { url: productImage('aji-amarillo-molido-1'), alt: 'Ají Amarillo Molido 50g - Vista frontal', isPrimary: true, sortOrder: 0 },
+        { url: productImage('aji-amarillo-molido-2'), alt: 'Ají Amarillo Molido - Detalle de textura', isPrimary: false, sortOrder: 1 },
+      ],
     },
     {
       sku: 'PDM-AJI-PAN-050G',
@@ -593,6 +611,10 @@ async function main() {
         { sku: 'PDM-AJI-PAN-050G', name: '50g', price: new Decimal('18.00'), weight: new Decimal('0.050'), isDefault: true, attributes: [{ attributeId: attrPeso.id, attributeValueId: val50g.id }] },
         { sku: 'PDM-AJI-PAN-100G', name: '100g', price: new Decimal('32.00'), weight: new Decimal('0.100'), attributes: [{ attributeId: attrPeso.id, attributeValueId: val100g.id }] },
       ],
+      images: [
+        { url: productImage('aji-panca-molido-1'), alt: 'Ají Panca Molido 50g - Vista frontal', isPrimary: true, sortOrder: 0 },
+        { url: productImage('aji-panca-molido-2'), alt: 'Ají Panca Molido - Color rojo intenso', isPrimary: false, sortOrder: 1 },
+      ],
     },
     {
       sku: 'PDM-AJI-ROC-030G',
@@ -613,8 +635,8 @@ async function main() {
       publishedAt: new Date(),
       categories: [catAjies.id],
       attributes: [
-        { attributeId: attrPeso.id, attributeValueId: await prisma.attributeValue.findFirst({ where: { attributeId: attrPeso.id, value: '30g' } }).then(r => r!.id) },
-        { attributeId: attrPicor.id, attributeValueId: (await prisma.attributeValue.findFirst({ where: { attributeId: attrPicor.id, value: 'Extremo' } }))!.id },
+        { attributeId: attrPeso.id, attributeValueId: val30g.id },
+        { attributeId: attrPicor.id, attributeValueId: valExtremo.id },
         { attributeId: attrOrigen.id, attributeValueId: valSierra.id },
         { attributeId: attrUso.id, attributeValueId: valCarnes.id },
         { attributeId: attrCert.id, attributeValueId: valSinGluten.id },
@@ -622,6 +644,9 @@ async function main() {
       variants: [
         { sku: 'PDM-AJI-ROC-030G', name: '30g', price: new Decimal('25.00'), weight: new Decimal('0.030'), isDefault: true },
         { sku: 'PDM-AJI-ROC-060G', name: '60g', price: new Decimal('45.00'), weight: new Decimal('0.060') },
+      ],
+      images: [
+        { url: productImage('aji-rocoto-molido-1'), alt: 'Ají Rocoto Molido 30g - Vista frontal', isPrimary: true, sortOrder: 0 },
       ],
     },
     {
@@ -654,6 +679,11 @@ async function main() {
         { sku: 'PDM-SAL-MAR-250G', name: '250g', price: new Decimal('45.00'), weight: new Decimal('0.250'), isDefault: true, attributes: [{ attributeId: attrPeso.id, attributeValueId: val250g.id }] },
         { sku: 'PDM-SAL-MAR-100G', name: '100g', price: new Decimal('22.00'), weight: new Decimal('0.100'), attributes: [{ attributeId: attrPeso.id, attributeValueId: val100g.id }] },
       ],
+      images: [
+        { url: productImage('sal-maras-flor-1'), alt: 'Sal de Maras Flor de Sal 250g - Frasco de vidrio', isPrimary: true, sortOrder: 0 },
+        { url: productImage('sal-maras-flor-2'), alt: 'Sal de Maras - Cristales delicados', isPrimary: false, sortOrder: 1 },
+        { url: productImage('sal-maras-flor-3'), alt: 'Salineras de Maras, Cusco', isPrimary: false, sortOrder: 2 },
+      ],
     },
     {
       sku: 'PDM-SAL-AJI-100G',
@@ -684,6 +714,10 @@ async function main() {
       variants: [
         { sku: 'PDM-SAL-AJI-100G', name: '100g', price: new Decimal('28.00'), weight: new Decimal('0.100'), isDefault: true },
         { sku: 'PDM-SAL-AJI-250G', name: '250g', price: new Decimal('60.00'), weight: new Decimal('0.250') },
+      ],
+      images: [
+        { url: productImage('sal-aji-amarillo-1'), alt: 'Sal de Ají Amarillo 100g - Frasco', isPrimary: true, sortOrder: 0 },
+        { url: productImage('sal-aji-amarillo-2'), alt: 'Sal de Ají Amarillo - Color vibrante', isPrimary: false, sortOrder: 1 },
       ],
     },
     {
@@ -719,6 +753,10 @@ async function main() {
         { sku: 'PDM-ACE-ARB-250ML', name: '250ml', price: new Decimal('49.00'), weight: new Decimal('0.235'), attributes: [{ attributeId: attrPeso.id, attributeValueId: val250ml.id }] },
         { sku: 'PDM-ACE-ARB-500ML', name: '500ml', price: new Decimal('89.00'), weight: new Decimal('0.470'), isDefault: true, attributes: [{ attributeId: attrPeso.id, attributeValueId: val500ml.id }] },
       ],
+      images: [
+        { url: productImage('aceite-arbequina-1'), alt: 'Aceite de Oliva Arbequina 500ml - Botella oscura', isPrimary: true, sortOrder: 0 },
+        { url: productImage('aceite-arbequina-2'), alt: 'Aceite Arbequina - Detalle de etiqueta', isPrimary: false, sortOrder: 1 },
+      ],
     },
     {
       sku: 'PDM-ACE-AJI-250ML',
@@ -748,6 +786,10 @@ async function main() {
       ],
       variants: [
         { sku: 'PDM-ACE-AJI-250ML', name: '250ml', price: new Decimal('65.00'), weight: new Decimal('0.235'), isDefault: true },
+      ],
+      images: [
+        { url: productImage('aceite-charapita-1'), alt: 'Aceite Infusionado Ají Charapita 250ml', isPrimary: true, sortOrder: 0 },
+        { url: productImage('aceite-charapita-2'), alt: 'Aceite Charapita - Ajíes en botella', isPrimary: false, sortOrder: 1 },
       ],
     },
     {
@@ -780,6 +822,10 @@ async function main() {
         { sku: 'PDM-VIN-MAN-250ML', name: '250ml', price: new Decimal('38.00'), weight: new Decimal('0.250'), isDefault: true },
         { sku: 'PDM-VIN-MAN-500ML', name: '500ml', price: new Decimal('68.00'), weight: new Decimal('0.500') },
       ],
+      images: [
+        { url: productImage('vinagre-manzana-1'), alt: 'Vinagre de Manzana Orgánico 250ml con madre', isPrimary: true, sortOrder: 0 },
+        { url: productImage('vinagre-manzana-2'), alt: 'Vinagre de Manzana - Madre visible', isPrimary: false, sortOrder: 1 },
+      ],
     },
     {
       sku: 'PDM-SAL-HUA-200ML',
@@ -800,7 +846,7 @@ async function main() {
       publishedAt: new Date(),
       categories: [catSalsas.id],
       attributes: [
-        { attributeId: attrPeso.id, attributeValueId: (await prisma.attributeValue.findFirst({ where: { attributeId: attrPeso.id, value: '200ml' } }))!.id },
+        { attributeId: attrPeso.id, attributeValueId: val200ml.id },
         { attributeId: attrPicor.id, attributeValueId: valMedio.id },
         { attributeId: attrOrigen.id, attributeValueId: valCosta.id },
         { attributeId: attrUso.id, attributeValueId: valTodo.id },
@@ -808,6 +854,10 @@ async function main() {
       variants: [
         { sku: 'PDM-SAL-HUA-200ML', name: '200ml', price: new Decimal('32.00'), weight: new Decimal('0.200'), isDefault: true },
         { sku: 'PDM-SAL-HUA-500ML', name: '500ml (Familiar)', price: new Decimal('68.00'), weight: new Decimal('0.500') },
+      ],
+      images: [
+        { url: productImage('salsa-huancaina-1'), alt: 'Salsa Huancaína Clásica 200ml - Frasco', isPrimary: true, sortOrder: 0 },
+        { url: productImage('salsa-huancaina-2'), alt: 'Salsa Huancaína - Textura cremosa', isPrimary: false, sortOrder: 1 },
       ],
     },
     {
@@ -842,11 +892,473 @@ async function main() {
         { componentSku: 'PDM-AJI-AMA-050G', quantity: 1 },
         { componentSku: 'PDM-ACE-ARB-250ML', quantity: 1 },
       ],
+      images: [
+        { url: productImage('pack-parrilla-1'), alt: 'Pack Parrilla Peruana - Caja de madera completa', isPrimary: true, sortOrder: 0 },
+        { url: productImage('pack-parrilla-2'), alt: 'Pack Parrilla - Contenido detallado', isPrimary: false, sortOrder: 1 },
+        { url: productImage('pack-parrilla-3'), alt: 'Pack Parrilla - Caja grabada', isPrimary: false, sortOrder: 2 },
+      ],
+    },
+    // ===== NUEVOS PRODUCTOS (11 más para total 20) =====
+    {
+      sku: 'PDM-AJI-CHA-020G',
+      name: 'Ají Charapita Fresco Deshidratado',
+      slug: 'aji-charapita-deshidratado',
+      description: 'Ají charapita de la Amazonía peruana, deshidratado a baja temperatura para preservar su aroma floral y picor brillante. El "caviar de ajíes" para ceviches, tiraditos y platos de autor.',
+      shortDescription: 'Ají charapita amazónico, aroma floral y picor brillante',
+      type: ProductType.SIMPLE,
+      status: ProductStatus.ACTIVE,
+      brandId: ajiBrand.id,
+      basePrice: new Decimal('42.00'),
+      compareAtPrice: new Decimal('50.00'),
+      costPrice: new Decimal('20.00'),
+      taxRate: new Decimal('18.00'),
+      weight: new Decimal('0.020'),
+      unitOfMeasure: 'G',
+      trackInventory: true,
+      publishedAt: new Date(),
+      categories: [catAjies.id],
+      attributes: [
+        { attributeId: attrPeso.id, attributeValueId: val20g.id },
+        { attributeId: attrPicor.id, attributeValueId: valFuerte.id },
+        { attributeId: attrOrigen.id, attributeValueId: valSelva.id },
+        { attributeId: attrUso.id, attributeValueId: valPescados.id },
+        { attributeId: attrCert.id, attributeValueId: valOrganico.id },
+        { attributeId: attrCert.id, attributeValueId: valSinGluten.id },
+        { attributeId: attrCert.id, attributeValueId: valVegano.id },
+      ],
+      variants: [
+        { sku: 'PDM-AJI-CHA-020G', name: '20g', price: new Decimal('42.00'), weight: new Decimal('0.020'), isDefault: true },
+        { sku: 'PDM-AJI-CHA-050G', name: '50g', price: new Decimal('95.00'), weight: new Decimal('0.050') },
+      ],
+      images: [
+        { url: productImage('aji-charapita-1'), alt: 'Ají Charapita Deshidratado 20g - Frasco pequeño', isPrimary: true, sortOrder: 0 },
+        { url: productImage('aji-charapita-2'), alt: 'Ají Charapita - Granos amarillo dorado', isPrimary: false, sortOrder: 1 },
+      ],
+    },
+    {
+      sku: 'PDM-HIE-HUA-030G',
+      name: 'Huacatay Andino Seco',
+      slug: 'huacatay-andino-seco',
+      description: 'Huacatay (menta negra andina) cosechado en los valles de Cusco. Aroma intenso a menta, albahaca y cítricos. Esencial para ocopa, pachamanca y adobos.',
+      shortDescription: 'Huacatay cusqueño, aroma a menta y cítricos',
+      type: ProductType.SIMPLE,
+      status: ProductStatus.ACTIVE,
+      brandId: inkaBrand.id,
+      basePrice: new Decimal('15.00'),
+      compareAtPrice: new Decimal('18.00'),
+      costPrice: new Decimal('7.00'),
+      taxRate: new Decimal('18.00'),
+      weight: new Decimal('0.030'),
+      unitOfMeasure: 'G',
+      trackInventory: true,
+      publishedAt: new Date(),
+      categories: [catHierbas.id],
+      attributes: [
+        { attributeId: attrPeso.id, attributeValueId: val30g.id },
+        { attributeId: attrPicor.id, attributeValueId: valSuave.id },
+        { attributeId: attrOrigen.id, attributeValueId: valSierra.id },
+        { attributeId: attrUso.id, attributeValueId: valTodo.id },
+        { attributeId: attrCert.id, attributeValueId: valOrganico.id },
+        { attributeId: attrCert.id, attributeValueId: valSinGluten.id },
+        { attributeId: attrCert.id, attributeValueId: valVegano.id },
+      ],
+      variants: [
+        { sku: 'PDM-HIE-HUA-030G', name: '30g', price: new Decimal('15.00'), weight: new Decimal('0.030'), isDefault: true },
+        { sku: 'PDM-HIE-HUA-100G', name: '100g', price: new Decimal('42.00'), weight: new Decimal('0.100') },
+      ],
+      images: [
+        { url: productImage('huacatay-1'), alt: 'Huacatay Andino 30g - Hojas secas', isPrimary: true, sortOrder: 0 },
+        { url: productImage('huacatay-2'), alt: 'Huacatay - Detalle de hoja', isPrimary: false, sortOrder: 1 },
+      ],
+    },
+    {
+      sku: 'PDM-HIE-ORO-025G',
+      name: 'Orégano de la Sierra',
+      slug: 'oregano-sierra',
+      description: 'Orégano silvestre recolectado en las alturas de Ayacucho. Sabor más intenso y complejo que el orégano mediterráneo. Ideal para carnes, guisos y pizzas artesanales.',
+      shortDescription: 'Orégano silvestre ayacuchano, sabor intenso',
+      type: ProductType.SIMPLE,
+      status: ProductStatus.ACTIVE,
+      brandId: pizcaBrand.id,
+      basePrice: new Decimal('14.00'),
+      compareAtPrice: new Decimal('17.00'),
+      costPrice: new Decimal('6.50'),
+      taxRate: new Decimal('18.00'),
+      weight: new Decimal('0.025'),
+      unitOfMeasure: 'G',
+      trackInventory: true,
+      publishedAt: new Date(),
+      categories: [catHierbas.id],
+      attributes: [
+        { attributeId: attrPeso.id, attributeValueId: val25g.id },
+        { attributeId: attrPicor.id, attributeValueId: valSuave.id },
+        { attributeId: attrOrigen.id, attributeValueId: valSierra.id },
+        { attributeId: attrUso.id, attributeValueId: valCarnes.id },
+        { attributeId: attrCert.id, attributeValueId: valOrganico.id },
+        { attributeId: attrCert.id, attributeValueId: valSinGluten.id },
+        { attributeId: attrCert.id, attributeValueId: valVegano.id },
+      ],
+      variants: [
+        { sku: 'PDM-HIE-ORO-025G', name: '25g', price: new Decimal('14.00'), weight: new Decimal('0.025'), isDefault: true },
+        { sku: 'PDM-HIE-ORO-050G', name: '50g', price: new Decimal('25.00'), weight: new Decimal('0.050') },
+      ],
+      images: [
+        { url: productImage('oregano-sierra-1'), alt: 'Orégano de la Sierra 25g', isPrimary: true, sortOrder: 0 },
+      ],
+    },
+    {
+      sku: 'PDM-SEM-COM-050G',
+      name: 'Comino Andino Entero',
+      slug: 'comino-andino-entero',
+      description: 'Semillas de comino cultivado en los valles interandinos. Aroma terroso, cálido y ligeramente dulce. Para adobos, chili, humitas y tamales.',
+      shortDescription: 'Comino andino en grano, aroma terroso y cálido',
+      type: ProductType.SIMPLE,
+      status: ProductStatus.ACTIVE,
+      brandId: pizcaBrand.id,
+      basePrice: new Decimal('16.00'),
+      compareAtPrice: new Decimal('20.00'),
+      costPrice: new Decimal('7.50'),
+      taxRate: new Decimal('18.00'),
+      weight: new Decimal('0.050'),
+      unitOfMeasure: 'G',
+      trackInventory: true,
+      publishedAt: new Date(),
+      categories: [catHierbas.id],
+      attributes: [
+        { attributeId: attrPeso.id, attributeValueId: val50g.id },
+        { attributeId: attrPicor.id, attributeValueId: valSuave.id },
+        { attributeId: attrOrigen.id, attributeValueId: valSierra.id },
+        { attributeId: attrUso.id, attributeValueId: valCarnes.id },
+        { attributeId: attrCert.id, attributeValueId: valOrganico.id },
+        { attributeId: attrCert.id, attributeValueId: valSinGluten.id },
+        { attributeId: attrCert.id, attributeValueId: valVegano.id },
+      ],
+      variants: [
+        { sku: 'PDM-SEM-COM-050G', name: '50g', price: new Decimal('16.00'), weight: new Decimal('0.050'), isDefault: true },
+        { sku: 'PDM-SEM-COM-100G', name: '100g', price: new Decimal('28.00'), weight: new Decimal('0.100') },
+      ],
+      images: [
+        { url: productImage('comino-andino-1'), alt: 'Comino Andino 50g - Semillas enteras', isPrimary: true, sortOrder: 0 },
+      ],
+    },
+    {
+      sku: 'PDM-SAL-ROS-200G',
+      name: 'Sal Rosa del Himalaya Fina',
+      slug: 'sal-rosa-himalaya-fina',
+      description: 'Sal rosa del Himalaya molida fina, rica en 84 minerales traza. Color rosa pálido natural, sabor suave y menos sodio por gramo. Para uso diario en cocina gourmet.',
+      shortDescription: 'Sal rosa del Himalaya fina, 84 minerales',
+      type: ProductType.SIMPLE,
+      status: ProductStatus.ACTIVE,
+      brandId: marasBrand.id,
+      basePrice: new Decimal('35.00'),
+      compareAtPrice: new Decimal('42.00'),
+      costPrice: new Decimal('16.00'),
+      taxRate: new Decimal('18.00'),
+      weight: new Decimal('0.200'),
+      unitOfMeasure: 'G',
+      trackInventory: true,
+      publishedAt: new Date(),
+      categories: [catSalesAroma.id],
+      attributes: [
+        { attributeId: attrPeso.id, attributeValueId: val200g.id },
+        { attributeId: attrOrigen.id, attributeValueId: valImportado.id },
+        { attributeId: attrUso.id, attributeValueId: valTodo.id },
+        { attributeId: attrCert.id, attributeValueId: valSinGluten.id },
+        { attributeId: attrCert.id, attributeValueId: valVegano.id },
+      ],
+      variants: [
+        { sku: 'PDM-SAL-ROS-200G', name: '200g', price: new Decimal('35.00'), weight: new Decimal('0.200'), isDefault: true },
+        { sku: 'PDM-SAL-ROS-500G', name: '500g', price: new Decimal('78.00'), weight: new Decimal('0.500') },
+      ],
+      images: [
+        { url: productImage('sal-rosa-himalaya-1'), alt: 'Sal Rosa Himalaya 200g - Color rosa natural', isPrimary: true, sortOrder: 0 },
+        { url: productImage('sal-rosa-himalaya-2'), alt: 'Sal Rosa - Cristales finos', isPrimary: false, sortOrder: 1 },
+      ],
+    },
+    {
+      sku: 'PDM-SAL-AHU-100G',
+      name: 'Sal Ahumada de Maras',
+      slug: 'sal-ahumada-maras',
+      description: 'Flor de sal de Maras ahumada con leña de algarrobo por 48 horas. Aroma ahumado profundo, color dorado. Para carnes a la parrilla, vegetales asados y cócteles.',
+      shortDescription: 'Sal de Maras ahumada con algarrobo, aroma profundo',
+      type: ProductType.SIMPLE,
+      status: ProductStatus.ACTIVE,
+      brandId: marasBrand.id,
+      basePrice: new Decimal('38.00'),
+      compareAtPrice: new Decimal('45.00'),
+      costPrice: new Decimal('18.00'),
+      taxRate: new Decimal('18.00'),
+      weight: new Decimal('0.100'),
+      unitOfMeasure: 'G',
+      trackInventory: true,
+      publishedAt: new Date(),
+      categories: [catSalesAroma.id],
+      attributes: [
+        { attributeId: attrPeso.id, attributeValueId: val100g.id },
+        { attributeId: attrPicor.id, attributeValueId: valSuave.id },
+        { attributeId: attrOrigen.id, attributeValueId: valSierra.id },
+        { attributeId: attrUso.id, attributeValueId: valCarnes.id },
+        { attributeId: attrCert.id, attributeValueId: valOrganico.id },
+        { attributeId: attrCert.id, attributeValueId: valSinGluten.id },
+        { attributeId: attrCert.id, attributeValueId: valVegano.id },
+      ],
+      variants: [
+        { sku: 'PDM-SAL-AHU-100G', name: '100g', price: new Decimal('38.00'), weight: new Decimal('0.100'), isDefault: true },
+      ],
+      images: [
+        { url: productImage('sal-ahumada-1'), alt: 'Sal Ahumada Maras 100g - Color dorado', isPrimary: true, sortOrder: 0 },
+        { url: productImage('sal-ahumada-2'), alt: 'Sal Ahumada - Ahumado con algarrobo', isPrimary: false, sortOrder: 1 },
+      ],
+    },
+    {
+      sku: 'PDM-ACE-PIC-250ML',
+      name: 'Aceite de Oliva Picual',
+      slug: 'aceite-oliva-picual',
+      description: 'Aceite de oliva variedad Picual, la más cultivada en España, producida en Ica. Sabor robusto, picante y amargo equilibrado. Alta estabilidad, ideal para freír y guisos.',
+      shortDescription: 'AOVE Picual, robusto y estable para cocinar',
+      type: ProductType.SIMPLE,
+      status: ProductStatus.ACTIVE,
+      brandId: olivaBrand.id,
+      basePrice: new Decimal('78.00'),
+      compareAtPrice: new Decimal('95.00'),
+      costPrice: new Decimal('36.00'),
+      taxRate: new Decimal('18.00'),
+      weight: new Decimal('0.235'),
+      length: new Decimal('7.5'),
+      width: new Decimal('7.5'),
+      height: new Decimal('28.0'),
+      unitOfMeasure: 'ML',
+      trackInventory: true,
+      publishedAt: new Date(),
+      categories: [catAceites.id],
+      attributes: [
+        { attributeId: attrPeso.id, attributeValueId: val250ml.id },
+        { attributeId: attrOrigen.id, attributeValueId: valCosta.id },
+        { attributeId: attrUso.id, attributeValueId: valTodo.id },
+        { attributeId: attrCert.id, attributeValueId: valOrganico.id },
+        { attributeId: attrCert.id, attributeValueId: valSinGluten.id },
+        { attributeId: attrCert.id, attributeValueId: valVegano.id },
+      ],
+      variants: [
+        { sku: 'PDM-ACE-PIC-250ML', name: '250ml', price: new Decimal('45.00'), weight: new Decimal('0.235'), attributes: [{ attributeId: attrPeso.id, attributeValueId: val250ml.id }] },
+        { sku: 'PDM-ACE-PIC-500ML', name: '500ml', price: new Decimal('78.00'), weight: new Decimal('0.470'), isDefault: true, attributes: [{ attributeId: attrPeso.id, attributeValueId: val500ml.id }] },
+      ],
+      images: [
+        { url: productImage('aceite-picual-1'), alt: 'Aceite de Oliva Picual 500ml', isPrimary: true, sortOrder: 0 },
+      ],
+    },
+    {
+      sku: 'PDM-ACE-ALB-250ML',
+      name: 'Aceite Infusionado de Albahaca',
+      slug: 'aceite-infusionado-albahaca',
+      description: 'Aceite de oliva Arbequina infusionado con albahaca fresca de Oxapampa. Aroma herbáceo dulce, notas a anís y menta. Para pastas, pizzas, ensaladas caprese y bruschettas.',
+      shortDescription: 'Aceite de oliva con albahaca fresca de Oxapampa',
+      type: ProductType.SIMPLE,
+      status: ProductStatus.ACTIVE,
+      brandId: olivaBrand.id,
+      basePrice: new Decimal('58.00'),
+      compareAtPrice: new Decimal('68.00'),
+      costPrice: new Decimal('27.00'),
+      taxRate: new Decimal('18.00'),
+      weight: new Decimal('0.235'),
+      unitOfMeasure: 'ML',
+      trackInventory: true,
+      publishedAt: new Date(),
+      categories: [catAceitesInf.id],
+      attributes: [
+        { attributeId: attrPeso.id, attributeValueId: val250ml.id },
+        { attributeId: attrPicor.id, attributeValueId: valSuave.id },
+        { attributeId: attrOrigen.id, attributeValueId: valCosta.id },
+        { attributeId: attrUso.id, attributeValueId: valTodo.id },
+        { attributeId: attrCert.id, attributeValueId: valSinGluten.id },
+        { attributeId: attrCert.id, attributeValueId: valVegano.id },
+      ],
+      variants: [
+        { sku: 'PDM-ACE-ALB-250ML', name: '250ml', price: new Decimal('58.00'), weight: new Decimal('0.235'), isDefault: true },
+      ],
+      images: [
+        { url: productImage('aceite-albahaca-1'), alt: 'Aceite Infusionado Albahaca 250ml', isPrimary: true, sortOrder: 0 },
+        { url: productImage('aceite-albahaca-2'), alt: 'Aceite Albahaca - Hojas en botella', isPrimary: false, sortOrder: 1 },
+      ],
+    },
+    {
+      sku: 'PDM-VIN-JER-250ML',
+      name: 'Vinagre de Jerez Reserva 25 Años',
+      slug: 'vinagre-jerez-reserva',
+      description: 'Vinagre de Jerez envejecido 25 años en botas de roble por sistema solera. Complejo, dulce, con notas a pasas, madera y caramelo. Para reducciones, foie, postres y quesos curados.',
+      shortDescription: 'Vinagre de Jerez 25 años solera, complejo y dulce',
+      type: ProductType.SIMPLE,
+      status: ProductStatus.ACTIVE,
+      brandId: inkaBrand.id,
+      basePrice: new Decimal('125.00'),
+      compareAtPrice: new Decimal('150.00'),
+      costPrice: new Decimal('58.00'),
+      taxRate: new Decimal('18.00'),
+      weight: new Decimal('0.250'),
+      unitOfMeasure: 'ML',
+      trackInventory: true,
+      publishedAt: new Date(),
+      categories: [catVinagres.id],
+      attributes: [
+        { attributeId: attrPeso.id, attributeValueId: val250ml.id },
+        { attributeId: attrOrigen.id, attributeValueId: valImportado.id },
+        { attributeId: attrUso.id, attributeValueId: valTodo.id },
+        { attributeId: attrCert.id, attributeValueId: valSinGluten.id },
+        { attributeId: attrCert.id, attributeValueId: valVegano.id },
+      ],
+      variants: [
+        { sku: 'PDM-VIN-JER-250ML', name: '250ml', price: new Decimal('125.00'), weight: new Decimal('0.250'), isDefault: true },
+      ],
+      images: [
+        { url: productImage('vinagre-jerez-1'), alt: 'Vinagre de Jerez Reserva 250ml - Botella oscura', isPrimary: true, sortOrder: 0 },
+      ],
+    },
+    {
+      sku: 'PDM-SAL-OCP-200ML',
+      name: 'Salsa Ocopa Arequipeña',
+      slug: 'salsa-ocopa-arenquipena',
+      description: 'Salsa tradicional arequipeña: huacatay, ají amarillo, ají panca, maní, queso, galleta y leche. Picante medio, cremosa y aromática. Para papas, yuca, cau-cau y como dip.',
+      shortDescription: 'Salsa ocopa arequipeña con huacatay y maní',
+      type: ProductType.SIMPLE,
+      status: ProductStatus.ACTIVE,
+      brandId: pizcaBrand.id,
+      basePrice: new Decimal('34.00'),
+      compareAtPrice: new Decimal('40.00'),
+      costPrice: new Decimal('16.00'),
+      taxRate: new Decimal('18.00'),
+      weight: new Decimal('0.200'),
+      unitOfMeasure: 'ML',
+      trackInventory: true,
+      publishedAt: new Date(),
+      categories: [catSalsas.id],
+      attributes: [
+        { attributeId: attrPeso.id, attributeValueId: val200ml.id },
+        { attributeId: attrPicor.id, attributeValueId: valMedio.id },
+        { attributeId: attrOrigen.id, attributeValueId: valSierra.id },
+        { attributeId: attrUso.id, attributeValueId: valTodo.id },
+      ],
+      variants: [
+        { sku: 'PDM-SAL-OCP-200ML', name: '200ml', price: new Decimal('34.00'), weight: new Decimal('0.200'), isDefault: true },
+        { sku: 'PDM-SAL-OCP-500ML', name: '500ml (Familiar)', price: new Decimal('72.00'), weight: new Decimal('0.500') },
+      ],
+      images: [
+        { url: productImage('salsa-ocopa-1'), alt: 'Salsa Ocopa Arequipeña 200ml - Color verde vibrante', isPrimary: true, sortOrder: 0 },
+        { url: productImage('salsa-ocopa-2'), alt: 'Salsa Ocopa - Textura con maní', isPrimary: false, sortOrder: 1 },
+      ],
+    },
+    {
+      sku: 'PDM-PACK-CEV-001',
+      name: 'Pack Ceviche & Tiradito',
+      slug: 'pack-ceviche-tiradito',
+      description: 'Kit para ceviche y tiradito perfecto: Sal de Maras 100g, Ají Limo fresco deshidratado 15g, Ají Amarillo 50g, Limón de Pica deshidratado 30g, Cancha serrana 100g, Choclo desgranado 100g. Incluye receta paso a paso.',
+      shortDescription: 'Kit completo para ceviche y tiradito',
+      type: ProductType.BUNDLE,
+      status: ProductStatus.ACTIVE,
+      brandId: pizcaBrand.id,
+      basePrice: new Decimal('189.00'),
+      compareAtPrice: new Decimal('229.00'),
+      costPrice: new Decimal('95.00'),
+      taxRate: new Decimal('18.00'),
+      weight: new Decimal('0.800'),
+      unitOfMeasure: 'UN',
+      trackInventory: true,
+      publishedAt: new Date(),
+      categories: [catPacks.id],
+      attributes: [
+        { attributeId: attrOrigen.id, attributeValueId: valCosta.id },
+        { attributeId: attrUso.id, attributeValueId: valPescados.id },
+        { attributeId: attrCert.id, attributeValueId: valSinGluten.id },
+      ],
+      variants: [
+        { sku: 'PDM-PACK-CEV-001', name: 'Pack Estándar', price: new Decimal('189.00'), weight: new Decimal('0.800'), isDefault: true },
+      ],
+      bundleComponents: [
+        { componentSku: 'PDM-SAL-MAR-100G', quantity: 1 },
+        { componentSku: 'PDM-AJI-AMA-050G', quantity: 1 },
+      ],
+      images: [
+        { url: productImage('pack-ceviche-1'), alt: 'Pack Ceviche & Tiradito - Caja completa', isPrimary: true, sortOrder: 0 },
+        { url: productImage('pack-ceviche-2'), alt: 'Pack Ceviche - Ingredientes detallados', isPrimary: false, sortOrder: 1 },
+      ],
+    },
+    {
+      sku: 'PDM-PACK-REG-001',
+      name: 'Pack Regalo Gourmet - Esenciales',
+      slug: 'pack-regalo-gourmet-esenciales',
+      description: 'Caja de regalo premium: Sal de Maras Flor 100g, Ají Amarillo 50g, Ají Panca 50g, Aceite Arbequina 250ml, Vinagre Manzana 250ml, Huacatay 30g. En caja rígida con separadores y tarjeta de recetas.',
+      shortDescription: 'Caja regalo: 6 esenciales peruanos premium',
+      type: ProductType.BUNDLE,
+      status: ProductStatus.ACTIVE,
+      brandId: pizcaBrand.id,
+      basePrice: new Decimal('349.00'),
+      compareAtPrice: new Decimal('419.00'),
+      costPrice: new Decimal('175.00'),
+      taxRate: new Decimal('18.00'),
+      weight: new Decimal('1.800'),
+      unitOfMeasure: 'UN',
+      trackInventory: true,
+      publishedAt: new Date(),
+      categories: [catPacks.id],
+      attributes: [
+        { attributeId: attrOrigen.id, attributeValueId: valCosta.id },
+        { attributeId: attrUso.id, attributeValueId: valTodo.id },
+        { attributeId: attrCert.id, attributeValueId: valSinGluten.id },
+      ],
+      variants: [
+        { sku: 'PDM-PACK-REG-001', name: 'Pack Premium', price: new Decimal('349.00'), weight: new Decimal('1.800'), isDefault: true },
+      ],
+      bundleComponents: [
+        { componentSku: 'PDM-SAL-MAR-100G', quantity: 1 },
+        { componentSku: 'PDM-AJI-AMA-050G', quantity: 1 },
+        { componentSku: 'PDM-AJI-PAN-050G', quantity: 1 },
+        { componentSku: 'PDM-ACE-ARB-250ML', quantity: 1 },
+        { componentSku: 'PDM-VIN-MAN-250ML', quantity: 1 },
+        { componentSku: 'PDM-HIE-HUA-030G', quantity: 1 },
+      ],
+      images: [
+        { url: productImage('pack-regalo-esenciales-1'), alt: 'Pack Regalo Gourmet Esenciales - Caja premium', isPrimary: true, sortOrder: 0 },
+        { url: productImage('pack-regalo-esenciales-2'), alt: 'Pack Regalo - Interior con separadores', isPrimary: false, sortOrder: 1 },
+        { url: productImage('pack-regalo-esenciales-3'), alt: 'Pack Regalo - Tarjeta de recetas incluida', isPrimary: false, sortOrder: 2 },
+      ],
+    },
+    {
+      sku: 'PDM-MIX-ADO-060G',
+      name: 'Adobo Criollo para Carnes',
+      slug: 'adobo-criollo-carnes',
+      description: 'Mezcla lista para adobar: ají panca, ají amarillo, comino, ajo, orégano, sillao, vinagre y especias. Para pollo, cerdo, res y anticuchos. Solo añadir aceite y marinar 2 horas.',
+      shortDescription: 'Adobo criollo listo para usar, para todo tipo de carnes',
+      type: ProductType.SIMPLE,
+      status: ProductStatus.ACTIVE,
+      brandId: inkaBrand.id,
+      basePrice: new Decimal('22.00'),
+      compareAtPrice: new Decimal('26.00'),
+      costPrice: new Decimal('10.00'),
+      taxRate: new Decimal('18.00'),
+      weight: new Decimal('0.060'),
+      unitOfMeasure: 'G',
+      trackInventory: true,
+      publishedAt: new Date(),
+      categories: [catAjies.id],
+      attributes: [
+        { attributeId: attrPeso.id, attributeValueId: val60g.id },
+        { attributeId: attrPicor.id, attributeValueId: valMedio.id },
+        { attributeId: attrOrigen.id, attributeValueId: valCosta.id },
+        { attributeId: attrUso.id, attributeValueId: valCarnes.id },
+        { attributeId: attrCert.id, attributeValueId: valSinGluten.id },
+        { attributeId: attrCert.id, attributeValueId: valVegano.id },
+      ],
+      variants: [
+        { sku: 'PDM-MIX-ADO-060G', name: '60g (4-5 porciones)', price: new Decimal('22.00'), weight: new Decimal('0.060'), isDefault: true },
+        { sku: 'PDM-MIX-ADO-120G', name: '120g (8-10 porciones)', price: new Decimal('38.00'), weight: new Decimal('0.120') },
+      ],
+      images: [
+        { url: productImage('adobo-criollo-1'), alt: 'Adobo Criollo 60g - Mezcla en frasco', isPrimary: true, sortOrder: 0 },
+      ],
     },
   ];
 
   for (const prodData of products) {
-    const { variants, categories, attributes, bundleComponents, ...productData } = prodData;
+    const { variants, categories, attributes, bundleComponents, images, ...productData } = prodData;
 
     // Crear producto base
     const product = await prisma.product.upsert({
@@ -854,6 +1366,43 @@ async function main() {
       update: {},
       create: productData,
     });
+
+    // Crear imágenes del producto (ProductMedia)
+    if (images && images.length > 0) {
+      for (let i = 0; i < images.length; i++) {
+        const img = images[i];
+        const sortOrder = img.sortOrder ?? i;
+
+        // Buscar si ya existe media para este producto y sortOrder
+        const existingMedia = await prisma.productMedia.findFirst({
+          where: { productId: product.id, sortOrder },
+        });
+
+        if (existingMedia) {
+          await prisma.productMedia.update({
+            where: { id: existingMedia.id },
+            data: {
+              url: img.url,
+              alt: img.alt,
+              type: 'IMAGE',
+              isPrimary: img.isPrimary ?? (i === 0),
+              sortOrder,
+            },
+          });
+        } else {
+          await prisma.productMedia.create({
+            data: {
+              productId: product.id,
+              url: img.url,
+              alt: img.alt,
+              type: 'IMAGE',
+              isPrimary: img.isPrimary ?? (i === 0),
+              sortOrder,
+            },
+          });
+        }
+      }
+    }
 
     // Relacionar categorías
     for (const catId of categories) {
