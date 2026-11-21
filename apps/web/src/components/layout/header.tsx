@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Menu, X, Search, ShoppingCart, User, Heart, Truck, RotateCcw, Shield, ChevronDown } from 'lucide-react';
@@ -24,10 +25,45 @@ const dropdownItems = [
   { name: 'Accesorios', href: '/tienda/categoria/accesorios', description: 'Morteros, molinillos, frascos' },
 ];
 
+// Componente para el contador del carrito que obtiene los datos dinámicamente
+function CartCount() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCartCount = async () => {
+      try {
+        const response = await fetch('/api/cart');
+        if (response.ok) {
+          const data = await response.json();
+          setCount(data.itemCount || 0);
+        }
+      } catch (error) {
+        console.error('Error fetching cart count:', error);
+      }
+    };
+
+    fetchCartCount();
+  }, []);
+
+  if (count === 0) return null;
+
+  return (
+    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-medium">
+      {count > 99 ? '99+' : count}
+    </span>
+  );
+}
+
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const router = useRouter();
+
+  const handleNavigate = (href: string) => {
+    router.push(href);
+    setMobileMenuOpen(false);
+  };
 
   return (
     <header className="sticky top-0 z-[300] w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
@@ -48,13 +84,13 @@ export function Header() {
           </span>
         </div>
         <div className="flex items-center gap-4">
-          <Link href="/login" className="text-muted-foreground hover:text-foreground transition-colors">
+          <Link href="/login" className="text-muted-foreground hover:text-foreground transition-colors" onClick={(e) => { e.preventDefault(); handleNavigate('/login'); }}>
             Iniciar sesión
           </Link>
-          <Link href="/register" className="text-muted-foreground hover:text-foreground transition-colors">
+          <Link href="/register" className="text-muted-foreground hover:text-foreground transition-colors" onClick={(e) => { e.preventDefault(); handleNavigate('/register'); }}>
             Registrarse
           </Link>
-          <Link href="/mi-cuenta" className="text-primary hover:text-primary-light transition-colors font-medium">
+          <Link href="/mi-cuenta" className="text-primary hover:text-primary-light transition-colors font-medium" onClick={(e) => { e.preventDefault(); handleNavigate('/mi-cuenta'); }}>
             Mi cuenta
           </Link>
         </div>
@@ -64,7 +100,7 @@ export function Header() {
       <nav className="container mx-auto px-4" aria-label="Navegación principal">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2" aria-label="Pizca del Monte - Inicio">
+          <Link href="/" className="flex items-center gap-2" aria-label="Pizca del Monte - Inicio" onClick={(e) => { e.preventDefault(); handleNavigate('/'); }}>
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
               <span className="text-primary-foreground font-heading font-bold text-xl">P</span>
             </div>
@@ -80,6 +116,7 @@ export function Header() {
                 key={item.name}
                 href={item.href}
                 className="px-4 py-2 text-body-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg"
+                onClick={(e) => { e.preventDefault(); handleNavigate(item.href); }}
               >
                 {item.name}
               </Link>
@@ -107,6 +144,7 @@ export function Header() {
                       key={item.name}
                       href={item.href}
                       className="flex items-start gap-3 px-3 py-2.5 rounded-lg text-body-sm hover:bg-muted transition-colors"
+                      onClick={(e) => { e.preventDefault(); handleNavigate(item.href); }}
                     >
                       <span className="font-medium text-foreground">{item.name}</span>
                       <span className="text-muted-foreground">{item.description}</span>
@@ -119,28 +157,18 @@ export function Header() {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="relative" asChild>
-              <Link href="/favoritos" aria-label="Favoritos">
-                <Heart className="h-5 w-5" />
-              </Link>
+            <Button variant="ghost" size="icon" className="relative" onClick={() => handleNavigate('/favoritos')} aria-label="Favoritos">
+              <Heart className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="relative" asChild>
-              <Link href="/carrito" aria-label="Carrito">
-                <ShoppingCart className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-medium">
-                  3
-                </span>
-              </Link>
+            <Button variant="ghost" size="icon" className="relative" onClick={() => handleNavigate('/carrito')} aria-label="Carrito">
+              <ShoppingCart className="h-5 w-5" />
+              <CartCount />
             </Button>
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="/mi-cuenta" aria-label="Mi cuenta">
-                <User className="h-5 w-5" />
-              </Link>
+            <Button variant="ghost" size="icon" onClick={() => handleNavigate('/mi-cuenta')} aria-label="Mi cuenta">
+              <User className="h-5 w-5" />
             </Button>
-            <Button variant="primary" size="sm" className="hidden sm:flex" asChild>
-              <Link href="/tienda">
-                Comprar
-              </Link>
+            <Button variant="primary" size="sm" className="hidden sm:flex" onClick={() => handleNavigate('/tienda')}>
+              Comprar
             </Button>
 
             {/* Mobile Menu Button */}
@@ -167,7 +195,7 @@ export function Header() {
                   key={item.name}
                   href={item.href}
                   className="px-3 py-2 text-body-md font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={(e) => { e.preventDefault(); handleNavigate(item.href); }}
                 >
                   {item.name}
                 </Link>
@@ -181,7 +209,7 @@ export function Header() {
                       key={item.name}
                       href={item.href}
                       className="px-3 py-2 text-body-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-                      onClick={() => setMobileMenuOpen(false)}
+                      onClick={(e) => { e.preventDefault(); handleNavigate(item.href); }}
                     >
                       {item.name}
                     </Link>
@@ -221,7 +249,7 @@ export function Header() {
                 <p className="text-body-sm text-muted-foreground mb-4">Categorías populares</p>
                 <div className="flex flex-wrap gap-2">
                   {['Ají Amarillo', 'Sal de Maras', 'Aceite de Oliva', 'Packs Regalo', 'Salsa Huancaína', 'Vinagre de Manzana'].map((cat) => (
-                    <Button key={cat} variant="outline" size="sm" className="gap-1">
+                    <Button key={cat} variant="outline" size="sm" className="gap-1" onClick={() => { handleNavigate(`/tienda?search=${encodeURIComponent(cat)}`); setSearchOpen(false); }}>
                       <Search className="h-3.5 w-3.5" />
                       {cat}
                     </Button>

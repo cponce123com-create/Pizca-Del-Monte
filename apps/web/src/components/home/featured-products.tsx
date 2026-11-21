@@ -1,10 +1,14 @@
 'use client';
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { ChevronRight, Tag, Package } from 'lucide-react';
+import { ChevronRight, Tag, Package, ShoppingBag } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const products = [
   {
@@ -96,16 +100,40 @@ function ProductCard({ product }: { product: typeof products[0] }) {
   const discount = product.compareAtPrice
     ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)
     : 0;
+  const [imageError, setImageError] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const handleQuickAdd = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toast({
+      title: 'Redirigiendo al producto',
+      description: 'Selecciona la variante y cantidad en la página del producto',
+      variant: 'default'
+    });
+    setTimeout(() => {
+      router.push(`/tienda/${product.slug}`);
+    }, 500);
+  };
 
   return (
     <Card className="group overflow-hidden h-full flex flex-col">
       <Link href={`/tienda/${product.slug}`} className="block relative aspect-square overflow-hidden">
-        <img
-          src={product.image}
-          alt={product.name}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
-        />
+        {!imageError ? (
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-muted">
+            <ShoppingBag className="h-12 w-12 text-muted-foreground/50" />
+          </div>
+        )}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5">
           {product.isNew && (
             <Badge variant="primary">Nuevo</Badge>
@@ -128,7 +156,8 @@ function ProductCard({ product }: { product: typeof products[0] }) {
             size="icon"
             variant="primary"
             className="rounded-full shadow-lg"
-            aria-label={`Agregar ${product.name} al carrito`}
+            onClick={handleQuickAdd}
+            aria-label={`Ver ${product.name} en la tienda`}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>

@@ -160,6 +160,45 @@ export function ProductDetailClient({ initialProduct }: ProductDetailClientProps
     }
   };
 
+  const handleToggleFavorite = () => {
+    const favorites = JSON.parse(localStorage.getItem('pizca-favorites') || '[]');
+    const productId = product.id;
+    const isFavorite = favorites.includes(productId);
+
+    if (isFavorite) {
+      const updated = favorites.filter((id: string) => id !== productId);
+      localStorage.setItem('pizca-favorites', JSON.stringify(updated));
+      toast({ title: 'Eliminado de favoritos', description: `${product.name} ya no está en tus favoritos`, variant: 'default' });
+    } else {
+      favorites.push(productId);
+      localStorage.setItem('pizca-favorites', JSON.stringify(favorites));
+      toast({ title: 'Agregado a favoritos', description: `${product.name} se guardó en tus favoritos`, variant: 'default' });
+    }
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: product.name,
+      text: product.shortDescription || 'Mira este producto de Pizca del Monte',
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        toast({ title: 'Compartido', description: 'Producto compartido correctamente', variant: 'default' });
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        toast({ title: 'Enlace copiado', description: 'El enlace del producto se copió al portapapeles', variant: 'default' });
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name !== 'AbortError') {
+        toast({ title: 'Error al compartir', description: 'No se pudo compartir el producto', variant: 'destructive' });
+      }
+    }
+  };
+
   const variant = selectedVariant || product;
   const hasDiscount = variant.discountPercent > 0;
   const images = variant.media.length > 0 ? variant.media : product.media;
@@ -471,11 +510,11 @@ export function ProductDetailClient({ initialProduct }: ProductDetailClientProps
                 </Button>
 
                 <div className="flex gap-3">
-                  <Button variant="outline" className="flex-1" size="lg">
+                  <Button variant="outline" className="flex-1" size="lg" onClick={handleToggleFavorite}>
                     <Heart className="mr-2 h-5 w-5" />
                     Favoritos
                   </Button>
-                  <Button variant="outline" className="flex-1" size="lg">
+                  <Button variant="outline" className="flex-1" size="lg" onClick={handleShare}>
                     <Share2 className="mr-2 h-5 w-5" />
                     Compartir
                   </Button>

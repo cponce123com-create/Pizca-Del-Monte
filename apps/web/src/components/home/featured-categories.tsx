@@ -1,8 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Package, Droplet, Leaf, Sparkles, Utensils, Wrench } from 'lucide-react';
 
 const categories = [
   {
@@ -12,6 +14,7 @@ const categories = [
     image: '/images/categories/especias.jpg',
     count: 24,
     color: 'from-forest-600 to-forest-800',
+    icon: Leaf,
   },
   {
     name: 'Sales Gourmet',
@@ -20,6 +23,7 @@ const categories = [
     image: '/images/categories/sales.jpg',
     count: 12,
     color: 'from-terracotta-500 to-terracotta-700',
+    icon: Droplet,
   },
   {
     name: 'Aceites y Vinagres',
@@ -28,6 +32,7 @@ const categories = [
     image: '/images/categories/aceites.jpg',
     count: 18,
     color: 'from-ochre-500 to-ochre-700',
+    icon: Package,
   },
   {
     name: 'Mezclas y Salsas',
@@ -36,6 +41,7 @@ const categories = [
     image: '/images/categories/salsas.jpg',
     count: 15,
     color: 'from-amber-500 to-amber-700',
+    icon: Utensils,
   },
   {
     name: 'Packs Gourmet',
@@ -44,6 +50,7 @@ const categories = [
     image: '/images/categories/packs.jpg',
     count: 8,
     color: 'from-rose-500 to-rose-700',
+    icon: Sparkles,
   },
   {
     name: 'Accesorios',
@@ -52,6 +59,7 @@ const categories = [
     image: '/images/categories/accesorios.jpg',
     count: 10,
     color: 'from-stone-500 to-stone-700',
+    icon: Wrench,
   },
 ];
 
@@ -78,29 +86,46 @@ export function FeaturedCategories() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {categories.map((category) => (
-            <article key={category.slug} className="group relative aspect-square overflow-hidden rounded-xl">
-              <Link href={`/tienda/categoria/${category.slug}`} className="block h-full">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10" />
-                <div className="absolute inset-0 bg-[var(--color)]/20" style={{ '--color': category.color.split(' ')[1] } as React.CSSProperties} />
-                <img
-                  src={category.image}
-                  alt={category.name}
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  loading="lazy"
-                />
-                <div className="relative z-20 p-6 h-full flex flex-col justify-end">
-                  <h3 className="text-heading-md font-semibold text-white">
-                    {category.name}
-                  </h3>
-                  <p className="text-body-sm text-white/80 mt-1">
-                    {category.count} productos
-                  </p>
-                </div>
-              </Link>
-            </article>
+            <CategoryCard key={category.slug} category={category} />
           ))}
         </div>
       </div>
     </section>
+  );
+}
+
+function CategoryCard({ category }: { category: typeof categories[0] }) {
+  const [imageError, setImageError] = useState(false);
+  const Icon = category.icon;
+
+  return (
+    <article className="group relative aspect-square overflow-hidden rounded-xl">
+      <Link href={`/tienda/categoria/${category.slug}`} className="block h-full">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10" />
+        <div className="absolute inset-0 bg-[var(--color)]/20" style={{ '--color': category.color.split(' ')[1] } as React.CSSProperties} />
+        {!imageError ? (
+          <Image
+            src={category.image}
+            alt={category.name}
+            fill
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 16.66vw"
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Icon className="h-16 w-16 text-white/50" />
+          </div>
+        )}
+        <div className="relative z-20 p-6 h-full flex flex-col justify-end">
+          <h3 className="text-heading-md font-semibold text-white">
+            {category.name}
+          </h3>
+          <p className="text-body-sm text-white/80 mt-1">
+            {category.count} productos
+          </p>
+        </div>
+      </Link>
+    </article>
   );
 }

@@ -1,10 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { ChevronRight, Clock, Users, Utensils, Flame } from 'lucide-react';
+import { ChevronRight, Clock, Users, Utensils, Flame, BookOpen } from 'lucide-react';
 
 const recipes = [
   {
@@ -77,15 +79,25 @@ export function FeaturedRecipes() {
 }
 
 function RecipeCard({ recipe }: { recipe: typeof recipes[0] }) {
+  const [imageError, setImageError] = useState(false);
+
   return (
     <Card className="group overflow-hidden h-full flex flex-col">
       <Link href={`/recetas/${recipe.slug}`} className="block relative aspect-video overflow-hidden">
-        <img
-          src={recipe.image}
-          alt={recipe.title}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
-        />
+        {!imageError ? (
+          <Image
+            src={recipe.image}
+            alt={recipe.title}
+            fill
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, 33vw"
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-muted">
+            <BookOpen className="h-12 w-12 text-muted-foreground/50" />
+          </div>
+        )}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5">
           <Badge variant="primary">{recipe.difficulty}</Badge>
         </div>

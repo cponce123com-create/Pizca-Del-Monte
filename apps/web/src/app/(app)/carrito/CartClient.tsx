@@ -455,7 +455,7 @@ function CartSummary({ subtotal, formattedSubtotal, itemCount }: { subtotal: num
             Incluye IGV. Envío calculado en el checkout.
           </p>
 
-          <Button className="w-full" size="lg" onClick={() => window.location.href = '/checkout'}>
+          <Button className="w-full" size="lg" onClick={() => router.push('/checkout')}>
             <ArrowRight className="mr-2 h-5 w-5" />
             Proceder al pago
           </Button>

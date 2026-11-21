@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2, Filter, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, ShoppingBag, Tag, Truck, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatPEN } from '@pizca/utils';
+import { useToast } from '@/hooks/use-toast';
 
 interface Product {
   id: string;
@@ -426,6 +427,32 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
 // Componentes auxiliares
 function ProductCard({ product }: { product: Product }) {
   const hasDiscount = product.discountPercent > 0;
+  const { toast } = useToast();
+  const [isAdding, setIsAdding] = useState(false);
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!product.inStock || isAdding) return;
+
+    setIsAdding(true);
+    try {
+      toast({
+        title: 'Redirigiendo al producto',
+        description: 'Selecciona la variante y cantidad en la página del producto',
+        variant: 'default'
+      });
+      setTimeout(() => {
+        window.location.href = `/producto/${product.slug}`;
+      }, 500);
+    } catch (error) {
+      console.error('Error:', error);
+      toast({ title: 'Error', description: 'No se pudo procesar la acción', variant: 'destructive' });
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   return (
     <Link href={`/producto/${product.slug}`} className="group block">
@@ -503,11 +530,12 @@ function ProductCard({ product }: { product: Product }) {
         <CardFooter className="p-0 px-4 pb-4">
           <Button
             className="w-full"
-            disabled={!product.inStock}
+            disabled={!product.inStock || isAdding}
+            onClick={handleAddToCart}
             aria-label={`Agregar ${product.name} al carrito`}
           >
             <ShoppingBag className="mr-2 h-4 w-4" />
-            {product.inStock ? 'Agregar al carrito' : 'Agotado'}
+            {isAdding ? 'Agregando...' : product.inStock ? 'Agregar al carrito' : 'Agotado'}
           </Button>
         </CardFooter>
       </Card>
