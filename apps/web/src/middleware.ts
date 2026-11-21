@@ -1,50 +1,24 @@
 import NextAuth from 'next-auth';
 import { NextResponse } from 'next/server';
-// Edge middleware must not import the server-side auth configuration (Prisma/bcryptjs).
-// JWT sessions are verified with the same AUTH_SECRET as the server.
+
+// Middleware Edge: nunca importar Prisma ni bcryptjs aquí.
 const { auth } = NextAuth({
   providers: [],
   session: { strategy: 'jwt' },
   pages: { signIn: '/login', error: '/login' },
 });
 
-// Rutas que requieren autenticación
-const protectedRoutes = ['/cuenta', '/checkout', '/pedidos', '/direcciones', '/favoritos'];
-
-// Rutas públicas (no requieren autenticación)
-const publicRoutes = ['/login', '/registro', '/recuperar-contrasena', '/api/auth'];
-
+const protectedRoutes = ['/cuenta', '/pedidos', '/direcciones', '/favoritos'];
 export default auth((req) => {
-  const { nextUrl } = req;
-  const isLoggedIn = !!req.auth;
-  const isProtected = protectedRoutes.some((route) => nextUrl.pathname.startsWith(route));
-  const isPublic = publicRoutes.some((route) => nextUrl.pathname.startsWith(route));
-
-  // Si la ruta está protegida y el usuario no está logueado
-  if (isProtected && !isLoggedIn) {
-    const loginUrl = new URL('/login', nextUrl);
-    loginUrl.searchParams.set('callbackUrl', nextUrl.pathname);
-    return NextResponse.redirect(loginUrl);
+  const pathname = req.nextUrl.pathname;
+  const isProtected = protectedRoutes.some((route) => pathname === route || pathname.startsWith(route + '/'));
+  if (isProtected && !req.auth) {
+    const url = new URL('/login', req.nextUrl);
+    url.searchParams.set('callbackUrl', pathname);
+    return NextResponse.redirect(url);
   }
-
-  // Si el usuario está logueado y intenta acceder a login/registro, redirigir a cuenta
-  if (isLoggedIn && (nextUrl.pathname.startsWith('/login') || nextUrl.pathname.startsWith('/registro'))) {
-    return NextResponse.redirect(new URL('/cuenta', nextUrl));
-  }
-
+  // El checkout será público cuando se implemente la compra como invitado en Fase 1.
+  // Por ahora, el endpoint de checkout sigue requiriendo sesión.
   return NextResponse.next();
 });
-
-export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     * - api routes that don't need auth
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\.png$|.*\.jpg$|.*\.svg$|.*\.ico$|public|api/(?!auth)).*)',
-  ],
-};
+export const config = { matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)'] };

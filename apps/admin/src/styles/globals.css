@@ -60,15 +60,15 @@
   }
 
   .card {
-    @apply rounded-xl border bg-background shadow-card transition-all duration-300 hover:shadow-card-hover;
+    @apply rounded-xl border bg-background shadow-sm transition-all duration-300 hover:shadow-md;
   }
 
   .input {
-    @apply w-full rounded-lg border border-border bg-background px-4 py-2.5 text-body-md placeholder:text-muted-foreground transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply w-full rounded-lg border border-border bg-background px-4 py-2.5 text-base placeholder:text-muted-foreground transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .label {
-    @apply block text-body-sm font-medium text-foreground mb-1.5;
+    @apply block text-sm font-medium text-foreground mb-1.5;
   }
 
   .badge {

@@ -2,27 +2,26 @@
   "name": "pizca-del-monte",
   "version": "0.0.0",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=20 <23"
+  },
   "scripts": {
-    "dev": "concurrently \"npm run dev:web\" \"npm run dev:admin\"",
-    "dev:web": "npm run dev --workspace=apps/web",
-    "dev:admin": "npm run dev --workspace=apps/admin",
-    "build": "npm run build --workspaces",
-    "build:web": "npm run build --workspace=apps/web",
-    "build:admin": "npm run build --workspace=apps/admin",
-    "lint": "npm run lint --workspaces",
-    "type-check": "npm run type-check --workspaces",
-    "db:generate": "npm run db:generate --workspace=packages/database",
-    "db:push": "npm run db:push --workspace=packages/database",
-    "db:migrate": "npm run db:migrate --workspace=packages/database",
-    "db:seed": "npm run db:seed --workspace=packages/database",
-    "db:studio": "npm run db:studio --workspace=packages/database",
-    "test": "npm run test --workspaces",
-    "test:e2e": "npm run test:e2e --workspace=apps/web",
-    "prepare": "husky install"
+    "dev": "concurrently \"pnpm dev:web\" \"pnpm dev:admin\"",
+    "dev:web": "pnpm --filter @pizca/web dev",
+    "dev:admin": "pnpm --filter @pizca/admin dev",
+    "build": "pnpm -r --if-present build",
+    "build:web": "pnpm --filter @pizca/web build",
+    "build:admin": "pnpm --filter @pizca/admin build",
+    "lint": "pnpm -r --if-present lint",
+    "type-check": "pnpm -r --if-present type-check",
+    "db:generate": "pnpm --filter @pizca/database db:generate",
+    "db:push": "pnpm --filter @pizca/database db:push",
+    "db:migrate": "pnpm --filter @pizca/database db:migrate",
+    "db:seed": "pnpm --filter @pizca/database db:seed",
+    "db:studio": "pnpm --filter @pizca/database db:studio",
+    "test": "pnpm -r --if-present test",
+    "test:e2e": "pnpm --filter @pizca/web test:e2e"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
@@ -30,8 +29,10 @@
     "husky": "^9.0.11",
     "typescript": "^5.5.0"
   },
-  "engines": {
-    "node": ">=20.0.0"
-  },
-  "packageManager": "pnpm@9.15.9"
+  "pnpm": {
+    "overrides": {
+      "postcss": "^8.5.18",
+      "zod": "^4.6.6"
+    }
+  }
 }

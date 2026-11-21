@@ -61,13 +61,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'es_PE',
-    url: 'https://pizcadelmonte.pe',
+    url: 'https://pizca-del-monte.onrender.com',
     siteName: 'Pizca del Monte',
     title: 'Pizca del Monte - Especias, Sales y Aceites Gourmet Peruanos',
     description: 'Descubre la mejor selección de especias, sales de Maras, aceites de oliva y productos gourmet peruanos. Envío a todo el Perú.',
     images: [
       {
-        url: '/images/og-default.jpg',
+        url: '/opengraph-image',
         width: 1200,
         height: 630,
         alt: 'Pizca del Monte - Productos Gourmet Peruanos',
@@ -78,18 +78,16 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Pizca del Monte - Especias, Sales y Aceites Gourmet Peruanos',
     description: 'Descubre la mejor selección de especias, sales de Maras, aceites de oliva y productos gourmet peruanos.',
-    images: ['/images/og-default.jpg'],
-    creator: '@pizcadelmonte',
+    images: ['/opengraph-image'],
+    
   },
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon-16x16.png',
-    apple: '/apple-touch-icon.png',
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/apple-icon.svg',
   },
   manifest: '/site.webmanifest',
-  verification: {
-    google: 'google-site-verification-code',
-  },
+
 };
 
 export const viewport: Viewport = {
