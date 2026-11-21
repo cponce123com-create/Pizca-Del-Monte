@@ -39,6 +39,8 @@ jobs:
         run: pnpm --filter @pizca/utils type-check && pnpm --filter @pizca/database type-check
       - name: Test web
         run: pnpm --filter @pizca/web exec jest --runInBand
+      - name: Test admin
+        run: pnpm --filter @pizca/admin exec jest --runInBand
       - name: Build web
         run: pnpm --filter @pizca/web build
       - name: Build admin
