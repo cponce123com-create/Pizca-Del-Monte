@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, ShoppingBag, Trash2, Heart, Plus, Minus, ChevronLeft, ChevronRight, ArrowRight, Gift, Truck, RotateCcw, Shield, X } from 'lucide-react';
+import { Loader2, ShoppingBag, Trash2, Heart, Plus, Minus, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatPEN } from '@pizca/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -229,10 +229,8 @@ export function CartClient() {
           {/* Resumen del carrito */}
           <div className="lg:col-span-1">
             <CartSummary
-              subtotal={cart.subtotal}
               formattedSubtotal={cart.formattedSubtotal}
               itemCount={cart.itemCount}
-              router={router}
             />
           </div>
         </div>
@@ -397,85 +395,25 @@ function CartItemCard({
   );
 }
 
-function CartSummary({ subtotal, formattedSubtotal, itemCount, router }: { subtotal: number; formattedSubtotal: string; itemCount: number; router: ReturnType<typeof useRouter> }) {
-  const shipping = subtotal >= 200 ? 0 : 15;
-  const tax = Math.round((subtotal + shipping) * 0.18 * 100) / 100;
-  const total = subtotal + shipping + tax;
-
+function CartSummary({ formattedSubtotal, itemCount }: { formattedSubtotal: string; itemCount: number }) {
   return (
     <div className="sticky top-24">
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-heading-md">Resumen del pedido</CardTitle>
+          <CardTitle className="text-heading-md">Resumen del carrito</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-3">
-            <div className="flex justify-between text-body-md">
-              <span>Subtotal ({itemCount} art.)</span>
-              <span className="font-medium">{formattedSubtotal}</span>
-            </div>
-            <div className="flex justify-between text-body-md">
-              <span className="flex items-center gap-2">
-                <Truck className="h-4 w-4" />
-                Envío
-              </span>
-              <span className="font-medium">
-                {shipping === 0 ? (
-                  <span className="text-success flex items-center gap-1">
-                    <Gift className="h-3.5 w-3.5" />
-                    Gratis
-                  </span>
-                ) : (
-                  formatPEN(shipping)
-                )}
-              </span>
-            </div>
-            {subtotal < 200 && (
-              <p className="text-body-xs text-muted-foreground flex items-center gap-1">
-                <Gift className="h-3.5 w-3.5" />
-                Agrega {formatPEN(200 - subtotal)} más para envío gratis
-              </p>
-            )}
-            <div className="flex justify-between text-body-md">
-              <span className="flex items-center gap-2">
-                <Shield className="h-4 w-4" />
-                IGV (18%)
-              </span>
-              <span className="font-medium">{formatPEN(tax)}</span>
-            </div>
+          <div className="flex justify-between text-body-md">
+            <span>Productos ({itemCount} art.)</span>
+            <span className="font-medium">{formattedSubtotal}</span>
           </div>
-
           <Separator />
-
-          <div className="flex justify-between text-display-sm font-heading font-semibold">
-            <span>Total</span>
-            <span>{formatPEN(total)}</span>
-          </div>
-
-          <p className="text-body-xs text-muted-foreground text-center">
-            Incluye IGV. Envío calculado en el checkout.
+          <p className="text-body-sm text-muted-foreground">
+            Estamos preparando las compras en línea. El pago y las tarifas de envío aún no están disponibles.
           </p>
-
-          <Button className="w-full" size="lg" onClick={() => router.push('/checkout')}>
-            <ArrowRight className="mr-2 h-5 w-5" />
-            Proceder al pago
+          <Button className="w-full" size="lg" asChild>
+            <Link href="/tienda">Seguir explorando</Link>
           </Button>
-
-          {/* Beneficios */}
-          <div className="border-t pt-4 space-y-3">
-            <div className="flex items-center gap-3 text-body-sm text-muted-foreground">
-              <Shield className="h-5 w-5 text-primary" />
-              <span>Pago seguro y encriptado</span>
-            </div>
-            <div className="flex items-center gap-3 text-body-sm text-muted-foreground">
-              <RotateCcw className="h-5 w-5 text-primary" />
-              <span>Devoluciones en 30 días</span>
-            </div>
-            <div className="flex items-center gap-3 text-body-sm text-muted-foreground">
-              <Truck className="h-5 w-5 text-primary" />
-              <span>Envío a todo el Perú</span>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>
