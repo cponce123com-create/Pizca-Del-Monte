@@ -1,287 +1,78 @@
-'use client';
-
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Facebook, Instagram, Music2 as Tiktok, MessageCircle as Whatsapp, Youtube, Mail, MapPin, Phone, Truck, Shield, RotateCcw, Heart } from 'lucide-react';
+import { Facebook, Instagram, Music2, Youtube, Mail, MapPin, BookOpen, ShoppingBag } from 'lucide-react';
+import { siteConfig } from '@/lib/site-config';
 
-const footerLinks = {
-  empresa: [
-    { name: 'Nuestra Historia', href: '/nuestra-historia' },
-    { name: 'Contacto', href: '/contacto' },
-    { name: 'Trabaja con nosotros', href: '/trabaja-con-nosotros' },
-    { name: 'Prensa', href: '/prensa' },
-    { name: 'Sostenibilidad', href: '/sostenibilidad' },
-  ],
-  ayuda: [
-    { name: 'Preguntas Frecuentes', href: '/preguntas-frecuentes' },
-    { name: 'Envíos y Cobertura', href: '/envios-y-cobertura' },
-    { name: 'Cambios y Devoluciones', href: '/cambios-y-devoluciones' },
-    { name: 'Medios de Pago', href: '/medios-de-pago' },
-    { name: 'Facturación Electrónica', href: '/facturacion-electronica' },
-  ],
-  legal: [
-    { name: 'Términos y Condiciones', href: '/terminos-y-condiciones' },
-    { name: 'Política de Privacidad', href: '/politica-de-privacidad' },
-    { name: 'Política de Cookies', href: '/politica-de-cookies' },
-    { name: 'Libro de Reclamaciones', href: '/libro-de-reclamaciones' },
-  ],
-  cuenta: [
-    { name: 'Mi Cuenta', href: '/mi-cuenta' },
-    { name: 'Mis Pedidos', href: '/mis-pedidos' },
-    { name: 'Mis Direcciones', href: '/mis-direcciones' },
-    { name: 'Mis Favoritos', href: '/favoritos' },
-    { name: 'Lista de Deseos', href: '/lista-deseos' },
-  ],
-};
+const groups = [
+  { title: 'Empresa', links: [
+    ['Nuestra historia', '/nuestra-historia'], ['Contacto', '/contacto'],
+    ['Sostenibilidad', '/sostenibilidad'], ['Prensa', '/prensa'],
+    ['Trabaja con nosotros', '/trabaja-con-nosotros'],
+  ] },
+  { title: 'Ayuda', links: [
+    ['Preguntas frecuentes', '/preguntas-frecuentes'], ['Envíos y cobertura', '/envios-y-cobertura'],
+    ['Cambios y devoluciones', '/cambios-y-devoluciones'], ['Medios de pago', '/medios-de-pago'],
+    ['Facturación electrónica', '/facturacion-electronica'],
+  ] },
+  { title: 'Información legal', links: [
+    ['Términos y condiciones', '/terminos-y-condiciones'], ['Privacidad', '/politica-de-privacidad'],
+    ['Cookies', '/politica-de-cookies'], ['Libro de Reclamaciones', '/libro-de-reclamaciones'],
+  ] },
+  { title: 'Mi cuenta', links: [
+    ['Mi cuenta', '/mi-cuenta'], ['Mis pedidos', '/mis-pedidos'],
+    ['Mis direcciones', '/mis-direcciones'], ['Favoritos', '/favoritos'],
+  ] },
+] as const;
 
-const socialLinks = [
-  { name: 'Facebook', href: 'https://facebook.com/pizcadelmonte', icon: Facebook },
-  { name: 'Instagram', href: 'https://instagram.com/pizcadelmonte', icon: Instagram },
-  { name: 'TikTok', href: 'https://tiktok.com/@pizcadelmonte', icon: Tiktok },
-  { name: 'WhatsApp', href: 'https://wa.me/51999888777', icon: Whatsapp },
-  { name: 'YouTube', href: 'https://youtube.com/@pizcadelmonte', icon: Youtube },
-];
-
-const paymentMethods = [
-  { name: 'Mercado Pago', icon: Shield },
-  { name: 'Yape', icon: Phone },
-  { name: 'Plin', icon: Phone },
-  { name: 'Transferencia', icon: RotateCcw },
-  { name: 'Visa', icon: Shield },
-  { name: 'Mastercard', icon: Shield },
-];
+const social = [
+  { name: 'Facebook', href: siteConfig.social.facebook, Icon: Facebook },
+  { name: 'Instagram', href: siteConfig.social.instagram, Icon: Instagram },
+  { name: 'TikTok', href: siteConfig.social.tiktok, Icon: Music2 },
+  { name: 'YouTube', href: siteConfig.social.youtube, Icon: Youtube },
+].filter((item): item is typeof item & { href: string } => Boolean(item.href));
 
 export function Footer() {
   return (
     <footer className="border-t border-border bg-muted/30" role="contentinfo">
-      <div className="container py-16 lg:py-24">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 mb-12">
-          {/* Brand */}
-          <div className="lg:col-span-2">
-            <Link href="/" className="flex items-center gap-2 mb-4" aria-label="Pizca del Monte - Inicio">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
-                <span className="text-primary-foreground font-heading font-bold text-xl">P</span>
-              </div>
-              <span className="font-heading font-semibold text-heading-sm text-foreground">
-                Pizca del Monte
-              </span>
+      <div className="container py-12 lg:py-16">
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-6">
+          <div className="col-span-2">
+            <Link href="/" className="inline-flex items-center gap-3 font-heading text-xl font-bold">
+              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">P</span>
+              {siteConfig.name}
             </Link>
-            <p className="text-body-md text-muted-foreground mb-6 max-w-xs">
-              Especias, sales y aceites gourmet peruanos seleccionados con amor.
-              Llevamos la despensa andina y costeña a tu mesa.
+            <p className="mt-4 max-w-sm text-sm leading-7 text-muted-foreground">
+              Explora especias, sales y aceites gourmet para descubrir nuevas formas de cocinar.
             </p>
-            <div className="flex flex-wrap gap-2 mb-6">
-              <Badge variant="outline">100% Peruano</Badge>
-              <Badge variant="outline">Origen Certificado</Badge>
-              <Badge variant="outline">Sin Aditivos</Badge>
-              <Badge variant="outline">Comercio Justo</Badge>
-            </div>
-            <div className="flex items-center gap-6">
-              <a
-                href="https://facebook.com/pizcadelmonte"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="Facebook"
-              >
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a
-                href="https://instagram.com/pizcadelmonte"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="Instagram"
-              >
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a
-                href="https://tiktok.com/@pizcadelmonte"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="TikTok"
-              >
-                <Tiktok className="h-5 w-5" />
-              </a>
-              <a
-                href="https://wa.me/51999888777"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="WhatsApp"
-              >
-                <Whatsapp className="h-5 w-5" />
-              </a>
-              <a
-                href="https://youtube.com/@pizcadelmonte"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="YouTube"
-              >
-                <Youtube className="h-5 w-5" />
-              </a>
-            </div>
+            {siteConfig.email && <a href={`mailto:${siteConfig.email}`} className="mt-4 flex items-center gap-2 text-sm hover:text-primary"><Mail className="h-4 w-4" />{siteConfig.email}</a>}
+            {siteConfig.address && <p className="mt-3 flex items-start gap-2 text-sm text-muted-foreground"><MapPin className="mt-0.5 h-4 w-4 shrink-0" />{siteConfig.address}</p>}
+            {social.length > 0 && (
+              <div className="mt-5 flex flex-wrap gap-4">
+                {social.map(({ name, href, Icon }) => <a key={name} href={href} target="_blank" rel="noopener noreferrer" aria-label={name} className="text-muted-foreground hover:text-primary"><Icon className="h-5 w-5" /></a>)}
+              </div>
+            )}
           </div>
-
-          {/* Empresa */}
-          <nav aria-label="Empresa">
-            <h3 className="font-semibold text-foreground mb-4">Empresa</h3>
-            <ul className="space-y-2">
-              {footerLinks.empresa.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-body-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
-          {/* Ayuda */}
-          <nav aria-label="Ayuda">
-            <h3 className="font-semibold text-foreground mb-4">Ayuda</h3>
-            <ul className="space-y-2">
-              {footerLinks.ayuda.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-body-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
-          {/* Legal */}
-          <nav aria-label="Legal">
-            <h3 className="font-semibold text-foreground mb-4">Legal</h3>
-            <ul className="space-y-2">
-              {footerLinks.legal.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-body-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
-          {/* Cuenta */}
-          <nav aria-label="Mi Cuenta">
-            <h3 className="font-semibold text-foreground mb-4">Mi Cuenta</h3>
-            <ul className="space-y-2">
-              {footerLinks.cuenta.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-body-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          {groups.map(group => (
+            <nav key={group.title} aria-label={group.title}>
+              <h2 className="mb-4 text-sm font-semibold">{group.title}</h2>
+              <ul className="space-y-3">
+                {group.links.map(([name, href]) => <li key={href}><Link href={href} className="text-sm text-muted-foreground hover:text-primary">{name}</Link></li>)}
+              </ul>
+            </nav>
+          ))}
         </div>
-
-        {/* Benefits & Payment */}
-        <div className="border-t border-border pt-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
-            <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Truck className="h-5 w-5" />
-              </div>
-              <div>
-                <h4 className="font-semibold text-foreground">Envío Nacional</h4>
-                <p className="text-body-sm text-muted-foreground">Con Shalom a todo el Perú</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Shield className="h-5 w-5" />
-              </div>
-              <div>
-                <h4 className="font-semibold text-foreground">Pago Seguro</h4>
-                <p className="text-body-sm text-muted-foreground">Mercado Pago, Yape, Plin</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <RotateCcw className="h-5 w-5" />
-              </div>
-              <div>
-                <h4 className="font-semibold text-foreground">Devoluciones Fáciles</h4>
-                <p className="text-body-sm text-muted-foreground">30 días para cambios</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Heart className="h-5 w-5" />
-              </div>
-              <div>
-                <h4 className="font-semibold text-foreground">Calidad Garantizada</h4>
-                <p className="text-body-sm text-muted-foreground">Productos 100% peruanos</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Payment Methods */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 pb-8 border-b border-border">
-            <div className="flex items-center gap-4 flex-wrap">
-              <span className="text-body-sm text-muted-foreground">Métodos de pago:</span>
-              <div className="flex items-center gap-3">
-                {paymentMethods.map((method) => (
-                  <span key={method.name} className="flex items-center gap-1.5 text-body-sm text-muted-foreground">
-                    <method.icon className="h-4 w-4" />
-                    {method.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="flex items-center gap-4 flex-wrap">
-              <span className="text-body-sm text-muted-foreground">Envíos por:</span>
-              <div className="flex items-center gap-3">
-                <Badge variant="outline">Shalom</Badge>
-                <Badge variant="outline">Olva Courier</Badge>
-                <Badge variant="outline">Serpost</Badge>
-                <Badge variant="outline">Recojo en tienda</Badge>
-              </div>
-            </div>
-          </div>
-
-          {/* Copyright */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8">
-            <p className="text-body-sm text-muted-foreground text-center md:text-left">
-              © {new Date().getFullYear()} Pizca del Monte SAC. Todos los derechos reservados.
-              RUC: 20123456789
-            </p>
-            <div className="flex items-center gap-6 text-body-xs text-muted-foreground flex-wrap justify-center md:justify-end">
-              <span>Hecho con amor en Perú 🇵🇪</span>
-              <span>·</span>
-              <Link href="/terminos-y-condiciones" className="hover:text-foreground transition-colors">
-                Términos
-              </Link>
-              <span>·</span>
-              <Link href="/politica-de-privacidad" className="hover:text-foreground transition-colors">
-                Privacidad
-              </Link>
-              <span>·</span>
-              <Link href="/libro-de-reclamaciones" className="hover:text-foreground transition-colors">
-                Libro de Reclamaciones
-              </Link>
-            </div>
-          </div>
+        <div className="mt-10 grid gap-4 border-t border-border pt-8 sm:grid-cols-2">
+          <Link href="/tienda" className="flex items-center gap-3 rounded-xl border border-border p-4 hover:bg-muted">
+            <ShoppingBag className="h-5 w-5 text-primary" />
+            <span><strong className="block text-sm">Explora la tienda</strong><span className="text-xs text-muted-foreground">Productos y presentaciones disponibles</span></span>
+          </Link>
+          <Link href="/recetas" className="flex items-center gap-3 rounded-xl border border-border p-4 hover:bg-muted">
+            <BookOpen className="h-5 w-5 text-primary" />
+            <span><strong className="block text-sm">Ideas para cocinar</strong><span className="text-xs text-muted-foreground">Recetas e inspiración</span></span>
+          </Link>
+        </div>
+        <div className="mt-8 flex flex-col gap-3 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <span>© {new Date().getFullYear()} {siteConfig.legalName ?? siteConfig.name}. Todos los derechos reservados.{siteConfig.ruc ? ` RUC: ${siteConfig.ruc}` : ''}</span>
+          <span>Los medios de pago, tarifas y condiciones se confirman antes de comprar.</span>
         </div>
       </div>
     </footer>
