@@ -4,17 +4,17 @@ import { z } from 'zod';
 import { formatPEN } from '@pizca/utils';
 
 const querySchema = z.object({
-  page: z.coerce.number().positive().default(1),
-  limit: z.coerce.number().positive().max(100).default(12),
+  page: z.coerce.number().int().positive().max(100000).default(1),
+  limit: z.coerce.number().int().positive().max(100).default(12),
   sort: z.enum(['newest', 'price_asc', 'price_desc', 'name_asc', 'name_desc', 'popular']).default('newest'),
   category: z.string().optional(),
   brand: z.string().optional(),
   minPrice: z.coerce.number().nonnegative().optional(),
   maxPrice: z.coerce.number().nonnegative().optional(),
-  search: z.string().optional(),
-  inStock: z.coerce.boolean().optional(),
-  featured: z.coerce.boolean().optional(),
-  onSale: z.coerce.boolean().optional(),
+  search: z.string().trim().max(120).optional(),
+  inStock: z.enum(['true', 'false']).transform(value => value === 'true').optional(),
+  featured: z.enum(['true', 'false']).transform(value => value === 'true').optional(),
+  onSale: z.enum(['true', 'false']).transform(value => value === 'true').optional(),
 });
 
 export const dynamic = 'force-dynamic';
@@ -32,6 +32,9 @@ export async function GET(request: NextRequest) {
     }
 
     const { page, limit, sort, category, brand, minPrice, maxPrice, search, inStock, featured, onSale } = parsed.data;
+    if (minPrice !== undefined && maxPrice !== undefined && minPrice > maxPrice) {
+      return NextResponse.json({ error: 'El precio mínimo no puede superar al máximo' }, { status: 400 });
+    }
     const skip = (page - 1) * limit;
 
     // Construir where
