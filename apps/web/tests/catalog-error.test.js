@@ -12,3 +12,14 @@ test('muestra un error recuperable si falla la carga', async () => {
   expect(await screen.findByText('No se encontraron productos')).toBeTruthy();
   expect(screen.queryByRole('alert')).toBeNull();
 });
+
+test('filtros móviles se cierran con Escape y devuelven el foco', async () => {
+  global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ products: [], pagination: { page: 1, limit: 12, total: 0, totalPages: 0, hasNext: false, hasPrev: false } }) });
+  render(<ProductCatalogClient initialParams={{}} />);
+  const trigger = screen.getByRole('button', { name: 'Abrir filtros' });
+  fireEvent.click(trigger);
+  expect(screen.getByRole('dialog', { name: 'Filtros de productos' }).getAttribute('aria-modal')).toBe('true');
+  fireEvent.keyDown(document, { key: 'Escape' });
+  expect(screen.queryByRole('dialog', { name: 'Filtros de productos' })).toBeNull();
+  expect(document.activeElement).toBe(trigger);
+});

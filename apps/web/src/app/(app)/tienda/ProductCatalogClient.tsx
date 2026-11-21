@@ -95,6 +95,24 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
+  const filterPanelRef = useRef<HTMLElement>(null);
+  const filterButtonRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!showFilters) return;
+    const panel = filterPanelRef.current;
+    panel?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { event.preventDefault(); setShowFilters(false); filterButtonRef.current?.focus(); return; }
+      if (event.key !== 'Tab' || !panel) return;
+      const focusable = Array.from(panel.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])')).filter(element => element.offsetParent !== null);
+      if (!focusable.length) { event.preventDefault(); panel.focus(); return; }
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (event.shiftKey && (document.activeElement === first || document.activeElement === panel)) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [showFilters]);
   const [error, setError] = useState(false);
   const requestVersion = useRef(0);
   const query = searchParams.toString();
@@ -147,7 +165,7 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
       <div className="border-b bg-white sticky top-0 z-40 lg:hidden">
         <div className="flex items-center justify-between p-4">
           <h1 className="text-heading-md font-heading font-semibold">Tienda</h1>
-          <Button variant="outline" size="icon" onClick={() => setShowFilters(true)}>
+          <Button ref={filterButtonRef} variant="outline" size="icon" aria-label="Abrir filtros" onClick={() => setShowFilters(true)}>
             <Filter className="h-5 w-5" />
           </Button>
         </div>
@@ -155,7 +173,7 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
 
       <div className="flex">
         {/* Sidebar de filtros */}
-        <aside className={cn(
+        <aside ref={filterPanelRef} role={showFilters ? 'dialog' : undefined} aria-modal={showFilters ? true : undefined} aria-label="Filtros de productos" tabIndex={-1} className={cn(
           'fixed inset-y-0 left-0 z-50 w-72 bg-white border-r lg:static lg:relative lg:z-auto lg:inset-0 lg:w-64',
           showFilters ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}>
@@ -163,7 +181,7 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
             {/* Header del sidebar */}
             <div className="flex items-center justify-between p-4 border-b lg:hidden">
               <h2 className="text-heading-sm font-heading font-semibold">Filtros</h2>
-              <Button variant="ghost" size="icon" onClick={() => setShowFilters(false)}>
+              <Button variant="ghost" size="icon" aria-label="Cerrar filtros" onClick={() => { setShowFilters(false); filterButtonRef.current?.focus(); }}>
                 <X className="h-5 w-5" />
               </Button>
             </div>
