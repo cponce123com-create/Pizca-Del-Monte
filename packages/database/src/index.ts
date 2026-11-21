@@ -83,37 +83,41 @@ export const prismaWithExtensions = prisma.$extends({
     // Helpers para Inventory
     inventoryItem: {
       async reserveStock(productId: string, quantity: number, variantId?: string, lotId?: string) {
+        if (!Number.isSafeInteger(quantity) || quantity <= 0) throw new Error('Cantidad inválida');
+        if (lotId) throw new Error('La reserva por lote aún no está implementada');
+        const where = variantId ? { variantId } : { productId };
         return prisma.$transaction(async (tx) => {
-          const where = variantId ? { variantId } : { productId };
-          const item = await tx.inventoryItem.findUnique({ where });
-          if (!item) throw new Error('Inventario no encontrado');
-          const available = item.availableQty - (lotId ? 0 : 0); // TODO: lógica por lote
-          if (available < quantity) throw new Error('Stock insuficiente');
-          return tx.inventoryItem.update({
-            where: { id: item.id },
+          const changed = await tx.inventoryItem.updateMany({
+            where: { ...where, availableQty: { gte: quantity } },
             data: { reservedQty: { increment: quantity }, availableQty: { decrement: quantity } },
           });
+          if (changed.count !== 1) throw new Error('Inventario no encontrado o stock insuficiente');
+          return tx.inventoryItem.findUniqueOrThrow({ where });
         });
       },
       async releaseReservation(productId: string, quantity: number, variantId?: string) {
+        if (!Number.isSafeInteger(quantity) || quantity <= 0) throw new Error('Cantidad inválida');
         const where = variantId ? { variantId } : { productId };
-        const item = await prisma.inventoryItem.findUnique({ where });
-        if (!item) return;
-        return prisma.inventoryItem.update({
-          where: { id: item.id },
-          data: { reservedQty: { decrement: quantity }, availableQty: { increment: quantity } },
+        return prisma.$transaction(async (tx) => {
+          const changed = await tx.inventoryItem.updateMany({
+            where: { ...where, reservedQty: { gte: quantity } },
+            data: { reservedQty: { decrement: quantity }, availableQty: { increment: quantity } },
+          });
+          if (changed.count !== 1) throw new Error('Inventario no encontrado o reserva insuficiente');
+          return tx.inventoryItem.findUniqueOrThrow({ where });
         });
       },
       async confirmSale(productId: string, quantity: number, variantId?: string, lotId?: string) {
+        if (!Number.isSafeInteger(quantity) || quantity <= 0) throw new Error('Cantidad inválida');
+        if (lotId) throw new Error('La venta por lote aún no está implementada');
+        const where = variantId ? { variantId } : { productId };
         return prisma.$transaction(async (tx) => {
-          const where = variantId ? { variantId } : { productId };
-          const item = await tx.inventoryItem.findUnique({ where });
-          if (!item) throw new Error('Inventario no encontrado');
-          // Decrementar reserved y quantity
-          return tx.inventoryItem.update({
-            where: { id: item.id },
+          const changed = await tx.inventoryItem.updateMany({
+            where: { ...where, quantity: { gte: quantity }, reservedQty: { gte: quantity } },
             data: { quantity: { decrement: quantity }, reservedQty: { decrement: quantity } },
           });
+          if (changed.count !== 1) throw new Error('Inventario no encontrado o reserva insuficiente');
+          return tx.inventoryItem.findUniqueOrThrow({ where });
         });
       },
     },
