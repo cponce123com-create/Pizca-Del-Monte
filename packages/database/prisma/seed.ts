@@ -107,10 +107,10 @@ async function main() {
     // General
     { key: 'store_name', value: 'Pizca del Monte', type: 'string', group: 'general', label: 'Nombre de la tienda', isPublic: true },
     { key: 'store_description', value: 'Especias, sales, aceites y productos gourmet peruanos de la más alta calidad', type: 'string', group: 'general', label: 'Descripción', isPublic: true },
-    { key: 'store_email', value: 'hola@pizcadelmonte.pe', type: 'string', group: 'general', label: 'Email de contacto', isPublic: true },
-    { key: 'store_phone', value: '+51 1 234 5678', type: 'string', group: 'general', label: 'Teléfono', isPublic: true },
-    { key: 'store_address', value: 'Av. Javier Prado Este 1234, San Isidro, Lima, Perú', type: 'string', group: 'general', label: 'Dirección física', isPublic: true },
-    { key: 'store_ruc', value: '20123456789', type: 'string', group: 'general', label: 'RUC', isPublic: true },
+    { key: 'store_email', value: '', type: 'string', group: 'general', label: 'Email de contacto', isPublic: true },
+    { key: 'store_phone', value: '', type: 'string', group: 'general', label: 'Teléfono', isPublic: true },
+    { key: 'store_address', value: '', type: 'string', group: 'general', label: 'Dirección física', isPublic: true },
+    { key: 'store_ruc', value: '', type: 'string', group: 'general', label: 'RUC', isPublic: true },
     { key: 'default_currency', value: 'PEN', type: 'string', group: 'general', label: 'Moneda por defecto', isPublic: true },
     { key: 'default_locale', value: 'es-PE', type: 'string', group: 'general', label: 'Idioma por defecto', isPublic: true },
     { key: 'timezone', value: 'America/Lima', type: 'string', group: 'general', label: 'Zona horaria', isPublic: true },
@@ -129,21 +129,21 @@ async function main() {
     { key: 'guest_checkout', value: true, type: 'boolean', group: 'checkout', label: 'Permitir compra como invitado', isPublic: true },
     { key: 'require_phone', value: true, type: 'boolean', group: 'checkout', label: 'Requerir teléfono', isPublic: true },
     { key: 'min_order_amount', value: 0, type: 'number', group: 'checkout', label: 'Monto mínimo de pedido', isPublic: true },
-    { key: 'free_shipping_threshold', value: 150, type: 'number', group: 'checkout', label: 'Envío gratis desde (PEN)', isPublic: true },
+    // El umbral de envío gratis se configura al confirmar tarifas; no asumir 0.
 
     // Shipping
-    { key: 'default_shipping_carrier', value: 'shalom', type: 'string', group: 'shipping', label: 'Transportista por defecto', isPublic: false },
-    { key: 'shipping_origin_ubigeo', value: '150101', type: 'string', group: 'shipping', label: 'UBIGEO origen (Lima)', isPublic: false },
-    { key: 'enable_pickup', value: true, type: 'boolean', group: 'shipping', label: 'Habilitar recojo en tienda', isPublic: true },
+    { key: 'default_shipping_carrier', value: '', type: 'string', group: 'shipping', label: 'Transportista por defecto', isPublic: false },
+    { key: 'shipping_origin_ubigeo', value: '', type: 'string', group: 'shipping', label: 'UBIGEO origen (Lima)', isPublic: false },
+    { key: 'enable_pickup', value: false, type: 'boolean', group: 'shipping', label: 'Habilitar recojo en tienda', isPublic: true },
 
     // Payment
     { key: 'mercadopago_public_key', value: '', type: 'string', group: 'payment', label: 'Mercado Pago Public Key', isPublic: false },
     { key: 'mercadopago_access_token', value: '', type: 'string', group: 'payment', label: 'Mercado Pago Access Token', isPublic: false },
     { key: 'mercadopago_webhook_secret', value: '', type: 'string', group: 'payment', label: 'Mercado Pago Webhook Secret', isPublic: false },
-    { key: 'enable_yape', value: true, type: 'boolean', group: 'payment', label: 'Habilitar Yape', isPublic: true },
-    { key: 'enable_plin', value: true, type: 'boolean', group: 'payment', label: 'Habilitar Plin', isPublic: true },
-    { key: 'enable_bank_transfer', value: true, type: 'boolean', group: 'payment', label: 'Habilitar transferencia bancaria', isPublic: true },
-    { key: 'bank_account_info', value: 'Banco de Crédito del Perú\nCuenta Corriente: 123-4567890-12\nCCI: 00212300456789012345\nTitular: Pizca del Monte SAC', type: 'html', group: 'payment', label: 'Datos de cuenta bancaria', isPublic: false },
+    { key: 'enable_yape', value: false, type: 'boolean', group: 'payment', label: 'Habilitar Yape', isPublic: true },
+    { key: 'enable_plin', value: false, type: 'boolean', group: 'payment', label: 'Habilitar Plin', isPublic: true },
+    { key: 'enable_bank_transfer', value: false, type: 'boolean', group: 'payment', label: 'Habilitar transferencia bancaria', isPublic: true },
+    { key: 'bank_account_info', value: '', type: 'html', group: 'payment', label: 'Datos de cuenta bancaria', isPublic: false },
 
     // Tax
     { key: 'default_tax_rate', value: 18, type: 'number', group: 'tax', label: 'IGV por defecto (%)', isPublic: false },
@@ -154,10 +154,10 @@ async function main() {
     { key: 'smtp_port', value: 587, type: 'number', group: 'email', label: 'SMTP Port', isPublic: false },
     { key: 'smtp_user', value: '', type: 'string', group: 'email', label: 'SMTP User', isPublic: false },
     { key: 'smtp_pass', value: '', type: 'string', group: 'email', label: 'SMTP Password', isPublic: false },
-    { key: 'email_from', value: 'Pizca del Monte <noreply@pizcadelmonte.pe>', type: 'string', group: 'email', label: 'Remitente emails', isPublic: false },
+    { key: 'email_from', value: '', type: 'string', group: 'email', label: 'Remitente emails', isPublic: false },
 
     // SEO
-    { key: 'site_url', value: 'https://pizcadelmonte.pe', type: 'string', group: 'seo', label: 'URL del sitio', isPublic: true },
+    { key: 'site_url', value: '', type: 'string', group: 'seo', label: 'URL del sitio', isPublic: true },
     { key: 'og_image', value: '', type: 'image', group: 'seo', label: 'Imagen Open Graph por defecto', isPublic: true },
     { key: 'google_analytics_id', value: '', type: 'string', group: 'seo', label: 'Google Analytics ID', isPublic: false },
     { key: 'facebook_pixel_id', value: '', type: 'string', group: 'seo', label: 'Facebook Pixel ID', isPublic: false },
@@ -172,7 +172,8 @@ async function main() {
   for (const setting of settings) {
     await prisma.storeSetting.upsert({
       where: { key: setting.key },
-      update: { value: setting.value, type: setting.type, group: setting.group, label: setting.label, isPublic: setting.isPublic },
+      // No sobrescribir valores que ya fueron configurados por el administrador.
+      update: {},
       create: setting,
     });
   }
