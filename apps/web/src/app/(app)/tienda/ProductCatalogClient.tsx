@@ -152,7 +152,7 @@ export function ProductCatalogClient({ initialParams, initialData }: ProductCata
       if (version === requestVersion.current) setIsLoading(false);
     }
   }, [query]);
-  useEffect(() => { fetchProducts(); return () => { requestVersion.current++; }; }, [fetchProducts]);
+  useEffect(() => { const version = requestVersion; fetchProducts(); return () => { version.current++; }; }, [fetchProducts]);
   const clearFilters = () => { setSearchDraft(''); router.replace('/tienda'); };
 
   const hasActiveFilters = Object.entries(filters).some(([key, value]) => {
