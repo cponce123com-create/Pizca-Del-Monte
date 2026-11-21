@@ -9,7 +9,7 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:migrate:prod": "prisma migrate deploy",
-    "db:seed": "tsx prisma/seed.ts",
+    "db:seed": "node --import tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "db:format": "prisma format",
     "db:validate": "prisma validate",
@@ -19,12 +19,14 @@
   "dependencies": {
     "@prisma/client": "^5.17.0",
     "decimal.js": "^10.4.3",
-    "@pizca/utils": "workspace:*"
+    "@pizca/utils": "workspace:*",
+    "bcryptjs": "2.4.3"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
     "prisma": "^5.17.0",
     "tsx": "^4.16.0",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "@types/bcryptjs": "2.4.6"
   }
 }
