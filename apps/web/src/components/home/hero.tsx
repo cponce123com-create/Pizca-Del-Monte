@@ -7,7 +7,9 @@ import Link from 'next/link';
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-gradient-hero py-20 lg:py-32">
+    <section className="relative isolate overflow-hidden bg-gradient-hero py-20 lg:py-32">
+      <div className="absolute inset-0 -z-10 bg-cover bg-center opacity-20" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=1800&q=85)" }} aria-hidden="true" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-background/95 via-background/85 to-background/60" aria-hidden="true" />
       <div className="container">
         <div className="mx-auto max-w-4xl text-center">
           <Badge variant="primary" className="mb-6 inline-flex items-center gap-2">
