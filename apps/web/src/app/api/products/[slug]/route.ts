@@ -46,10 +46,12 @@ export async function GET(
       );
     }
 
-    // Calcular rating promedio
-    const avgRating = product.reviews.length > 0
-      ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
-      : 0;
+    // Calcular promedio sobre todas las reseñas aprobadas, no solo las últimas 10.
+    const ratingStats = await prisma.review.aggregate({
+      where: { productId: product.id, isApproved: true },
+      _avg: { rating: true },
+    });
+    const avgRating = ratingStats._avg.rating ?? 0;
 
     // Formatear variantes con atributos agrupados
     const variants = product.variants.map((v) => ({
@@ -164,8 +166,12 @@ export async function GET(
         lowStockThreshold: product.inventory.minStock,
       } : null,
       trackInventory: product.trackInventory,
-      inStock: !product.trackInventory || (product.inventory?.availableQty || 0) > 0,
-      availableQty: product.inventory?.availableQty || 0,
+      inStock: product.variants.length > 0
+        ? variants.some(variant => variant.inStock)
+        : (!product.trackInventory || (product.inventory?.availableQty || 0) > 0),
+      availableQty: product.variants.length > 0
+        ? variants.reduce((total, variant) => total + variant.availableQty, 0)
+        : (product.inventory?.availableQty || 0),
       isNew: Boolean(product.publishedAt && product.publishedAt > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)),
       isBestseller: false,
       isFeatured: Boolean(product.featuredUntil && product.featuredUntil > new Date()),

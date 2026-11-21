@@ -164,8 +164,12 @@ export async function GET(request: NextRequest) {
           value: a.attributeValue.value,
         })),
       })),
-      inStock: !product.trackInventory || (product.inventory?.availableQty || 0) > 0,
-      availableQty: product.inventory?.availableQty || 0,
+      inStock: product.variants.length > 0
+        ? product.variants.some(v => !v.trackInventory || (v.inventory?.availableQty || 0) > 0)
+        : (!product.trackInventory || (product.inventory?.availableQty || 0) > 0),
+      availableQty: product.variants.length > 0
+        ? product.variants.reduce((total, v) => total + (v.inventory?.availableQty || 0), 0)
+        : (product.inventory?.availableQty || 0),
       trackInventory: product.trackInventory,
       isNew: Boolean(product.publishedAt && product.publishedAt > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)),
       isBestseller: false, // Se calcularía con analytics
