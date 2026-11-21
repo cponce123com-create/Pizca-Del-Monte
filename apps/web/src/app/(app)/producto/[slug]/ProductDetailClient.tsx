@@ -73,7 +73,7 @@ interface Product {
   isFeatured: boolean;
   rating: number;
   reviewCount: number;
-  reviews: { id: string; rating: number; title: string; comment: string; createdAt: string; user: { name: string; image: string | null }; verifiedPurchase: boolean }[];
+  reviews: { id: string; rating: number; title: string | null; comment: string | null; createdAt: string; user: { name: string | null; image: string | null }; verifiedPurchase: boolean }[];
   metaTitle: string | null;
   metaDescription: string | null;
   tags: string[];
@@ -593,14 +593,14 @@ export function ProductDetailClient({ initialProduct }: ProductDetailClientProps
                               <Image src={review.user.image} alt="" className="w-10 h-10 rounded-full" />
                             ) : (
                               <span className="text-primary font-medium">
-                                {review.user.name.charAt(0).toUpperCase()}
+                                {(review.user.name || 'Cliente').charAt(0).toUpperCase()}
                               </span>
                             )}
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <span className="font-medium">{review.user.name}</span>
+                                <span className="font-medium">{review.user.name || 'Cliente'}</span>
                                 {review.verifiedPurchase && (
                                   <Badge variant="secondary" className="text-body-xs gap-1">
                                     <CheckCircle className="h-3 w-3" />

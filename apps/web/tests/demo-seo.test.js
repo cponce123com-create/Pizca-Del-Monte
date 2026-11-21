@@ -8,4 +8,4 @@ beforeEach(() => { process.env.DEMO_MODE = 'true'; process.env.NEXT_PUBLIC_APP_U
 afterEach(() => { delete process.env.DEMO_MODE; delete process.env.NEXT_PUBLIC_APP_URL; });
 test('metadatos demo impiden indexación y seguimiento', () => { expect(generateMetadata().robots).toEqual({ index: false, follow: false }); });
 test('robots bloquea todas las rutas en demo', () => { expect(robots().rules).toEqual({ userAgent: '*', disallow: '/' }); });
-test('sitemap demo no publica URLs', () => { expect(sitemap()).toEqual([]); });
+test('sitemap demo no publica URLs', async () => { expect(await sitemap()).toEqual([]); });

@@ -51,12 +51,13 @@ interface Pagination {
   hasPrev: boolean;
 }
 
-interface ProductsResponse {
+export interface ProductsResponse {
   products: Product[];
   pagination: Pagination;
 }
 
 interface ProductCatalogClientProps {
+  initialData?: ProductsResponse;
   initialParams: {
     page?: string;
     sort?: string;
@@ -88,12 +89,12 @@ const PERU_DEPARTMENTS = [
   'Tumbes', 'Ucayali'
 ];
 
-export function ProductCatalogClient({ initialParams }: ProductCatalogClientProps) {
+export function ProductCatalogClient({ initialParams, initialData }: ProductCatalogClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [pagination, setPagination] = useState<Pagination | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [products, setProducts] = useState<Product[]>(initialData?.products || []);
+  const [pagination, setPagination] = useState<Pagination | null>(initialData?.pagination || null);
+  const [isLoading, setIsLoading] = useState(!initialData);
   const [showFilters, setShowFilters] = useState(false);
   const filterPanelRef = useRef<HTMLElement>(null);
   const filterButtonRef = useRef<HTMLButtonElement>(null);

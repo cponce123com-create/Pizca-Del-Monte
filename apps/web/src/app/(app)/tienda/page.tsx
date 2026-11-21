@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { ProductCatalogClient } from './ProductCatalogClient';
+import { listProducts, productQuerySchema } from '@/lib/products';
 
 export const metadata: Metadata = {
   title: 'Tienda - Pizca del Monte',
@@ -23,5 +24,12 @@ interface ProductCatalogPageProps {
 
 export default async function ProductCatalogPage({ searchParams }: ProductCatalogPageProps) {
   const params = await searchParams;
-  return <ProductCatalogClient initialParams={params} />;
+  const parsed = productQuerySchema.safeParse(params);
+  if (!parsed.success || (parsed.data.minPrice !== undefined && parsed.data.maxPrice !== undefined && parsed.data.minPrice > parsed.data.maxPrice)) return <ProductCatalogClient initialParams={params} />;
+  try {
+    const initialData = await listProducts(parsed.data);
+    return <ProductCatalogClient initialParams={params} initialData={initialData} />;
+  } catch {
+    return <ProductCatalogClient initialParams={params} />;
+  }
 }
