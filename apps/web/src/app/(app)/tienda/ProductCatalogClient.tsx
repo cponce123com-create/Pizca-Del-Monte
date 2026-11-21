@@ -1,7 +1,7 @@
 'use client';
 import { logger } from '@/lib/logger';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -95,74 +95,46 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({
-    sort: initialParams.sort || 'newest',
-    category: initialParams.category || '',
-    brand: initialParams.brand || '',
-    minPrice: initialParams.minPrice || '',
-    maxPrice: initialParams.maxPrice || '',
-    search: initialParams.search || '',
-    inStock: initialParams.inStock === 'true',
-    featured: initialParams.featured === 'true',
-    onSale: initialParams.onSale === 'true',
-  });
+  const [error, setError] = useState(false);
+  const requestVersion = useRef(0);
+  const query = searchParams.toString();
+  const filters = useMemo(() => {
+    const params = new URLSearchParams(query);
+    return { sort: params.get('sort') || 'newest', category: params.get('category') || '', brand: params.get('brand') || '', minPrice: params.get('minPrice') || '', maxPrice: params.get('maxPrice') || '', search: params.get('search') || '', inStock: params.get('inStock') === 'true', featured: params.get('featured') === 'true', onSale: params.get('onSale') === 'true' };
+  }, [query]);
+  const [searchDraft, setSearchDraft] = useState(initialParams.search || '');
+  useEffect(() => { setSearchDraft(filters.search); }, [filters.search]);
+  const handleFilterChange = useCallback((key: keyof typeof filters, value: string | boolean) => {
+    const params = new URLSearchParams(query);
+    if (value !== '' && value !== false) params.set(key, String(value)); else params.delete(key);
+    params.set('page', '1');
+    router.replace(`/tienda?${params.toString()}`);
+  }, [query, router]);
+  useEffect(() => {
+    if (searchDraft === filters.search) return;
+    const timer = setTimeout(() => handleFilterChange('search', searchDraft), 300);
+    return () => clearTimeout(timer);
+  }, [searchDraft, filters.search, handleFilterChange]);
 
   const fetchProducts = useCallback(async () => {
-    setIsLoading(true);
+    const version = ++requestVersion.current;
+    setIsLoading(true); setError(false);
     try {
-      const params = new URLSearchParams();
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== '' && value !== false) {
-          params.set(key, String(value));
-        }
-      });
-      params.set('page', String(searchParams.get('page') || '1'));
-
+      const params = new URLSearchParams(query);
+      params.delete('view');
       const response = await fetch(`/api/products?${params.toString()}`);
       if (!response.ok) throw new Error('Error al cargar productos');
-
       const data: ProductsResponse = await response.json();
-      setProducts(data.products);
-      setPagination(data.pagination);
+      if (version === requestVersion.current) { setProducts(data.products); setPagination(data.pagination); }
     } catch (error) {
       logger.error('Error fetching products:', error);
+      if (version === requestVersion.current) setError(true);
     } finally {
-      setIsLoading(false);
+      if (version === requestVersion.current) setIsLoading(false);
     }
-  }, [filters, searchParams]);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
-
-  const handleFilterChange = (key: keyof typeof filters, value: string | boolean) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-    // Update URL
-    const params = new URLSearchParams(searchParams.toString());
-    if (value !== '' && value !== false) {
-      params.set(key, String(value));
-    } else {
-      params.delete(key);
-    }
-    params.set('page', '1');
-    router.push(`/tienda?${params.toString()}`);
-  };
-
-  const clearFilters = () => {
-    const clearedFilters = {
-      sort: 'newest',
-      category: '',
-      brand: '',
-      minPrice: '',
-      maxPrice: '',
-      search: '',
-      inStock: false,
-      featured: false,
-      onSale: false,
-    };
-    setFilters(clearedFilters);
-    router.push('/tienda');
-  };
+  }, [query]);
+  useEffect(() => { fetchProducts(); return () => { requestVersion.current++; }; }, [fetchProducts]);
+  const clearFilters = () => { setSearchDraft(''); router.replace('/tienda'); };
 
   const hasActiveFilters = Object.entries(filters).some(([key, value]) => {
     if (key === 'sort') return value !== 'newest';
@@ -202,8 +174,8 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
                 <label className="block text-body-sm font-medium mb-2">Buscar productos</label>
                 <Input
                   placeholder="Especias, sales, aceites..."
-                  value={filters.search}
-                  onChange={(e) => handleFilterChange('search', e.target.value)}
+                  value={searchDraft}
+                  onChange={(e) => setSearchDraft(e.target.value)}
                   className="mb-2"
                 />
               </div>
@@ -362,6 +334,8 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
                   <ProductCardSkeleton key={i} />
                 ))}
               </div>
+            ) : error ? (
+              <div role="alert" className="py-16 text-center"><h2 className="font-semibold">No pudimos cargar los productos</h2><p className="my-4 text-muted-foreground">Inténtalo nuevamente.</p><Button variant="outline" onClick={fetchProducts}>Reintentar</Button></div>
             ) : products.length === 0 ? (
               <div className="text-center py-16">
                 <ShoppingBag className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
