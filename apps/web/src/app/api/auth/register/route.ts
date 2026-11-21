@@ -48,9 +48,9 @@ export async function POST(request: NextRequest) {
         name: `${firstName} ${lastName}`,
         passwordHash,
         phone: phone || null,
-        phoneVerified: phone ? new Date() : null,
+        phoneVerified: null, // Solo marcar tras verificar el número
         status: 'ACTIVE',
-        emailVerified: new Date(), // En producción: enviar email de verificación
+        emailVerified: null, // Solo marcar tras confirmar un enlace de verificación
         locale: 'es-PE',
         timezone: 'America/Lima',
         currency: 'PEN',
