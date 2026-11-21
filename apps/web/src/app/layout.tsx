@@ -100,10 +100,7 @@ export function generateMetadata(): Metadata {
 }
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#FDFBF7' },
-    { media: '(prefers-color-scheme: dark)', color: '#1A1A1A' },
-  ],
+  themeColor: '#FDFBF7',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
@@ -119,8 +116,6 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
-        <link rel="preconnect" href="https://api.mercadopago.com" />
-        <link rel="dns-prefetch" href="https://api.mercadopago.com" />
       </head>
       <body className="min-h-screen bg-background font-sans antialiased">
         <Providers>
