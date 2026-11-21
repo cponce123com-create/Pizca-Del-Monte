@@ -59,30 +59,44 @@ async function main() {
   // ============================================
   console.log('👤 Creando superadmin...');
 
-  const passwordHash = await hash('PizcaDelMonte2024!', 12);
-
-  const superAdmin = await prisma.user.upsert({
-    where: { email: 'admin@pizcadelmonte.pe' },
-    update: {},
-    create: {
-      email: 'admin@pizcadelmonte.pe',
-      name: 'Administrador Principal',
-      passwordHash,
-      status: UserStatus.ACTIVE,
-      emailVerified: new Date(),
-      phone: '+51999888777',
-      phoneVerified: new Date(),
-      locale: 'es-PE',
-      timezone: 'America/Lima',
-      currency: 'PEN',
-    },
-  });
-
-  await prisma.userRole.upsert({
-    where: { userId_roleId: { userId: superAdmin.id, roleId: (await prisma.roleModel.findUnique({ where: { name: Role.SUPERADMIN } }))!.id } },
-    update: {},
-    create: { userId: superAdmin.id, roleId: (await prisma.roleModel.findUnique({ where: { name: Role.SUPERADMIN } }))!.id },
-  });
+  // El seed nunca debe crear una cuenta privilegiada con credenciales públicas.
+  // Para crear el primer administrador se requiere una contraseña explícita y segura.
+  const adminEmail = process.env.SEED_ADMIN_EMAIL?.trim().toLowerCase();
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD;
+  if (adminEmail && adminPassword) {
+    if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(adminEmail)) {
+      throw new Error('SEED_ADMIN_EMAIL no es un correo válido');
+    }
+    if (adminPassword.length < 16) {
+      throw new Error('SEED_ADMIN_PASSWORD debe tener al menos 16 caracteres');
+    }
+    const passwordHash = await hash(adminPassword, 12);
+    const superAdmin = await prisma.user.upsert({
+      where: { email: adminEmail },
+      update: {},
+      create: {
+        email: adminEmail,
+        name: 'Administrador Principal',
+        passwordHash,
+        status: UserStatus.ACTIVE,
+        emailVerified: null,
+        phoneVerified: null,
+        locale: 'es-PE',
+        timezone: 'America/Lima',
+        currency: 'PEN',
+      },
+    });
+    const adminRole = await prisma.roleModel.findUniqueOrThrow({ where: { name: Role.SUPERADMIN } });
+    await prisma.userRole.upsert({
+      where: { userId_roleId: { userId: superAdmin.id, roleId: adminRole.id } },
+      update: {},
+      create: { userId: superAdmin.id, roleId: adminRole.id },
+    });
+  } else if (adminEmail || adminPassword) {
+    throw new Error('Configura SEED_ADMIN_EMAIL y SEED_ADMIN_PASSWORD juntos');
+  } else {
+    console.log('Sin credenciales de administrador: se omite la creación del superadmin.');
+  }
 
   // ============================================
   // 3. CONFIGURACIÓN DE TIENDA
