@@ -25,8 +25,6 @@ const pages: Record<string, { title: string; intro: string; sections: { heading:
   'mis-direcciones': { title: 'Mis direcciones', intro: 'Administra direcciones de entrega desde tu cuenta.', sections: [{ heading: 'Datos personales', text: 'Esta función requiere inicio de sesión seguro y todavía está en preparación.' }] },
   favoritos: { title: 'Mis favoritos', intro: 'Guarda los productos que más te gustan.', sections: [{ heading: 'Explorar productos', text: 'Puedes marcar productos como favoritos desde sus fichas. La gestión de una lista completa estará disponible próximamente.' }], cta: { label: 'Ir a la tienda', href: '/tienda' } },
   'lista-deseos': { title: 'Lista de deseos', intro: 'Organiza tus productos preferidos.', sections: [{ heading: 'En preparación', text: 'La sincronización de listas entre dispositivos estará disponible cuando se complete el sistema de cuentas.' }], cta: { label: 'Explorar productos', href: '/tienda' } },
-  login: { title: 'Iniciar sesión', intro: 'Acceso a la cuenta de cliente en preparación.', sections: [{ heading: 'Protección de tu cuenta', text: 'El acceso estará disponible cuando se hayan validado los flujos de autenticación y recuperación de contraseña.' }] },
-  register: { title: 'Crear cuenta', intro: 'El registro seguro de clientes está en preparación.', sections: [{ heading: 'Verificación', text: 'Antes de habilitar el registro público completaremos la confirmación de correo y las medidas de seguridad.' }] },
 };
 
 export function generateStaticParams() {
@@ -36,7 +34,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const page = pages[slug];
-  return { title: page ? `${page.title} | Pizca del Monte` : 'Página no encontrada', description: page?.intro, robots: page && ['terminos-y-condiciones', 'politica-de-privacidad', 'politica-de-cookies', 'libro-de-reclamaciones'].includes(slug) ? { index: false, follow: false } : undefined };
+  return { title: page ? `${page.title} | Pizca del Monte` : 'Página no encontrada', description: page?.intro, robots: { index: false, follow: false } };
 }
 
 export default async function StorefrontInformationPage({ params }: { params: Promise<{ slug: string }> }) {
