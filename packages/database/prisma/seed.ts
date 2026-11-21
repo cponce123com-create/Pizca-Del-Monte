@@ -64,34 +64,34 @@ async function main() {
   const adminEmail = process.env.SEED_ADMIN_EMAIL?.trim().toLowerCase();
   const adminPassword = process.env.SEED_ADMIN_PASSWORD;
   if (adminEmail && adminPassword) {
-    if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(adminEmail)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminEmail)) {
       throw new Error('SEED_ADMIN_EMAIL no es un correo válido');
     }
-    if (adminPassword.length < 16) {
-      throw new Error('SEED_ADMIN_PASSWORD debe tener al menos 16 caracteres');
+    if (adminPassword.length < 16 || Buffer.byteLength(adminPassword, 'utf8') > 72) {
+      throw new Error('SEED_ADMIN_PASSWORD debe tener al menos 16 caracteres y no superar 72 bytes');
     }
-    const passwordHash = await hash(adminPassword, 12);
-    const superAdmin = await prisma.user.upsert({
-      where: { email: adminEmail },
-      update: {},
-      create: {
-        email: adminEmail,
-        name: 'Administrador Principal',
-        passwordHash,
-        status: UserStatus.ACTIVE,
-        emailVerified: null,
-        phoneVerified: null,
-        locale: 'es-PE',
-        timezone: 'America/Lima',
-        currency: 'PEN',
-      },
-    });
-    const adminRole = await prisma.roleModel.findUniqueOrThrow({ where: { name: Role.SUPERADMIN } });
-    await prisma.userRole.upsert({
-      where: { userId_roleId: { userId: superAdmin.id, roleId: adminRole.id } },
-      update: {},
-      create: { userId: superAdmin.id, roleId: adminRole.id },
-    });
+    // Nunca conceder privilegios a una cuenta preexistente mediante el seed.
+    const existingAdmin = await prisma.user.findUnique({ where: { email: adminEmail } });
+    if (existingAdmin) {
+      console.log('La cuenta ya existe; el seed no modifica su contraseña ni sus roles.');
+    } else {
+      const passwordHash = await hash(adminPassword, 12);
+      await prisma.$transaction(async (tx) => {
+        const adminRole = await tx.roleModel.findUniqueOrThrow({ where: { name: Role.SUPERADMIN } });
+        const superAdmin = await tx.user.create({
+          data: {
+            email: adminEmail,
+            name: 'Administrador Principal',
+            passwordHash,
+            status: UserStatus.ACTIVE,
+            locale: 'es-PE',
+            timezone: 'America/Lima',
+            currency: 'PEN',
+          },
+        });
+        await tx.userRole.create({ data: { userId: superAdmin.id, roleId: adminRole.id } });
+      });
+    }
   } else if (adminEmail || adminPassword) {
     throw new Error('Configura SEED_ADMIN_EMAIL y SEED_ADMIN_PASSWORD juntos');
   } else {
