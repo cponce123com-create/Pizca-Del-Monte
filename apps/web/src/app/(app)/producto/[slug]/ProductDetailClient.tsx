@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2, ShoppingBag, Heart, Share2, Truck, RotateCcw, Star, Minus, Plus, ChevronLeft, ChevronRight, X, MapPin, Clock, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { DemoProductImage } from '@/components/products/demo-product-image';
 import { formatPEN } from '@pizca/utils';
 import { useToast } from '@/hooks/use-toast';
 
@@ -238,20 +239,14 @@ export function ProductDetailClient({ initialProduct }: ProductDetailClientProps
           <div className="lg:col-span-7 space-y-4">
             {/* Imagen principal */}
             <div className="relative aspect-square bg-muted rounded-xl overflow-hidden">
-              {currentImage ? (
-                <Image
-                  src={currentImage.url}
-                  alt={currentImage.alt}
-                  fill
-                  className="object-cover"
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Package className="h-16 w-16 text-muted-foreground/50" />
-                </div>
-              )}
+              <DemoProductImage
+                key={product.id + ':' + (currentImage?.url || 'demo')}
+                name={product.name}
+                category={product.categories.map(category => category.name).join(' ')}
+                src={currentImage?.url}
+                alt={currentImage?.alt}
+                loading="eager"
+              />
 
               {/* Badges en imagen */}
               <div className="absolute top-3 left-3 flex flex-col gap-1.5">

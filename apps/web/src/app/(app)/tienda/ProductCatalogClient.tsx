@@ -12,6 +12,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2, Filter, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, ShoppingBag, Tag, Truck, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { DemoProductImage } from '@/components/products/demo-product-image';
 import { formatPEN } from '@pizca/utils';
 import { useToast } from '@/hooks/use-toast';
 
@@ -458,18 +459,14 @@ function ProductCard({ product }: { product: Product }) {
     <Link href={`/producto/${product.slug}`} className="group block">
       <Card className="h-full transition-shadow hover:shadow-lg overflow-hidden">
         <div className="relative aspect-square overflow-hidden bg-muted">
-          {product.primaryImage ? (
-            <img
-              src={product.primaryImage.url}
-              alt={product.primaryImage.alt}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-              loading="lazy"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <ShoppingBag className="h-12 w-12 text-muted-foreground/50" />
-            </div>
-          )}
+          <DemoProductImage
+            key={product.id}
+            name={product.name}
+            category={product.categories.map(category => category.name).join(' ')}
+            src={product.primaryImage?.url}
+            alt={product.primaryImage?.alt}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
 
           {/* Badges */}
           <div className="absolute top-2 left-2 flex flex-col gap-1.5">
