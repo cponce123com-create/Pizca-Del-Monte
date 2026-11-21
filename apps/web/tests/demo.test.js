@@ -49,3 +49,8 @@ test('popular prioriza destacados sin inventar ventas', async () => {
   const firstNonFeatured = result.products.findIndex(product => !product.isFeatured);
   expect(result.products.slice(0, firstNonFeatured).every(product => product.isFeatured)).toBe(true);
 });
+
+test('el catálogo demo expone caché corta para revalidación', async () => {
+  const response = await list(request());
+  expect(response.headers.get('cache-control')).toContain('s-maxage=60');
+});
