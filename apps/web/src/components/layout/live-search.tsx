@@ -56,7 +56,7 @@ export function LiveSearch({ onClose }: { onClose: () => void }) {
     setLoading(true);
     const timer = window.setTimeout(async () => {
       try {
-        const params = new URLSearchParams({ search: term, limit: '6', sort: 'name_asc' });
+        const params = new URLSearchParams({ search: term, limit: '6', sort: 'newest' });
         const response = await fetch('/api/products?' + params.toString(), {
           signal: controller.signal,
           cache: 'no-store',
@@ -115,7 +115,7 @@ export function LiveSearch({ onClose }: { onClose: () => void }) {
             maxLength={120}
             onChange={event => setQuery(event.target.value)}
             onKeyDown={onInputKeyDown}
-            placeholder="Busca desde la primera letra: ají, sal, café..."
+            placeholder="Busca desde la primera letra: ají, sal, especias..."
             className="min-w-0 flex-1 bg-transparent py-2 text-base outline-none"
             aria-label="Buscar productos del catálogo"
             role="combobox"
