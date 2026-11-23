@@ -1,202 +1,62 @@
-'use client';
-
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Button } from '@/components/ui/button';
+import { ChevronRight, Package } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { ChevronRight, Tag, Package, ShoppingBag } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { DemoProductImage } from '@/components/products/demo-product-image';
+import { demoProducts } from '@/lib/demo-products';
+import { isDemoMode } from '@/lib/demo-mode';
 
-const products = [
-  {
-    id: '1',
-    name: 'Ají Amarillo Molido',
-    slug: 'aji-amarillo-molido',
-    description: 'El alma de la cocina criolla: causa, huancaína, ají de gallina',
-    price: 18.00,
-    compareAtPrice: 22.00,
-    image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=900&q=85',
-    brand: 'Pizca del Monte',
-    category: 'Especias',
-    inStock: true,
-    isNew: true,
-  },
-  {
-    id: '2',
-    name: 'Sal de Maras - Flor de Sal',
-    slug: 'sal-de-maras-flor-de-sal',
-    description: 'Cosechada a mano en las milenarias salineras de Maras, Cusco',
-    price: 45.00,
-    compareAtPrice: 55.00,
-    image: 'https://images.unsplash.com/photo-1518110925495-5fe2b0ba94a9?w=900&q=85',
-    brand: 'Maras',
-    category: 'Sales Gourmet',
-    inStock: true,
-    isBestseller: true,
-  },
-  {
-    id: '3',
-    name: 'Aceite de Oliva Virgen Extra - Arbequina',
-    slug: 'aceite-oliva-arbequina',
-    description: 'Cosecha temprana en Ica, notas a manzana verde y almendra',
-    price: 89.00,
-    compareAtPrice: 110.00,
-    image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=900&q=85',
-    brand: 'Oliva del Sur',
-    category: 'Aceites',
-    inStock: true,
-  },
-  {
-    id: '4',
-    name: 'Pack Parrilla Peruana',
-    slug: 'pack-parrilla-peruana',
-    description: 'Sales, ajíes, aceite y chimichurri en caja de madera grabada',
-    price: 289.00,
-    compareAtPrice: 349.00,
-    image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=900&q=85',
-    brand: 'Pizca del Monte',
-    category: 'Packs Gourmet',
-    inStock: true,
-    isNew: true,
-    isBundle: true,
-  },
+const featuredSlugs = [
+  'aji-amarillo-molido',
+  'sal-de-maras-flor-de-sal',
+  'aceite-oliva-arbequina',
+  'pack-parrilla-peruana',
 ];
 
 export function FeaturedProducts() {
+  const isDemo = isDemoMode();
+  const products = isDemo
+    ? featuredSlugs.flatMap(slug => {
+        const product = demoProducts.find(item => item.slug === slug);
+        return product ? [product] : [];
+      })
+    : [];
+
   return (
-    <section className="py-20 bg-background" aria-labelledby="products-heading">
+    <section className="bg-background py-16" aria-labelledby="products-heading">
       <div className="container">
-        <div className="flex items-center justify-between mb-12">
+        <div className="mb-9 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 id="products-heading" className="text-display-md font-heading font-medium">
-              Productos Destacados
-            </h2>
-            <p className="text-muted-foreground mt-2">
-              Nuestra selección de los más vendidos y novedades
-            </p>
+            <h2 id="products-heading" className="font-heading text-3xl font-semibold">Productos destacados</h2>
+            <p className="mt-2 text-muted-foreground">{isDemo ? 'Conoce algunas ideas de nuestro catálogo de demostración.' : 'Explora los productos del catálogo.'}</p>
           </div>
           <Button variant="ghost" asChild>
-            <Link href="/tienda?featured=true">
-              Ver catálogo completo
-              <ChevronRight className="h-4 w-4 ml-2" />
-            </Link>
+            <Link href="/tienda">Ver catálogo completo <ChevronRight className="h-4 w-4" /></Link>
           </Button>
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ProductCard({ product }: { product: typeof products[0] }) {
-  const discount = product.compareAtPrice
-    ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)
-    : 0;
-  const [imageError, setImageError] = useState(false);
-  const router = useRouter();
-  const { toast } = useToast();
-
-  const handleQuickAdd = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    toast({
-      title: 'Redirigiendo al producto',
-      description: 'Selecciona la variante y cantidad en la página del producto',
-      variant: 'default'
-    });
-    setTimeout(() => {
-      router.push(`/tienda/${product.slug}`);
-    }, 500);
-  };
-
-  return (
-    <Card className="group overflow-hidden h-full flex flex-col">
-      <Link href={`/tienda/${product.slug}`} className="block relative aspect-square overflow-hidden">
-        {!imageError ? (
-          <Image
-            unoptimized
-            src={product.image}
-            alt={product.name}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            onError={() => setImageError(true)}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-muted">
-            <ShoppingBag className="h-12 w-12 text-muted-foreground/50" />
+        {products.length > 0 && (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {products.map(product => (
+              <Card key={product.id} className="group overflow-hidden">
+                <Link href={'/producto/' + product.slug} className="block h-full">
+                  <div className="relative aspect-square overflow-hidden bg-muted">
+                    <DemoProductImage name={product.name} category={product.categories[0].name} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                    {product.categories[0].slug === 'packs-gourmet' && <Badge variant="accent" className="absolute left-3 top-3"><Package className="mr-1 h-3 w-3" /> Pack</Badge>}
+                  </div>
+                  <CardContent className="space-y-2 p-4">
+                    <p className="text-xs text-muted-foreground">{product.categories[0].name}</p>
+                    <h3 className="font-semibold group-hover:text-primary">{product.name}</h3>
+                    <p className="line-clamp-2 text-sm text-muted-foreground">{product.shortDescription}</p>
+                    <p className="font-semibold">{product.formattedPrice} <span className="text-xs font-normal text-muted-foreground">(referencial)</span></p>
+                    <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">Ver producto <ChevronRight className="h-4 w-4" /></span>
+                  </CardContent>
+                </Link>
+              </Card>
+            ))}
           </div>
         )}
-        <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-          {product.isNew && (
-            <Badge variant="primary">Nuevo</Badge>
-          )}
-          {product.isBestseller && (
-            <Badge variant="secondary">Más vendido</Badge>
-          )}
-          {product.isBundle && (
-            <Badge variant="accent">
-              <Package className="h-3 w-3 mr-1" />
-              Pack
-            </Badge>
-          )}
-          {discount > 0 && (
-            <Badge variant="destructive">-{discount}%</Badge>
-          )}
-        </div>
-        <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button
-            size="icon"
-            variant="primary"
-            className="rounded-full shadow-lg"
-            onClick={handleQuickAdd}
-            aria-label={`Ver ${product.name} en la tienda`}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </Link>
-      <CardContent className="flex-1 p-4 pb-0 flex flex-col">
-        <div className="flex items-center gap-2 text-body-xs text-muted-foreground mb-2">
-          <Tag className="h-3 w-3" />
-          <span>{product.brand}</span>
-          <span>·</span>
-          <span>{product.category}</span>
-        </div>
-        <Link href={`/tienda/${product.slug}`}>
-          <h3 className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
-            {product.name}
-          </h3>
-        </Link>
-        <p className="text-body-sm text-muted-foreground mt-1 line-clamp-2 flex-1">
-          {product.description}
-        </p>
-      </CardContent>
-      <CardFooter className="p-4 pt-0">
-        <div className="flex items-baseline gap-2">
-          <span className="text-heading-sm font-semibold text-foreground">
-            S/ {product.price.toFixed(2)}
-          </span>
-          {product.compareAtPrice && (
-            <span className="text-body-sm text-muted-foreground line-through">
-              S/ {product.compareAtPrice.toFixed(2)}
-            </span>
-          )}
-        </div>
-        {!product.inStock && (
-          <Badge variant="destructive" className="mt-2 w-full text-center">
-            Agotado
-          </Badge>
-        )}
-      </CardFooter>
-    </Card>
+      </div>
+    </section>
   );
 }
