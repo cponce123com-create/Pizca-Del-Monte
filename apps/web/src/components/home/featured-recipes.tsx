@@ -1,150 +1,48 @@
-'use client';
-
-import { useState } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
+import { ChevronRight, Clock, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { ChevronRight, Clock, Users, Utensils, Flame, BookOpen } from 'lucide-react';
-
-const recipes = [
-  {
-    id: '1',
-    title: 'Papa a la Huancaína Clásica',
-    slug: 'papa-huancaina-clasica',
-    description: 'El plato bandera de la cocina limeña, cremoso y picante con ají amarillo y queso fresco.',
-    image: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=1200&q=85',
-    difficulty: 'FÁCIL',
-    time: 35,
-    servings: 4,
-    tags: ['vegetariano', 'sin gluten', 'clásico'],
-    products: ['Ají Amarillo', 'Aceite de Oliva', 'Sal de Maras'],
-  },
-  {
-    id: '2',
-    title: 'Lomo Saltado Tradicional',
-    slug: 'lomo-saltado-tradicional',
-    description: 'El mestizaje perfecto: wok chino, ingredientes peruanos. Tiras de lomo salteadas con cebolla y tomate.',
-    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=1200&q=85',
-    difficulty: 'MEDIO',
-    time: 30,
-    servings: 4,
-    tags: ['fusión', 'chino-peruano', 'carne'],
-    products: ['Ají Amarillo', 'Aceite de Oliva', 'Vinagre de Manzana', 'Sal de Maras'],
-  },
-  {
-    id: '3',
-    title: 'Ceviche Clásico Peruano',
-    slug: 'ceviche-clasico',
-    description: 'Pescado fresco "cocido" en limón, el orgullo de la costa. Con camote, choclo y cancha.',
-    image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=1200&q=85',
-    difficulty: 'FÁCIL',
-    time: 35,
-    servings: 4,
-    tags: ['pescado', 'crudo', 'patrimonio', 'sin cocción'],
-    products: ['Sal de Maras'],
-  },
-];
+import { Card, CardContent } from '@/components/ui/card';
+import { demoRecipes } from '@/lib/demo-recipes';
+import { demoProducts } from '@/lib/demo-products';
 
 export function FeaturedRecipes() {
   return (
-    <section className="py-20 bg-muted/30" aria-labelledby="recipes-heading">
+    <section className="bg-muted/30 py-16" aria-labelledby="recipes-heading">
       <div className="container">
-        <div className="flex items-center justify-between mb-12">
+        <div className="mb-9 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 id="recipes-heading" className="text-display-md font-heading font-medium">
-              Recetario Peruano
-            </h2>
-            <p className="text-muted-foreground mt-2">
-              Aprende a cocinar con nuestros ingredientes. Paso a paso, tips y productos recomendados.
-            </p>
+            <h2 id="recipes-heading" className="font-heading text-3xl font-semibold">Recetario peruano</h2>
+            <p className="mt-2 text-muted-foreground">Ideas paso a paso con ingredientes que puedes explorar en la tienda.</p>
           </div>
           <Button variant="ghost" asChild>
-            <Link href="/recetas">
-              Ver todas las recetas
-              <ChevronRight className="h-4 w-4 ml-2" />
-            </Link>
+            <Link href="/recetas">Ver todas las recetas <ChevronRight className="h-4 w-4" /></Link>
           </Button>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {recipes.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          {demoRecipes.slice(0, 3).map(recipe => (
+            <Card key={recipe.slug} className="group overflow-hidden">
+              <Link href={'/recetas/' + recipe.slug} className="block h-full">
+                <div className="relative aspect-video overflow-hidden bg-muted">
+                  <Image unoptimized src={recipe.image} alt={'Imagen referencial de ' + recipe.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" sizes="(max-width: 768px) 100vw, 33vw" />
+                </div>
+                <CardContent className="space-y-3 p-4">
+                  <p className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {recipe.time}</span>
+                    <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" /> {recipe.servings}</span>
+                  </p>
+                  <h3 className="font-semibold group-hover:text-primary">{recipe.title}</h3>
+                  <p className="line-clamp-2 text-sm text-muted-foreground">{recipe.description}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {recipe.products.slice(0, 3).map(slug => demoProducts.find(product => product.slug === slug)?.name).filter(Boolean).join(' · ')}
+                  </p>
+                  <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">Ver receta completa <ChevronRight className="h-4 w-4" /></span>
+                </CardContent>
+              </Link>
+            </Card>
           ))}
         </div>
       </div>
     </section>
-  );
-}
-
-function RecipeCard({ recipe }: { recipe: typeof recipes[0] }) {
-  const [imageError, setImageError] = useState(false);
-
-  return (
-    <Card className="group overflow-hidden h-full flex flex-col">
-      <Link href={`/recetas/${recipe.slug}`} className="block relative aspect-video overflow-hidden">
-        {!imageError ? (
-          <Image
-            unoptimized
-            src={recipe.image}
-            alt={recipe.title}
-            fill
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, 33vw"
-            onError={() => setImageError(true)}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-muted">
-            <BookOpen className="h-12 w-12 text-muted-foreground/50" />
-          </div>
-        )}
-        <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-          <Badge variant="primary">{recipe.difficulty}</Badge>
-        </div>
-        <div className="absolute bottom-3 left-3 right-3 flex gap-2">
-          {recipe.products.slice(0, 3).map((product, index) => (
-            <Badge key={index} variant="outline" className="bg-background/90 backdrop-blur">
-              {product}
-            </Badge>
-          ))}
-        </div>
-      </Link>
-      <CardContent className="flex-1 p-4 pb-0 flex flex-col">
-        <div className="flex items-center gap-4 text-body-xs text-muted-foreground mb-2">
-          <span className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            {recipe.time} min
-          </span>
-          <span className="flex items-center gap-1">
-            <Users className="h-3 w-3" />
-            {recipe.servings} porc.
-          </span>
-        </div>
-        <Link href={`/recetas/${recipe.slug}`}>
-          <h3 className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
-            {recipe.title}
-          </h3>
-        </Link>
-        <p className="text-body-sm text-muted-foreground mt-1 line-clamp-2 flex-1">
-          {recipe.description}
-        </p>
-        <div className="flex flex-wrap gap-1.5 mt-3">
-          {recipe.tags.map((tag) => (
-            <Badge key={tag} variant="outline" className="text-xs">
-              {tag}
-            </Badge>
-          ))}
-        </div>
-      </CardContent>
-      <CardFooter className="p-4 pt-0">
-        <Button variant="ghost" size="sm" className="w-full" asChild>
-          <Link href={`/recetas/${recipe.slug}`}>
-            Ver receta completa
-            <ChevronRight className="h-4 w-4 ml-2" />
-          </Link>
-        </Button>
-      </CardFooter>
-    </Card>
   );
 }
