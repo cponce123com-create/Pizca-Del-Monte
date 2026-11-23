@@ -37,3 +37,16 @@ test('no se muestra demo automáticamente al configurar una base', () => {
   process.env.DEMO_MODE = 'true';
   expect(isDemoMode()).toBe(true);
 });
+
+
+test('autocompletado encuentra tildes omitidas y prioriza nombres que comienzan con las letras', async () => {
+  const response = await list(request('?search=aji&limit=100'));
+  const data = await response.json();
+  expect(data.products.some(product => product.slug === 'aji-charapita')).toBe(true);
+  expect(data.products.every(product => /aj/i.test(product.slug))).toBe(true);
+  const salts = await (await list(request('?search=sal&limit=100'))).json();
+  expect(salts.products[0].name).toMatch(/^Sal /);
+  const accent = await (await list(request('?search=CH%C3%81RAPIT%C3%81'))).json();
+  expect(accent.products).toHaveLength(1);
+  expect(accent.products[0].slug).toBe('aji-charapita');
+});
