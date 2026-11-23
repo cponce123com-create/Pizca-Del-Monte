@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Loader2, ShoppingBag, Heart, Share2, Truck, RotateCcw, Star, Minus, Plus, ChevronLeft, ChevronRight, X, MapPin, Clock, Package } from 'lucide-react';
+import { Loader2, ShoppingBag, Heart, Share2, Truck, RotateCcw, Star, Minus, Plus, ChevronLeft, ChevronRight, X, MapPin, Clock, Package, Maximize } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DemoProductImage } from '@/components/products/demo-product-image';
 import { formatPEN } from '@pizca/utils';
@@ -226,7 +226,7 @@ export function ProductDetailClient({ initialProduct }: ProductDetailClientProps
               <li key={cat.id}>
                 {i < product.categories.length - 1 ? (
                   <>
-                    <Link href={`/categoria/${cat.slug}`} className="hover:text-foreground">{cat.name}</Link>
+                    <Link href={`/tienda/categoria/${cat.slug}`} className="hover:text-foreground">{cat.name}</Link>
                     <ChevronRight className="h-4 w-4" />
                   </>
                 ) : (
@@ -340,7 +340,7 @@ export function ProductDetailClient({ initialProduct }: ProductDetailClientProps
               {/* Header del producto */}
               <div className="space-y-3">
                 {product.brand && (
-                  <Link href={`/marca/${product.brand.slug}`} className="text-body-sm text-muted-foreground hover:text-foreground transition-colors">
+                  <Link href={`/tienda?brand=${encodeURIComponent(product.brand.slug)}`} className="text-body-sm text-muted-foreground hover:text-foreground transition-colors">
                     {product.brand.name}
                   </Link>
                 )}
