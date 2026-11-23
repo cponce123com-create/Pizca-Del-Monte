@@ -6,7 +6,7 @@ import { LiveSearch } from '../src/components/layout/live-search';
 const mockPush = jest.fn();
 jest.mock('next/navigation', () => ({ useRouter: () => ({ push: mockPush }) }));
 jest.mock('../src/components/products/demo-product-image', () => ({
-  DemoProductImage: ({ name }) => React.createElement('span', { role: 'img', 'aria-label': name }),
+  DemoProductImage: () => null,
 }));
 
 beforeEach(() => {
