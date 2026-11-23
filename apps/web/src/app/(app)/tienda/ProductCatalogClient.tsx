@@ -106,6 +106,24 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
     onSale: initialParams.onSale === 'true',
   });
 
+  // Sincroniza búsquedas externas, como las sugerencias del encabezado,
+  // incluso si el usuario ya estaba visitando /tienda.
+  const urlFilters = searchParams.toString();
+  useEffect(() => {
+    const params = new URLSearchParams(urlFilters);
+    setFilters({
+      sort: params.get('sort') || 'newest',
+      category: params.get('category') || '',
+      brand: params.get('brand') || '',
+      minPrice: params.get('minPrice') || '',
+      maxPrice: params.get('maxPrice') || '',
+      search: params.get('search') || '',
+      inStock: params.get('inStock') === 'true',
+      featured: params.get('featured') === 'true',
+      onSale: params.get('onSale') === 'true',
+    });
+  }, [urlFilters]);
+
   const fetchProducts = useCallback(async () => {
     setIsLoading(true);
     try {
