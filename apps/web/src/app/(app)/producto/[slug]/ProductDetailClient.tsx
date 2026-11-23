@@ -226,7 +226,7 @@ export function ProductDetailClient({ initialProduct }: ProductDetailClientProps
               <li key={cat.id}>
                 {i < product.categories.length - 1 ? (
                   <>
-                    <Link href={`/categoria/${cat.slug}`} className="hover:text-foreground">{cat.name}</Link>
+                    <Link href={`/tienda/categoria/${cat.slug}`} className="hover:text-foreground">{cat.name}</Link>
                     <ChevronRight className="h-4 w-4" />
                   </>
                 ) : (
@@ -340,7 +340,7 @@ export function ProductDetailClient({ initialProduct }: ProductDetailClientProps
               {/* Header del producto */}
               <div className="space-y-3">
                 {product.brand && (
-                  <Link href={`/marca/${product.brand.slug}`} className="text-body-sm text-muted-foreground hover:text-foreground transition-colors">
+                  <Link href={`/tienda?brand=${encodeURIComponent(product.brand.slug)}`} className="text-body-sm text-muted-foreground hover:text-foreground transition-colors">
                     {product.brand.name}
                   </Link>
                 )}

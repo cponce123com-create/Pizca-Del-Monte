@@ -42,16 +42,22 @@ export const demoProducts = items.map(([name, slug, price, index], i) => {
   };
 });
 
+export function normalizeProductSearch(value: string): string {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es').trim();
+}
+
 type Filters = { page: number; limit: number; sort: string; category?: string; brand?: string; minPrice?: number; maxPrice?: number; search?: string; inStock?: boolean; featured?: boolean; onSale?: boolean };
 export function listDemoProducts(filters: Filters) {
+  const term = filters.search ? normalizeProductSearch(filters.search) : '';
   let result = demoProducts.filter(product =>
     (!filters.category || product.categories.some(category => category.slug === filters.category)) &&
     (!filters.brand || product.brand.slug === filters.brand) &&
     (filters.minPrice === undefined || product.basePrice >= filters.minPrice) &&
     (filters.maxPrice === undefined || product.basePrice <= filters.maxPrice) &&
-    (!filters.search || `${product.name} ${product.description} ${product.sku}`.toLocaleLowerCase('es').includes(filters.search.toLocaleLowerCase('es'))) &&
+    (!term || normalizeProductSearch(`${product.name} ${product.categories[0].name} ${product.sku}`).includes(term)) &&
     (!filters.featured || product.isFeatured) && !filters.onSale
   );
+  if (term && filters.sort === 'newest') result = result.sort((a, b) => Number(normalizeProductSearch(b.name).startsWith(term)) - Number(normalizeProductSearch(a.name).startsWith(term)));
   if (filters.sort === 'price_asc') result = result.sort((a,b) => a.basePrice - b.basePrice);
   if (filters.sort === 'price_desc') result = result.sort((a,b) => b.basePrice - a.basePrice);
   if (filters.sort === 'name_asc') result = result.sort((a,b) => a.name.localeCompare(b.name, 'es'));

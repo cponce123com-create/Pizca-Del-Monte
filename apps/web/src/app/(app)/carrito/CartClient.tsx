@@ -286,7 +286,7 @@ function CartItemCard({
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0">
                 {item.brand && (
-                  <Link href={`/marca/${item.brand.slug}`} className="text-body-xs text-muted-foreground hover:text-foreground transition-colors block mb-1">
+                  <Link href={`/tienda?brand=${encodeURIComponent(item.brand.slug)}`} className="text-body-xs text-muted-foreground hover:text-foreground transition-colors block mb-1">
                     {item.brand.name}
                   </Link>
                 )}
