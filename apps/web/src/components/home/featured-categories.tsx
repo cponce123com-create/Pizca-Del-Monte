@@ -70,14 +70,14 @@ export function FeaturedCategories() {
         <div className="flex items-center justify-between mb-12">
           <div>
             <h2 id="categories-heading" className="text-display-md font-heading font-medium">
-              Compra por Categoría
+              Explora por categoría
             </h2>
             <p className="text-muted-foreground mt-2">
               Encuentra exactamente lo que necesitas para tu cocina
             </p>
           </div>
           <Button variant="ghost" asChild>
-            <Link href="/tienda?view=categories">
+            <Link href="/tienda">
               Ver todas
               <ChevronRight className="h-4 w-4 ml-2" />
             </Link>
