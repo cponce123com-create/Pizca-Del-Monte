@@ -4,10 +4,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Menu, X, Search, ShoppingCart, User, Heart, Truck, RotateCcw, Shield, ChevronDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { readDemoCart } from '@/lib/demo-cart';
+import { LiveSearch } from '@/components/layout/live-search';
 
 const navigation = [
   { name: 'Inicio', href: '/' },
@@ -162,6 +161,9 @@ export function Header({ isDemo = false }: { isDemo?: boolean }) {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={() => setSearchOpen(true)} aria-label="Buscar productos" aria-haspopup="dialog">
+              <Search className="h-5 w-5" />
+            </Button>
             <Button variant="ghost" size="icon" className="relative" onClick={() => handleNavigate('/favoritos')} aria-label="Favoritos">
               <Heart className="h-5 w-5" />
             </Button>
@@ -225,45 +227,7 @@ export function Header({ isDemo = false }: { isDemo?: boolean }) {
           </div>
         )}
 
-        {/* Search Modal */}
-        {searchOpen && (
-          <div
-            className="fixed inset-0 z-50 flex items-start justify-center pt-16 md:pt-24 bg-black/50 animate-fade-in"
-            onClick={() => setSearchOpen(false)}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Buscar productos"
-          >
-            <div
-              className="w-full max-w-2xl mx-4 bg-background rounded-xl shadow-xl overflow-hidden animate-zoom-in"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="p-4 border-b border-border">
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <input
-                    type="search"
-                    placeholder="Buscar productos, recetas, marcas..."
-                    className="w-full pl-12 pr-4 py-3 text-body-lg border-border bg-muted rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                    autoFocus
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
-              </div>
-              <div className="p-4">
-                <p className="text-body-sm text-muted-foreground mb-4">Categorías populares</p>
-                <div className="flex flex-wrap gap-2">
-                  {['Ají Amarillo', 'Sal de Maras', 'Aceite de Oliva', 'Packs Regalo', 'Salsa Huancaína', 'Vinagre de Manzana'].map((cat) => (
-                    <Button key={cat} variant="outline" size="sm" className="gap-1" onClick={() => { handleNavigate(`/tienda?search=${encodeURIComponent(cat)}`); setSearchOpen(false); }}>
-                      <Search className="h-3.5 w-3.5" />
-                      {cat}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {searchOpen && <LiveSearch onClose={() => setSearchOpen(false)} />}
       </nav>
     </header>
   );
