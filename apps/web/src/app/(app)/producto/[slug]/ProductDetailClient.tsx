@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Loader2, ShoppingBag, Heart, Share2, Truck, RotateCcw, Star, Minus, Plus, ChevronLeft, ChevronRight, X, MapPin, Clock, Package, Maximize } from 'lucide-react';
+import { Loader2, ShoppingBag, Heart, Share2, Truck, RotateCcw, Star, Minus, Plus, ChevronLeft, ChevronRight, X, MapPin, Clock, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DemoProductImage } from '@/components/products/demo-product-image';
 import { formatPEN } from '@pizca/utils';
