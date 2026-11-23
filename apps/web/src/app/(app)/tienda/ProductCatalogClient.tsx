@@ -13,7 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2, Filter, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, ShoppingBag, Tag, Truck, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DemoProductImage } from '@/components/products/demo-product-image';
-import { formatPEN } from '@pizca/utils';
+import { addDemoCartItem } from '@/lib/demo-cart';
 import { useToast } from '@/hooks/use-toast';
 
 interface Product {
@@ -38,6 +38,7 @@ interface Product {
   trackInventory: boolean;
   isNew: boolean;
   isBestseller: boolean;
+  isDemo?: boolean;
 }
 
 interface Pagination {
@@ -428,116 +429,53 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
 
 // Componentes auxiliares
 function ProductCard({ product }: { product: Product }) {
-  const hasDiscount = product.discountPercent > 0;
   const { toast } = useToast();
-  const [isAdding, setIsAdding] = useState(false);
+  const router = useRouter();
 
-  const handleAddToCart = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!product.inStock || isAdding) return;
-
-    setIsAdding(true);
-    try {
-      toast({
-        title: 'Redirigiendo al producto',
-        description: 'Selecciona la variante y cantidad en la página del producto',
-        variant: 'default'
-      });
-      setTimeout(() => {
-        window.location.href = `/producto/${product.slug}`;
-      }, 500);
-    } catch (error) {
-      console.error('Error:', error);
-      toast({ title: 'Error', description: 'No se pudo procesar la acción', variant: 'destructive' });
-    } finally {
-      setIsAdding(false);
+  const handleAddToCart = () => {
+    if (!product.inStock) return;
+    if (product.isDemo) {
+      addDemoCartItem(product.slug, 1);
+      toast({ title: 'Agregado al carrito de prueba', description: product.name });
+      return;
     }
+    // En modo real la selección de variantes se realiza en la ficha.
+    router.push('/producto/' + product.slug);
   };
 
   return (
-    <Link href={`/producto/${product.slug}`} className="group block">
-      <Card className="h-full transition-shadow hover:shadow-lg overflow-hidden">
+    <Card className="group flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">
+      <Link href={'/producto/' + product.slug} className="block flex-1">
         <div className="relative aspect-square overflow-hidden bg-muted">
           <DemoProductImage
-            key={product.id}
             name={product.name}
             category={product.categories.map(category => category.name).join(' ')}
             src={product.primaryImage?.url}
             alt={product.primaryImage?.alt}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
-
-          {/* Badges */}
-          <div className="absolute top-2 left-2 flex flex-col gap-1.5">
-            {hasDiscount && (
-              <Badge variant="destructive" className="text-body-xs">
-                -{product.discountPercent}%
-              </Badge>
-            )}
-            {product.isNew && (
-              <Badge variant="secondary" className="text-body-xs">
-                <Star className="mr-1 h-3 w-3" />
-                Nuevo
-              </Badge>
-            )}
-          </div>
-
-          {/* Stock */}
-          {!product.inStock && (
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-              <Badge variant="outline" className="text-body-sm bg-destructive/90 text-destructive-foreground border-destructive">
-                Agotado
-              </Badge>
-            </div>
-          )}
+          {product.discountPercent > 0 && <Badge variant="destructive" className="absolute left-2 top-2">-{product.discountPercent}%</Badge>}
+          {!product.inStock && <span className="absolute inset-0 flex items-center justify-center bg-black/50"><Badge variant="destructive">Agotado</Badge></span>}
         </div>
-
-        <CardContent className="p-4 space-y-2">
-          {/* Marca */}
-          {product.brand && (
-            <p className="text-body-xs text-muted-foreground uppercase tracking-wide">
-              {product.brand.name}
-            </p>
-          )}
-
-          <h3 className="text-body-md font-medium line-clamp-2 group-hover:text-primary transition-colors">
-            {product.name}
-          </h3>
-
-          {product.shortDescription && (
-            <p className="text-body-sm text-muted-foreground line-clamp-2">
-              {product.shortDescription}
-            </p>
-          )}
-
-          {/* Precio */}
-          <div className="flex items-baseline gap-2 pt-2">
-            <span className="text-heading-sm font-heading font-semibold">
-              {product.formattedPrice}
-            </span>
-            {hasDiscount && product.formattedCompareAtPrice && (
-              <span className="text-body-sm text-muted-foreground line-through">
-                {product.formattedCompareAtPrice}
-              </span>
-            )}
+        <CardContent className="space-y-2 p-4">
+          {product.brand && <p className="text-xs uppercase tracking-wide text-muted-foreground">{product.brand.name}</p>}
+          <h3 className="font-medium group-hover:text-primary">{product.name}</h3>
+          {product.shortDescription && <p className="line-clamp-2 text-sm text-muted-foreground">{product.shortDescription}</p>}
+          <div className="flex flex-wrap items-baseline gap-2 pt-2">
+            <span className="font-heading text-lg font-semibold">{product.formattedPrice}</span>
+            {product.discountPercent > 0 && product.formattedCompareAtPrice && <span className="text-sm text-muted-foreground line-through">{product.formattedCompareAtPrice}</span>}
+            {product.isDemo && <span className="text-xs text-muted-foreground">Referencial</span>}
           </div>
         </CardContent>
-
-        <CardFooter className="p-0 px-4 pb-4">
-          <Button
-            className="w-full"
-            disabled={!product.inStock || isAdding}
-            onClick={handleAddToCart}
-            aria-label={`Agregar ${product.name} al carrito`}
-          >
-            <ShoppingBag className="mr-2 h-4 w-4" />
-            {isAdding ? 'Agregando...' : product.inStock ? 'Agregar al carrito' : 'Agotado'}
-          </Button>
-        </CardFooter>
-      </Card>
-    </Link>
+      </Link>
+      <CardFooter className="px-4 pb-4 pt-0">
+        <Button className="w-full" disabled={!product.inStock} onClick={handleAddToCart}
+          aria-label={product.isDemo ? 'Agregar ' + product.name + ' al carrito de prueba' : 'Elegir presentación de ' + product.name}>
+          <ShoppingBag className="mr-2 h-4 w-4" />
+          {!product.inStock ? 'Agotado' : product.isDemo ? 'Agregar al carrito' : 'Elegir presentación'}
+        </Button>
+      </CardFooter>
+    </Card>
   );
 }
 
