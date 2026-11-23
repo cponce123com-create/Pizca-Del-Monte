@@ -54,7 +54,7 @@ export function listDemoProducts(filters: Filters) {
     (!filters.brand || product.brand.slug === filters.brand) &&
     (filters.minPrice === undefined || product.basePrice >= filters.minPrice) &&
     (filters.maxPrice === undefined || product.basePrice <= filters.maxPrice) &&
-    (!term || normalizeProductSearch(`${product.name} ${product.description} ${product.sku}`).includes(term)) &&
+    (!term || normalizeProductSearch(`${product.name} ${product.categories[0].name} ${product.sku}`).includes(term)) &&
     (!filters.featured || product.isFeatured) && !filters.onSale
   );
   if (term && filters.sort === 'newest') result = result.sort((a, b) => Number(normalizeProductSearch(b.name).startsWith(term)) - Number(normalizeProductSearch(a.name).startsWith(term)));
