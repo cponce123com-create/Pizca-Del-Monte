@@ -12,7 +12,7 @@ const categories = [
     slug: 'especias',
     description: 'Ajíes, hierbas, semillas y mezclas',
     image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=900&q=85',
-    count: 8,
+    count: 12,
     color: 'from-forest-600 to-forest-800',
     icon: Leaf,
   },
@@ -21,7 +21,7 @@ const categories = [
     slug: 'sales-gourmet',
     description: 'Maras, aromatizadas y de origen',
     image: 'https://images.unsplash.com/photo-1518110925495-5fe2b0ba94a9?w=900&q=85',
-    count: 5,
+    count: 8,
     color: 'from-terracotta-500 to-terracotta-700',
     icon: Droplet,
   },
@@ -30,7 +30,7 @@ const categories = [
     slug: 'aceites-vinagres',
     description: 'AOVE, infusionados y artesanales',
     image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=900&q=85',
-    count: 5,
+    count: 10,
     color: 'from-ochre-500 to-ochre-700',
     icon: Package,
   },
@@ -39,7 +39,7 @@ const categories = [
     slug: 'mezclas-salsas',
     description: 'Huancaína, ocopa, aderezos',
     image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=900&q=85',
-    count: 5,
+    count: 12,
     color: 'from-amber-500 to-amber-700',
     icon: Utensils,
   },
@@ -48,7 +48,7 @@ const categories = [
     slug: 'packs-gourmet',
     description: 'Regalos curados y temáticos',
     image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=900&q=85',
-    count: 4,
+    count: 10,
     color: 'from-rose-500 to-rose-700',
     icon: Sparkles,
   },
@@ -57,7 +57,7 @@ const categories = [
     slug: 'accesorios',
     description: 'Morteros, molinillos, frascos',
     image: 'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=900&q=85',
-    count: 3,
+    count: 8,
     color: 'from-stone-500 to-stone-700',
     icon: Wrench,
   },
@@ -67,9 +67,10 @@ export function FeaturedCategories() {
   return (
     <section className="py-20" aria-labelledby="categories-heading">
       <div className="container">
-        <div className="flex items-center justify-between mb-12">
+        <div className="mb-10 flex items-end justify-between gap-4">
           <div>
-            <h2 id="categories-heading" className="text-display-md font-heading font-medium">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Una despensa con identidad</p>
+            <h2 id="categories-heading" className="text-display-md font-heading font-medium tracking-tight">
               Explora por categoría
             </h2>
             <p className="text-muted-foreground mt-2">
@@ -84,7 +85,7 @@ export function FeaturedCategories() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {categories.map((category) => (
             <CategoryCard key={category.slug} category={category} />
           ))}
@@ -118,11 +119,12 @@ function CategoryCard({ category }: { category: typeof categories[0] }) {
             <Icon className="h-16 w-16 text-white/50" />
           </div>
         )}
-        <div className="relative z-20 p-6 h-full flex flex-col justify-end">
+        <div className="relative z-20 flex h-full flex-col justify-end p-5 sm:p-6">
           <h3 className="text-heading-md font-semibold text-white">
             {category.name}
           </h3>
-          <p className="text-body-sm text-white/80 mt-1">{category.description}</p>
+          <p className="text-body-sm mt-1 text-white/80">{category.description}</p>
+          <span className="mt-3 inline-flex w-fit rounded-full border border-white/25 bg-black/20 px-2.5 py-1 text-[11px] font-medium text-white/90 backdrop-blur-sm">{category.count} productos</span>
         </div>
       </Link>
     </article>

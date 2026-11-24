@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Search, ShoppingCart, User, Heart, Truck, RotateCcw, Shield, ChevronDown } from 'lucide-react';
+import { Menu, X, Search, ShoppingCart, User, Heart, Truck, RotateCcw, Shield, ChevronDown, Leaf } from 'lucide-react';
 import { readDemoCart } from '@/lib/demo-cart';
 import { LiveSearch } from '@/components/layout/live-search';
 
@@ -20,12 +20,11 @@ const dropdownItems = [
   { name: 'Especias', href: '/tienda/categoria/especias', description: 'Ajíes, hierbas, semillas y mezclas' },
   { name: 'Sales Gourmet', href: '/tienda/categoria/sales-gourmet', description: 'Maras, aromatizadas y de origen' },
   { name: 'Aceites y Vinagres', href: '/tienda/categoria/aceites-vinagres', description: 'AOVE, infusionados y artesanales' },
-  { name: 'Mezclas y Salsas', href: '/tienda/categoria/mezclas-salsas', description: 'Huancaína, ocopa, aderezos' },
+  { name: 'Mezclas y Salsas', href: '/tienda/categoria/mezclas-salsas', description: 'Aderezos y picantes peruanos' },
   { name: 'Packs Gourmet', href: '/tienda/categoria/packs-gourmet', description: 'Regalos curados y temáticos' },
   { name: 'Accesorios', href: '/tienda/categoria/accesorios', description: 'Morteros, molinillos, frascos' },
 ];
 
-// Componente para el contador del carrito que obtiene los datos dinámicamente
 function CartCount({ isDemo }: { isDemo: boolean }) {
   const [count, setCount] = useState(0);
 
@@ -50,10 +49,19 @@ function CartCount({ isDemo }: { isDemo: boolean }) {
   }, [isDemo]);
 
   if (count === 0) return null;
+  return <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-terracotta-700 px-1 text-[10px] font-semibold text-white shadow-sm">{count > 99 ? '99+' : count}</span>;
+}
 
+function Brand() {
   return (
-    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-medium">
-      {count > 99 ? '99+' : count}
+    <span className="flex items-center gap-2.5">
+      <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm shadow-primary/20">
+        <Leaf className="h-5 w-5" />
+      </span>
+      <span className="flex flex-col leading-none">
+        <span className="font-heading text-lg font-semibold tracking-tight text-foreground">Pizca</span>
+        <span className="font-heading text-sm italic text-primary">del Monte</span>
+      </span>
     </span>
   );
 }
@@ -70,88 +78,34 @@ export function Header({ isDemo = false }: { isDemo?: boolean }) {
   };
 
   return (
-    <header className="sticky top-0 z-[300] w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      {/* Top Bar */}
-      <div className="hidden md:flex items-center justify-between px-4 py-2 bg-muted/50 border-b border-border text-body-xs">
-        <div className="flex items-center gap-6">
-          <span className="flex items-center gap-1.5 text-muted-foreground">
-            <Truck className="h-3.5 w-3.5" />
-            Envíos sujetos a cobertura y confirmación
-          </span>
-          <span className="flex items-center gap-1.5 text-muted-foreground">
-            <Shield className="h-3.5 w-3.5" />
-            Consulta los medios de pago disponibles
-          </span>
-          <span className="flex items-center gap-1.5 text-muted-foreground">
-            <RotateCcw className="h-3.5 w-3.5" />
-            Consulta las condiciones de devolución
-          </span>
-        </div>
-        <div className="flex items-center gap-4">
-          <Link href="/login" className="text-muted-foreground hover:text-foreground transition-colors" onClick={(e) => { e.preventDefault(); handleNavigate('/login'); }}>
-            Iniciar sesión
-          </Link>
-          <Link href="/register" className="text-muted-foreground hover:text-foreground transition-colors" onClick={(e) => { e.preventDefault(); handleNavigate('/register'); }}>
-            Registrarse
-          </Link>
-          <Link href="/mi-cuenta" className="text-primary hover:text-primary-light transition-colors font-medium" onClick={(e) => { e.preventDefault(); handleNavigate('/mi-cuenta'); }}>
-            Mi cuenta
-          </Link>
+    <header className="sticky top-0 z-[300] w-full border-b border-border/80 bg-background/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/85">
+      <div className="bg-primary px-4 py-2 text-[10px] font-medium uppercase tracking-[0.16em] text-primary-foreground/90">
+        <div className="container flex items-center justify-between gap-3">
+          <span className="inline-flex items-center gap-1.5"><Truck className="h-3.5 w-3.5" /> Envíos sujetos a cobertura y confirmación</span>
+          <span className="hidden items-center gap-1.5 sm:inline-flex"><Shield className="h-3.5 w-3.5" /> Catálogo demo · precios referenciales</span>
         </div>
       </div>
 
-      {/* Main Header */}
-      <nav className="container mx-auto px-4" aria-label="Navegación principal">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2" aria-label="Pizca del Monte - Inicio" onClick={(e) => { e.preventDefault(); handleNavigate('/'); }}>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
-              <span className="text-primary-foreground font-heading font-bold text-xl">P</span>
-            </div>
-            <span className="hidden sm:block font-heading font-semibold text-heading-sm text-foreground">
-              Pizca del Monte
-            </span>
-          </Link>
+      <nav className="container" aria-label="Navegación principal">
+        <div className="flex h-[4.5rem] items-center justify-between gap-4">
+          <Link href="/" className="shrink-0" aria-label="Pizca del Monte - Inicio" onClick={(e) => { e.preventDefault(); handleNavigate('/'); }}><Brand /></Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex md:items-center md:gap-1">
+          <div className="hidden items-center gap-0.5 lg:flex">
             {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="px-4 py-2 text-body-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg"
-                onClick={(e) => { e.preventDefault(); handleNavigate(item.href); }}
-              >
+              <Link key={item.name} href={item.href} className="rounded-full px-3.5 py-2 text-sm font-medium text-foreground-muted transition-colors hover:bg-primary/8 hover:text-primary" onClick={(e) => { e.preventDefault(); handleNavigate(item.href); }}>
                 {item.name}
               </Link>
             ))}
-            {/* Categorías Dropdown */}
-            <div className="relative">
-              <button
-                className="flex items-center gap-1.5 px-4 py-2 text-body-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg"
-                onMouseEnter={() => setDropdownOpen(true)}
-                onMouseLeave={() => setDropdownOpen(false)}
-                aria-haspopup="true"
-                aria-expanded={dropdownOpen}
-              >
-                Categorías
-                <ChevronDown className="h-4 w-4" />
+            <div className="relative ml-1" onMouseEnter={() => setDropdownOpen(true)} onMouseLeave={() => setDropdownOpen(false)}>
+              <button className="flex items-center gap-1 rounded-full px-3.5 py-2 text-sm font-medium text-foreground-muted transition-colors hover:bg-primary/8 hover:text-primary" aria-haspopup="true" aria-expanded={dropdownOpen}>
+                Categorías <ChevronDown className="h-4 w-4" />
               </button>
               {dropdownOpen && (
-                <div
-                  className="absolute left-0 top-full z-50 mt-2 w-72 rounded-xl border bg-background p-2 shadow-dropdown"
-                  onMouseEnter={() => setDropdownOpen(true)}
-                  onMouseLeave={() => setDropdownOpen(false)}
-                >
+                <div className="absolute left-0 top-full z-50 mt-2 w-80 rounded-2xl border border-border bg-background p-2 shadow-dropdown" role="menu">
+                  <div className="px-3 pb-2 pt-2"><p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Explora la despensa</p></div>
                   {dropdownItems.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className="flex items-start gap-3 px-3 py-2.5 rounded-lg text-body-sm hover:bg-muted transition-colors"
-                      onClick={(e) => { e.preventDefault(); handleNavigate(item.href); }}
-                    >
-                      <span className="font-medium text-foreground">{item.name}</span>
-                      <span className="text-muted-foreground">{item.description}</span>
+                    <Link key={item.name} href={item.href} className="flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-ivory-100" onClick={(e) => { e.preventDefault(); handleNavigate(item.href); }}>
+                      <span className="font-medium text-foreground">{item.name}</span><span className="text-right text-xs text-foreground-muted">{item.description}</span>
                     </Link>
                   ))}
                 </div>
@@ -159,74 +113,24 @@ export function Header({ isDemo = false }: { isDemo?: boolean }) {
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => setSearchOpen(true)} aria-label="Buscar productos" aria-haspopup="dialog">
-              <Search className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" className="relative" onClick={() => handleNavigate('/favoritos')} aria-label="Favoritos">
-              <Heart className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" className="relative" onClick={() => handleNavigate('/carrito')} aria-label="Carrito">
-              <ShoppingCart className="h-5 w-5" />
-              <CartCount isDemo={isDemo} />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => handleNavigate('/mi-cuenta')} aria-label="Mi cuenta">
-              <User className="h-5 w-5" />
-            </Button>
-            <Button variant="primary" size="sm" className="hidden sm:flex" onClick={() => handleNavigate('/tienda')}>
-              Comprar
-            </Button>
-
-            {/* Mobile Menu Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-expanded={mobileMenuOpen}
-              aria-controls="mobile-menu"
-              aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
-            >
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </Button>
+          <div className="flex items-center gap-1 sm:gap-2">
+            <Button variant="ghost" size="icon" onClick={() => setSearchOpen(true)} aria-label="Buscar productos" aria-haspopup="dialog"><Search className="h-5 w-5" /></Button>
+            <Button variant="ghost" size="icon" className="relative" onClick={() => handleNavigate('/favoritos')} aria-label="Favoritos"><Heart className="h-5 w-5" /></Button>
+            <Button variant="ghost" size="icon" className="relative" onClick={() => handleNavigate('/carrito')} aria-label="Carrito"><ShoppingCart className="h-5 w-5" /><CartCount isDemo={isDemo} /></Button>
+            <Button variant="ghost" size="icon" className="hidden sm:inline-flex" onClick={() => handleNavigate('/mi-cuenta')} aria-label="Mi cuenta"><User className="h-5 w-5" /></Button>
+            <Button variant="primary" size="sm" className="hidden rounded-full px-5 sm:flex" onClick={() => handleNavigate('/tienda')}>Comprar</Button>
+            <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-expanded={mobileMenuOpen} aria-controls="mobile-menu" aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}>{mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}</Button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div id="mobile-menu" className="md:hidden py-4 border-t border-border animate-slide-in-from-top">
-            <div className="flex flex-col gap-2">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="px-3 py-2 text-body-md font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-                  onClick={(e) => { e.preventDefault(); handleNavigate(item.href); }}
-                >
-                  {item.name}
-                </Link>
-              ))}
-              <hr className="border-border my-2" />
-              <div className="px-3 py-2">
-                <h3 className="font-semibold text-foreground mb-2">Categorías</h3>
-                <div className="flex flex-col gap-1">
-                  {dropdownItems.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className="px-3 py-2 text-body-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-                      onClick={(e) => { e.preventDefault(); handleNavigate(item.href); }}
-                    >
-                      {item.name}
-                    </Link>
-                  ))}
-                </div>
-              </div>
+          <div id="mobile-menu" className="border-t border-border py-4 lg:hidden" role="dialog" aria-label="Menú móvil">
+            <div className="grid gap-1">
+              {navigation.map((item) => <Link key={item.name} href={item.href} className="rounded-xl px-3 py-2.5 text-sm font-medium text-foreground-muted hover:bg-ivory-100 hover:text-primary" onClick={(e) => { e.preventDefault(); handleNavigate(item.href); }}>{item.name}</Link>)}
+              <div className="mt-2 border-t border-border pt-3"><p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Categorías</p>{dropdownItems.map((item) => <Link key={item.name} href={item.href} className="block rounded-xl px-3 py-2 text-sm text-foreground-muted hover:bg-ivory-100 hover:text-primary" onClick={(e) => { e.preventDefault(); handleNavigate(item.href); }}>{item.name}</Link>)}</div>
             </div>
           </div>
         )}
-
         {searchOpen && <LiveSearch onClose={() => setSearchOpen(false)} />}
       </nav>
     </header>
