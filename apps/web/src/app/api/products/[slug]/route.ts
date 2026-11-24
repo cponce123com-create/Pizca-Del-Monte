@@ -165,12 +165,6 @@ export async function GET(
       })),
       variants,
       attributeGroups: formattedAttributeGroups,
-      inventory: product.inventory ? {
-        totalQty: product.inventory.quantity,
-        reservedQty: product.inventory.reservedQty,
-        availableQty: product.inventory.availableQty,
-        lowStockThreshold: product.inventory.minStock,
-      } : null,
       trackInventory: product.trackInventory,
       inStock: product.variants.length > 0
         ? variants.some(variant => variant.inStock)

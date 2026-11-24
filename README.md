@@ -2,12 +2,12 @@
 
 > **Especias, Sales y Aceites Gourmet Peruanos** - Plataforma de e-commerce completa para la venta de productos gourmet peruanos con cumplimiento SUNAT, integración Shalom, y arquitectura multi-app.
 
-[![Next.js](https://img.shields.io/badge/Next.js-14.2-black?logo=next.js)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue?logo=typescript)](https://www.typescriptlang.org/)
-[![Prisma](https://img.shields.io/badge/Prisma-5.17-2D3748?logo=prisma)](https://www.prisma.io/)
+[![Prisma](https://img.shields.io/badge/Prisma-5.22-2D3748?logo=prisma)](https://www.prisma.io/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql)](https://www.postgresql.org/)
-[![pnpm](https://img.shields.io/badge/pnpm-9.x-F69220?logo=pnpm)](https://pnpm.io/)
+[![pnpm](https://img.shields.io/badge/pnpm-10.x-F69220?logo=pnpm)](https://pnpm.io/)
 
 ---
 
@@ -55,7 +55,7 @@
                         MONOREPO (pnpm workspaces)
 ├─────────────────┬─────────────────┬─────────────────────────────┤
 │   apps/web      │   apps/admin    │      packages/*             │
-│  (Next.js 14)   │  (Next.js 14)   │  ┌─────────────────────┐    │
+│  (Next.js 15)   │  (Next.js 15)   │  ┌─────────────────────┐    │
 │  - Tienda       │  - Dashboard    │  │ @pizca/database     │    │
 │  - Recetario    │  - Gestión      │  │   - Prisma Client   │    │
 │  - Blog/CMS     │  - Analytics    │  │   - Seed & Migrat.  │    │
@@ -92,14 +92,14 @@
 ## 🛠️ Stack Tecnológico
 
 ### Frontend
-- **Next.js 14.2** (App Router, RSC, Server Actions)
+- **Next.js 15.5** (App Router, RSC, Server Actions)
 - **React 18.3** + **TypeScript 5.5**
 - **Tailwind CSS 3.4** + **Radix UI** (componentes accesibles)
 - **Lucide React** (iconos)
-- **TanStack Query v5** + **React Hook Form v7** + **Zod v3**
+- **TanStack Query v5** + **React Hook Form v7** + **Zod v4**
 
 ### Backend & Database
-- **Prisma Client 5.17** + **PostgreSQL 16** (Neon Free Tier)
+- **Prisma Client 5.22** + **PostgreSQL 16** (Neon Free Tier)
 - **NextAuth.js v5** (credentials, OAuth, JWT)
 - **Server Actions** para mutaciones
 - **Upstash Redis** (caché, rate limiting, sesiones)
@@ -116,7 +116,7 @@
 ### DevOps
 - **GitHub Actions** (CI/CD)
 - **Render** (hosting web services + cron jobs)
-- **pnpm 9** + **Turborepo** (build system)
+- **pnpm 10** + **Turborepo** (build system)
 - **Husky** + **ESLint** + **Prettier** (code quality)
 
 ---
@@ -192,7 +192,7 @@ pizca-del-monte/
 ### Prerrequisitos
 
 - **Node.js 20+** (recomendado: usar `fnm` o `nvm`)
-- **pnpm 9+** (`npm install -g pnpm@9` o `corepack enable pnpm`)
+- **pnpm 10+** (`npm install -g pnpm@10` o `corepack enable pnpm`)
 - **PostgreSQL 16** (local o Neon)
 - **Git**
 

@@ -2092,63 +2092,11 @@ async function main() {
   }
 
   // ============================================
-  // 20. CUENTA DE PRUEBA CLIENTE
+  // 20. CUENTAS DE PRUEBA
   // ============================================
-  console.log('👤 Creando cliente de prueba...');
-
-  const testCustomerPass = await hash('ClienteTest2024!', 12);
-  const testUser = await prisma.user.upsert({
-    where: { email: 'cliente@test.pe' },
-    update: {},
-    create: {
-      email: 'cliente@test.pe',
-      name: 'Cliente Prueba',
-      passwordHash: testCustomerPass,
-      status: UserStatus.ACTIVE,
-      emailVerified: new Date(),
-      phone: '+51912345678',
-      locale: 'es-PE',
-    },
-  });
-
-  await prisma.customer.upsert({
-    where: { userId: testUser.id },
-    update: {},
-    create: {
-      userId: testUser.id,
-      documentType: 'DNI',
-      documentNumber: '12345678',
-      firstName: 'Juan',
-      lastName: 'Pérez',
-      email: 'cliente@test.pe',
-      phone: '+51912345678',
-      isWholesale: false,
-      marketingConsent: true,
-    },
-  });
-
-  await prisma.address.upsert({
-    where: { id: 'addr-test-1' },
-    update: {},
-    create: {
-      id: 'addr-test-1',
-      userId: testUser.id,
-      type: 'both',
-      isDefault: true,
-      firstName: 'Juan',
-      lastName: 'Pérez',
-      addressLine1: 'Av. Arequipa 1234',
-      addressLine2: 'Dpto 501',
-      neighborhood: 'Lince',
-      district: 'Lince',
-      province: 'Lima',
-      department: 'Lima',
-      postalCode: '15046',
-      country: 'PE',
-      phone: '+51912345678',
-      ubigeo: '150114',
-    },
-  });
+  // No crear cuentas autenticables con credenciales predecibles desde el seed.
+  // Las cuentas de prueba deben provisionarse con fixtures aislados y secretos de cada entorno.
+  console.log('ℹ️ Se omiten las cuentas de prueba.');
 
   // ============================================
   // 21. BANNERS DE EJEMPLO
@@ -2170,8 +2118,7 @@ async function main() {
   console.log('');
   console.log('📋 Resumen:');
   console.log('  - Roles y permisos: 7 roles configurados');
-  console.log('  - Superadmin: admin@pizcadelmonte.pe / PizcaDelMonte2024!');
-  console.log('  - Cliente prueba: cliente@test.pe / ClienteTest2024!');
+  console.log('  - Cuentas de prueba: omitidas; no se generan credenciales predeterminadas');
   console.log('  - Categorías: 6 principales + 18 subcategorías');
   console.log('  - Marcas: 5');
   console.log('  - Atributos: 6 con múltiples valores');

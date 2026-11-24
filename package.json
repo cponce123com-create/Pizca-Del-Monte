@@ -2,7 +2,7 @@
   "name": "pizca-del-monte",
   "version": "0.0.0",
   "private": true,
-  "packageManager": "pnpm@9.15.9",
+  "packageManager": "pnpm@10.34.9",
   "engines": {
     "node": ">=20 <23"
   },
@@ -28,11 +28,5 @@
     "concurrently": "^8.2.2",
     "husky": "^9.0.11",
     "typescript": "^5.5.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "postcss": "^8.5.18",
-      "zod": "^4.6.6"
-    }
   }
 }

@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, Loader2, Mail, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { safeCallbackUrl } from '@/lib/auth/safe-callback-url';
 
 export default function LoginPage() {
   return <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Cargando acceso...</div>}><LoginContent /></Suspense>;
@@ -18,7 +19,7 @@ export default function LoginPage() {
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/mi-cuenta';
+  const callbackUrl = safeCallbackUrl(searchParams.get('callbackUrl'));
   const error = searchParams.get('error');
 
   const [email, setEmail] = useState('');

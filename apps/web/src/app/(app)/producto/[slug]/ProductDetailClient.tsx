@@ -63,7 +63,6 @@ interface Product {
   media: { id: string; url: string; alt: string; type: string; sortOrder: number }[];
   variants: ProductVariant[];
   attributeGroups: AttributeGroup[];
-  inventory: { totalQty: number; reservedQty: number; availableQty: number; lowStockThreshold: number } | null;
   trackInventory: boolean;
   inStock: boolean;
   availableQty: number;
@@ -555,7 +554,7 @@ export function ProductDetailClient({ initialProduct }: ProductDetailClientProps
             <TabsContent value="descripcion" className="space-y-4">
               <div className="prose prose-slate max-w-none">
                 {product.description ? (
-                  <div dangerouslySetInnerHTML={{ __html: product.description }} />
+                  <p className="whitespace-pre-line">{product.description}</p>
                 ) : (
                   <p className="text-muted-foreground">No hay descripción disponible para este producto.</p>
                 )}
