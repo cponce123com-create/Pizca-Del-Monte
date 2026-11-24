@@ -2,23 +2,30 @@
 
 import { useState } from 'react';
 
-const demoImages = {
-  spice: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=900&q=85',
-  salt: 'https://images.unsplash.com/photo-1518110925495-5fe2b0ba94a9?w=900&q=85',
-  oil: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=900&q=85',
-  sauce: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=900&q=85',
-  gift: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=900&q=85',
-  cooking: 'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=900&q=85',
-} as const;
+const demoImages = [
+  'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1518110925495-5fe2b0ba94a9?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1528825871115-3581a5387919?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=85',
+  'https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=crop&w=900&q=85',
+] as const;
 
 export function demoProductImage(name: string, category = ''): string {
   const text = (name + ' ' + category).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  if (/sal|maras/.test(text)) return demoImages.salt;
-  if (/aceite|oliva|vinagre/.test(text)) return demoImages.oil;
-  if (/salsa|aderezo|huancaina|ocopa/.test(text)) return demoImages.sauce;
-  if (/pack|regalo|caja|kit/.test(text)) return demoImages.gift;
-  if (/mortero|frasco|molinillo|accesorio/.test(text)) return demoImages.cooking;
-  return demoImages.spice;
+  if (/pack|regalo|caja|kit/.test(text)) return demoImages[4];
+  if (/sal|maras/.test(text)) return demoImages[1];
+  if (/aceite|oliva|vinagre/.test(text)) return demoImages[2];
+  if (/salsa|aderezo|pasta|mermelada|miel/.test(text)) return demoImages[3];
+  if (/mortero|frasco|molinillo|accesorio|cuchara|tabla|tazon|pinza/.test(text)) return demoImages[5];
+  const hash = [...text].reduce((sum, character) => sum + character.charCodeAt(0), 0);
+  return demoImages[hash % demoImages.length];
 }
 
 interface DemoProductImageProps {
