@@ -265,6 +265,10 @@ SMTP_PASS="xxx"
 
 Ver [`.env.example`](.env.example) para lista completa.
 
+En producción, configurar `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN` para las cuotas distribuidas de inicio de sesión y registro. El login limita por IP (30 intentos/15 min) y correo (10/15 min); el registro, por IP (10/hora) y correo (3/hora). Si Redis falta o no responde, ambos flujos se deniegan: el registro devuelve HTTP 503 y login muestra un error genérico. En desarrollo y tests se puede omitir Upstash.
+
+El límite por IP usa `X-Forwarded-For` o `X-Real-IP`. El proxy de producción debe reemplazar estas cabeceras en vez de conservar valores enviados por el cliente. El limitador usa [Upstash Ratelimit](https://upstash.com/docs/redis/sdks/ratelimit-ts/gettingstarted) con Redis REST compartido entre instancias.
+
 ---
 
 ## 🗄️ Base de Datos

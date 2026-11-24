@@ -3,6 +3,7 @@ import { hash } from 'bcryptjs';
 import { prisma } from '@pizca/database';
 import { z } from 'zod';
 import { isDemoMode } from '@/lib/demo-mode';
+import { checkAuthRateLimits, getClientIp } from '@/lib/security/auth-rate-limit';
 
 const registerSchema = z.object({
   firstName: z.string().min(2, 'Nombre muy corto'),
@@ -15,6 +16,23 @@ const registerSchema = z.object({
 
 export async function POST(request: NextRequest) {
   if (isDemoMode()) return NextResponse.json({ message: 'El registro estará disponible cuando la tienda esté configurada.' }, { status: 503 });
+
+  const ipLimit = await checkAuthRateLimits([
+    { scope: 'register:ip', identifier: getClientIp(request.headers) },
+  ]);
+  if (ipLimit.status === 'limited') {
+    return NextResponse.json(
+      { message: 'Demasiados intentos. Inténtalo de nuevo más tarde.' },
+      { status: 429, headers: { 'Retry-After': String(ipLimit.retryAfterSeconds), 'Cache-Control': 'no-store' } }
+    );
+  }
+  if (ipLimit.status === 'unavailable') {
+    return NextResponse.json(
+      { message: 'El registro no está disponible temporalmente.' },
+      { status: 503, headers: { 'Retry-After': '60', 'Cache-Control': 'no-store' } }
+    );
+  }
+
   try {
     const body = await request.json();
     const parsed = registerSchema.safeParse(body);
@@ -26,7 +44,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { firstName, lastName, email, password, phone, newsletter } = parsed.data;
+    const { firstName, lastName, password, phone, newsletter } = parsed.data;
+    const email = parsed.data.email.trim().toLowerCase();
+
+    const identityLimit = await checkAuthRateLimits([
+      { scope: 'register:identity', identifier: email },
+    ]);
+    if (identityLimit.status === 'limited') {
+      return NextResponse.json(
+        { message: 'Demasiados intentos. Inténtalo de nuevo más tarde.' },
+        { status: 429, headers: { 'Retry-After': String(identityLimit.retryAfterSeconds), 'Cache-Control': 'no-store' } }
+      );
+    }
+    if (identityLimit.status === 'unavailable') {
+      return NextResponse.json(
+        { message: 'El registro no está disponible temporalmente.' },
+        { status: 503, headers: { 'Retry-After': '60', 'Cache-Control': 'no-store' } }
+      );
+    }
 
     // Verificar si el usuario ya existe
     const existingUser = await prisma.user.findUnique({

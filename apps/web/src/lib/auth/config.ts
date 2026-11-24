@@ -3,6 +3,7 @@ import Credentials from 'next-auth/providers/credentials';
 import { prisma } from '@pizca/database';
 import { compare } from 'bcryptjs';
 import { z } from 'zod';
+import { checkAuthRateLimits, getClientIp } from '@/lib/security/auth-rate-limit';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   session: {
@@ -20,7 +21,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         email: { label: 'Correo', type: 'email' },
         password: { label: 'Contraseña', type: 'password' },
       },
-      authorize: async (credentials) => {
+      authorize: async (credentials, request) => {
         const parsed = z
           .object({
             email: z.string().email(),
@@ -30,7 +31,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (!parsed.success) return null;
 
-        const { email, password } = parsed.data;
+        const email = parsed.data.email.trim().toLowerCase();
+        const { password } = parsed.data;
+
+        const rateLimit = await checkAuthRateLimits([
+          { scope: 'login:ip', identifier: getClientIp(request.headers) },
+          { scope: 'login:identity', identifier: email },
+        ]);
+        if (rateLimit.status === 'limited') return null;
+        if (rateLimit.status === 'unavailable') {
+          throw new Error('Authentication rate limiting is unavailable');
+        }
 
         const user = await prisma.user.findUnique({
           where: { email },
