@@ -187,9 +187,9 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-ivory-50">
       {/* Header con filtros móviles */}
-      <div className="border-b bg-white sticky top-0 z-40 lg:hidden">
+      <div className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur lg:hidden">
         <div className="flex items-center justify-between p-4">
           <h1 className="text-heading-md font-heading font-semibold">Tienda</h1>
           <Button variant="outline" size="icon" onClick={() => setShowFilters(true)}>
@@ -350,9 +350,9 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
         {/* Contenido principal */}
         <main className="flex-1 lg:pl-0">
           {/* Toolbar superior */}
-          <div className="hidden lg:flex items-center justify-between p-4 border-b bg-white sticky top-0 z-30">
+          <div className="sticky top-0 z-30 hidden items-center justify-between border-b border-border bg-background/95 p-5 backdrop-blur lg:flex">
             <div className="flex items-center gap-4">
-              <h1 className="text-heading-lg font-heading font-semibold">Tienda</h1>
+              <div><p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">Pizca del Monte</p><h1 className="text-heading-lg font-heading font-semibold tracking-tight">Tienda</h1></div>
               {hasActiveFilters && (
                 <Badge variant="secondary" className="gap-1">
                   <Tag className="h-3 w-3" />
@@ -380,7 +380,7 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
           </div>
 
           {/* Grid de productos */}
-          <div className="p-4 lg:p-6">
+          <div className="p-4 lg:p-7">
             {isLoading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {Array.from({ length: 8 }).map((_, i) => (
@@ -398,7 +398,7 @@ export function ProductCatalogClient({ initialParams }: ProductCatalogClientProp
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {products.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
@@ -462,9 +462,9 @@ function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <Card className="group flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg">
+    <Card className="group flex h-full flex-col overflow-hidden rounded-2xl border-border/80 bg-background transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10">
       <Link href={'/producto/' + product.slug} className="block flex-1">
-        <div className="relative aspect-square overflow-hidden bg-muted">
+        <div className="relative aspect-square overflow-hidden bg-ivory-100">
           <DemoProductImage
             name={product.name}
             category={product.categories.map(category => category.name).join(' ')}
@@ -475,7 +475,7 @@ function ProductCard({ product }: { product: Product }) {
           {product.discountPercent > 0 && <Badge variant="destructive" className="absolute left-2 top-2">-{product.discountPercent}%</Badge>}
           {!product.inStock && <span className="absolute inset-0 flex items-center justify-center bg-black/50"><Badge variant="destructive">Agotado</Badge></span>}
         </div>
-        <CardContent className="space-y-2 p-4">
+        <CardContent className="space-y-2 p-5">
           {product.brand && <p className="text-xs uppercase tracking-wide text-muted-foreground">{product.brand.name}</p>}
           <h3 className="font-medium group-hover:text-primary">{product.name}</h3>
           {product.shortDescription && <p className="line-clamp-2 text-sm text-muted-foreground">{product.shortDescription}</p>}
@@ -486,7 +486,7 @@ function ProductCard({ product }: { product: Product }) {
           </div>
         </CardContent>
       </Link>
-      <CardFooter className="px-4 pb-4 pt-0">
+      <CardFooter className="px-5 pb-5 pt-0">
         <Button className="w-full" disabled={!product.inStock} onClick={handleAddToCart}
           aria-label={product.isDemo ? 'Agregar ' + product.name + ' al carrito de prueba' : 'Elegir presentación de ' + product.name}>
           <ShoppingBag className="mr-2 h-4 w-4" />
