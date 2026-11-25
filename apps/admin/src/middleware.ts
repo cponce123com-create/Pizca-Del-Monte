@@ -1,6 +1,13 @@
+import { isAdminDemo } from './lib/demo/mode';
+import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-export function middleware() {
+export function middleware(request?: NextRequest) {
+  const pathname = request?.nextUrl.pathname;
+  if (isAdminDemo() && pathname) {
+    if (pathname === '/login' || pathname === '/demo') return NextResponse.next();
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
   const secret = process.env.ADMIN_AUTH_SECRET;
   if (!process.env.DATABASE_URL || !secret || secret.length < 32 ||
       secret === process.env.AUTH_SECRET || secret === process.env.NEXTAUTH_SECRET) {

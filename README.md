@@ -652,3 +652,11 @@ El panel se ejecuta como servicio independiente y su entrada es `/login`. Config
 En una base de pruebas vacía con el esquema aplicado, puedes usar `pnpm db:seed` con `SEED_ADMIN_EMAIL` y `SEED_ADMIN_PASSWORD` para crear la primera cuenta y cargar datos de muestra. El seed no modifica la contraseña ni los roles de una cuenta existente. Elimina las variables del seed cuando termines.
 
 Desde la raíz del repositorio, el servicio se compila con `pnpm db:generate && pnpm build:admin` y se inicia con `pnpm --filter @pizca/admin start`.
+
+#### Acceso de demostración
+
+Inicia el servicio con `pnpm dev:admin` y abre `http://localhost:3001/login`.
+Si el servicio del administrador no tiene `DATABASE_URL`, se activa el modo demo. Puedes desactivarlo con `ADMIN_DEMO_MODE=false`.
+Usa **demo@pizcadelmonte.example** y **PizcaDemo-2026!**. Son credenciales públicas y solo abren el panel de demostración. El catálogo inicial proviene de los datos de demostración de la tienda y las modificaciones se guardan aparte, en el navegador.
+
+Para alojar la demostración, usa HTTPS, omite `DATABASE_URL` en ese servicio y configura `ADMIN_DEMO_SECRET` con un valor aleatorio compartido por sus instancias. Configura `NEXT_PUBLIC_APP_URL` si quieres generar QR que apunten a tu tienda. Una receta creada solo en el navegador no queda publicada en la tienda. El seguimiento de envíos y los comprobantes del demo son de práctica.
