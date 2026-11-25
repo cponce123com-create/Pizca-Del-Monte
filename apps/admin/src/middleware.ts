@@ -6,7 +6,7 @@ export function middleware(request?: NextRequest) {
   const pathname = request?.nextUrl.pathname;
   if (isAdminDemo() && pathname) {
     if (pathname === '/login' || pathname === '/demo') return NextResponse.next();
-    return NextResponse.redirect(new URL('/login', request.url));
+    return new NextResponse(null, { status: 307, headers: { Location: '/login' } });
   }
   const secret = process.env.ADMIN_AUTH_SECRET;
   if (!process.env.DATABASE_URL || !secret || secret.length < 32 ||
