@@ -1,0 +1,116 @@
+services:
+  # Web App (Next.js)
+  - type: web
+    name: pizca-web
+    runtime: node
+    repo: https://github.com/cponce123com-create/Pizca-Del-Monte
+    branch: main
+    buildCommand: |
+      pnpm install --frozen-lockfile && pnpm --filter @pizca/web build
+    startCommand: |
+      pnpm --filter @pizca/web start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      # Database
+      - key: DATABASE_URL
+        fromDatabase:
+          name: pizca-db
+          property: connectionString
+      # Auth
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: NEXTAUTH_URL
+        value: https://pizca-web.onrender.com
+      # Mercado Pago
+      - key: MERCADOPAGO_ACCESS_TOKEN
+        sync: false
+      - key: MERCADOPAGO_PUBLIC_KEY
+        sync: false
+      - key: MERCADOPAGO_WEBHOOK_SECRET
+        sync: false
+      # Email (Resend recommended)
+      - key: EMAIL_PROVIDER
+        value: resend
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        value: noreply@pizcadelmonte.pe
+      - key: EMAIL_FROM_NAME
+        value: Pizca del Monte
+      # NubeFact SUNAT
+      - key: NUBEFACT_API_URL
+        value: https://api.nubefact.com/api/v1
+      - key: NUBEFACT_API_KEY
+        sync: false
+      - key: NUBEFACT_WEBHOOK_SECRET
+        sync: false
+      # Upstash Redis (rate limiting)
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false
+      # App URL
+      - key: NEXT_PUBLIC_APP_URL
+        value: https://pizca-web.onrender.com
+    healthCheckPath: /api/health
+    autoDeploy: true
+
+  # Admin App (Next.js)
+  - type: web
+    name: pizca-admin
+    runtime: node
+    repo: https://github.com/cponce123com-create/Pizca-Del-Monte
+    branch: main
+    buildCommand: |
+      pnpm install --frozen-lockfile && pnpm --filter @pizca/admin build
+    startCommand: |
+      pnpm --filter @pizca/admin start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      # Database (same as web)
+      - key: DATABASE_URL
+        fromDatabase:
+          name: pizca-db
+          property: connectionString
+      # Auth (separate from web)
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: NEXTAUTH_URL
+        value: https://pizca-admin.onrender.com
+      # Admin credentials (set these in Render dashboard)
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      # NubeFact
+      - key: NUBEFACT_API_URL
+        value: https://api.nubefact.com/api/v1
+      - key: NUBEFACT_API_KEY
+        sync: false
+      - key: NUBEFACT_WEBHOOK_SECRET
+        sync: false
+      # App URL
+      - key: NEXT_PUBLIC_APP_URL
+        value: https://pizca-web.onrender.com
+    healthCheckPath: /api/health
+    autoDeploy: true
+
+  # Database (PostgreSQL)
+  - type: pserv
+    name: pizca-db
+    plan: starter
+    region: ohio
+    databaseName: pizca_del_monte
+    user: pizca_user
+    ipAllowList: []
+    postgresMajorVersion: 16
+
+databases:
+  - name: pizca-db
+    plan: starter
