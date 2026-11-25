@@ -4,8 +4,7 @@ import { compare } from 'bcryptjs';
 import { prisma } from '@pizca/database';
 import { z } from 'zod';
 
-// Independiente de la sesión de clientes. El middleware mantiene el panel cerrado
-// hasta completar las pruebas de seguridad y despliegue.
+// Sesión independiente de la tienda pública.
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env.ADMIN_AUTH_SECRET,
   session: { strategy: 'jwt', maxAge: 60 * 60 * 8 },

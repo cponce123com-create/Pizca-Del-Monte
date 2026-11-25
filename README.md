@@ -643,3 +643,12 @@ Proyecto privado - Pizca del Monte SAC. Todos los derechos reservados.
 **Hecho con ❤️ en Perú** 🇵🇪
 
 *Pizca del Monte - El Sabor del Perú en tu Cocina*
+
+
+### Administrador separado
+
+El panel se ejecuta como servicio independiente y su entrada es `/login`. Configura `DATABASE_URL`, `ADMIN_AUTH_SECRET` (32 caracteres o más, distinto del secreto de la tienda) y `AUTH_URL` (URL HTTPS del panel) en ese servicio. `NEXT_PUBLIC_APP_URL` debe apuntar a la tienda para que los QR de recetas abran la URL pública correcta.
+
+En una base de pruebas vacía con el esquema aplicado, puedes usar `pnpm db:seed` con `SEED_ADMIN_EMAIL` y `SEED_ADMIN_PASSWORD` para crear la primera cuenta y cargar datos de muestra. El seed no modifica la contraseña ni los roles de una cuenta existente. Elimina las variables del seed cuando termines.
+
+Desde la raíz del repositorio, el servicio se compila con `pnpm db:generate && pnpm build:admin` y se inicia con `pnpm --filter @pizca/admin start`.
