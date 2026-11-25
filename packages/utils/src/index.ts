@@ -412,3 +412,6 @@ export function getContrastColor(hex: string): '#000000' | '#ffffff' {
 
 export type { Decimal };
 export { Decimal as DecimalClass } from 'decimal.js';
+
+// NubeFact SUNAT Integration
+export * from './nubefact';
