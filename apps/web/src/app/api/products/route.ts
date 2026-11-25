@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { formatPEN } from '@pizca/utils';
 import { isDemoMode } from '@/lib/demo-mode';
 import { listDemoProducts } from '@/lib/demo-products';
+import type { Prisma } from '@prisma/client';
 
 const querySchema = z.object({
   page: z.coerce.number().int().positive().max(100000).default(1),
@@ -41,7 +42,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Construir where
-    const where: any = {
+    const where: Prisma.ProductWhereInput = {
       status: 'ACTIVE',
     };
 
@@ -83,7 +84,7 @@ export async function GET(request: NextRequest) {
     }
 
     // OrderBy
-    let orderBy: any = { publishedAt: 'desc' };
+    let orderBy: Prisma.ProductOrderByWithRelationInput = { publishedAt: 'desc' };
     switch (sort) {
       case 'price_asc':
         orderBy = { basePrice: 'asc' };
