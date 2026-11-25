@@ -1,6 +1,15 @@
-import { NextResponse, type NextRequest } from 'next/server';
-// Fail closed: el panel no tiene autenticación administrativa verificada todavía.
-export function middleware(_request: NextRequest) {
-  return new NextResponse('Administrador temporalmente deshabilitado', { status: 503, headers: { 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' } });
+import { NextResponse } from 'next/server';
+
+export function middleware() {
+  const secret = process.env.ADMIN_AUTH_SECRET;
+  if (!process.env.DATABASE_URL || !secret || secret.length < 32 ||
+      secret === process.env.AUTH_SECRET || secret === process.env.NEXTAUTH_SECRET) {
+    return new NextResponse('Administrador sin configurar', {
+      status: 503,
+      headers: { 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' },
+    });
+  }
+  return NextResponse.next();
 }
+
 export const config = { matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'] };
